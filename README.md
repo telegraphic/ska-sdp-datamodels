@@ -1,5 +1,10 @@
 # SKA SDP Python-based Data Models
 
+This repository contains high-level data models implemented in Python.
+These models were originally developed in [RASCIL](https://gitlab.com/ska-telescope/external/rascil).
+They were migrated during PI16 (autumn 2022) to provide an independent library 
+and easy access to the models.
+
 ## Standard CI machinery
 
 This repository is set up to use the
@@ -33,7 +38,7 @@ the code does not pass all of them.
 
 ## Creating a new release
 
-When you are ready to make a new release:
+When you are ready to make a new release (maintainers only):
 
   - Check out the master branch
   - Create an issue in the [Release Management](https://jira.skatelescope.org/projects/REL/summary) project
