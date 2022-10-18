@@ -1,6 +1,6 @@
-.. _rascil_data_models_data_convert_persist:
+.. _ska_sdp_datamodels_data_convert_persist:
 
-.. py:currentmodule:: rascil.data_models.data_convert_persist
+.. py:currentmodule:: ska_sdp_datamodels.data_convert_persist
 
 .. toctree::
    :maxdepth: 3
@@ -9,6 +9,6 @@
 Data model helpers
 ==================
 
-.. automodapi::    rascil.data_models.data_convert_persist
+.. automodapi::    ska_sdp_datamodels.data_convert_persist
    :no-inheritance-diagram:
 

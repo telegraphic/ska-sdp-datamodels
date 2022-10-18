@@ -1,4 +1,4 @@
-.. _rascil_xarray:
+.. _xarray:
 
 .. toctree::
    :maxdepth: 3
@@ -6,9 +6,9 @@
 Use of xarray
 *************
 
-From release 0.2+, RASCIL has moved to use the `Xarray <https:/www.dask.org>`_ library instead of numpy in the
-data classes.  RASCIL data classes are now all derived from xarray.Dataset. This change is motivated
-by the large range of capababilities available from xarray. These include:
+ska-sdp-datamodels uses the `Xarray <https:/www.dask.org>`_ library instead of numpy in the
+data classes. All data classes are derived from xarray.Dataset. This change is motivated
+by the large range of capabilities available from xarray. These include:
 
  - Named dimensions and coordinates, allowing access via quantities such as time. frequency, polarisation, receptor
  - Indexing, selection, iteration, and conditions
@@ -17,10 +17,10 @@ by the large range of capababilities available from xarray. These include:
  - Automatic invocation of Dask for array operations
  - Arbitrary meta data as attributes
 
-We have chosen to make the RASCIL data classes derive from xarray.Dataset. Instead of adding
-class methods to the RASCIL data class, which would introduce some interface fragility
+We have chosen to make data classes derive from xarray.Dataset. Instead of adding
+class methods to the data class, which would introduce some interface fragility
 as xarray changes over time, we have used data accessors to control access to
-methods specfic to the class. This design is suggested in the xarray documentation
+methods specific to the class. This design is suggested in the xarray documentation
 on extending xarray. Examples::
 
     # Flagged visibility
@@ -41,30 +41,7 @@ on extending xarray. Examples::
     # Gaintable number of receptors
     gt.gaintable_acc.nrec
 
-For examples of the capabilities afforded by xarray see the jupyter notebooks below:
-
-.. toctree::
-   :maxdepth: 3
-
-   examples/notebooks/demo_visibility_xarray.rst
-
-Here is a simple example of how the capabilities of xarray can be used:
-
-.. code:: ipython3
-
-    vis = create_visibility_from_ms(ms)[0]
-
-    # Don't squeeze out the unit dimensions because we will want
-    # them for the concat
-    chan_vis = [v[1] for v in vis.groupby_bins(dim, bins=2)]
-
-    # Predict visibility from a model.
-    chan_vis = [predict_ng(vis, model) in chan_vis]
-
-    # Now concatenate
-    newvis = xarray.concat(chan_vis, dim=dim, data_vars="minimal")
-
-Conversion from previous data classes
+Usage Examples
 *************************************
 
 The steps required are:
@@ -108,3 +85,26 @@ The steps required are:
     # becomes
     bvis.visibility_acc.flagged_vis
 
+Usage with Xarray
+*************************************
+
+Here is a simple example of how the capabilities of xarray can be used:
+
+.. code:: ipython3
+
+    vis = create_visibility_from_ms(ms)[0]
+
+    # Don't squeeze out the unit dimensions because we will want
+    # them for the concat
+    chan_vis = [v[1] for v in vis.groupby_bins(dim, bins=2)]
+
+    # Predict visibility from a model.
+    chan_vis = [predict_ng(vis, model) in chan_vis]
+
+    # Now concatenate
+    newvis = xarray.concat(chan_vis, dim=dim, data_vars="minimal")
+
+Warnings and Limitations
+*************************************
+
+Need to have a comment about the xarray concat problem
