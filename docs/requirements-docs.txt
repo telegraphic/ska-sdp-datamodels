@@ -1,6 +1,5 @@
-graphviz
-m2r2
 sphinx
-sphinx_rtd_theme
-sphinx_automodapi
 sphinx-argparse
+sphinx-rtd-theme
+sphinx-automodapi
+
