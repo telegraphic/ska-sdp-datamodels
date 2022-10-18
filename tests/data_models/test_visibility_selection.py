@@ -1,5 +1,5 @@
 # pylint: disable=missing-function-docstring,missing-class-docstring
-# pylint: disable=no-name-in-module,import-error
+# pylint: disable=no-name-in-module,import-error,invalid-name
 
 """
 Unit tests for visibility selectors

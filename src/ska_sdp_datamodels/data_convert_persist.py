@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name,no-name-in-module,import-error,too-many-lines
+
 """
 Functions to help with persistence of data models
 
@@ -42,8 +44,6 @@ __all__ = [
     "convert_hdf_to_convolutionfunction",
     "export_convolutionfunction_to_hdf5",
     "import_convolutionfunction_from_hdf5",
-    "memory_data_model_to_buffer",
-    "buffer_data_model_to_memory",
 ]
 
 import ast
@@ -60,6 +60,7 @@ from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.units import Quantity
 from astropy.wcs import WCS
 
+from src.processing_components import generate_baselines
 from src.ska_sdp_datamodels.memory_data_models import (
     Configuration,
     ConvolutionFunction,
@@ -94,7 +95,7 @@ def convert_configuration_to_hdf(config: Configuration, f):
         :param el:
         :return:
         """
-        return "%s, %s, %s" % (el.x, el.y, el.z)
+        return f"{el.x}, {el.y}, {el.z}"
 
     if not isinstance(config, Configuration):
         raise ValueError(f"config is not a Configuration: {config}")
@@ -144,9 +145,9 @@ def convert_configuration_from_hdf(f):
 
     cf = f["configuration"]
 
-    assert cf.attrs["rascil_data_model"] == "Configuration", (
-        "%s is a Configuration" % cf.attrs["rascil_data_model"]
-    )
+    assert (
+        cf.attrs["rascil_data_model"] == "Configuration"
+    ), f"{cf.attrs['rascil_data_model']} is not a Configuration"
 
     name = cf.attrs["name"]
     location = _convert_earthlocation_from_string(cf.attrs["location"])
@@ -210,11 +211,12 @@ def convert_visibility_to_hdf(vis: Visibility, f):
         "integration_time",
     ]
     for var in datavars:
-        f["data_{}".format(var)] = vis[var].data
+        f[f"data_{var}"] = vis[var].data
     f = convert_configuration_to_hdf(vis.configuration, f)
     return f
 
 
+# pylint: disable=too-many-locals
 def convert_hdf_to_visibility(f):
     """Convert HDF root to visibility
 
@@ -239,8 +241,6 @@ def convert_hdf_to_visibility(f):
     vis = f["data_vis"][()]
     weight = f["data_weight"][()]
     flags = f["data_flags"][()]
-
-    from src.processing_components.visibility import generate_baselines
 
     baselines = pandas.MultiIndex.from_tuples(
         generate_baselines(nants), names=("antenna1", "antenna2")
@@ -288,7 +288,7 @@ def convert_flagtable_to_hdf(ft: FlagTable, f):
         "channel_bandwidth",
     ]
     for var in datavars:
-        f["data_{}".format(var)] = ft[var].data
+        f[f"data_{var}"] = ft[var].data
     f = convert_configuration_to_hdf(ft.configuration, f)
     return f
 
@@ -301,7 +301,6 @@ def convert_hdf_to_flagtable(f):
     """
     assert f.attrs["rascil_data_model"] == "FlagTable", "Not a FlagTable"
     nants = f.attrs["nants"]
-    from src.processing_components import generate_baselines
 
     baselines = pandas.MultiIndex.from_tuples(
         generate_baselines(nants), names=("antenna1", "antenna2")
@@ -339,11 +338,11 @@ def export_visibility_to_hdf5(vis, filename):
         if isinstance(vis, list):
             f.attrs["number_data_models"] = len(vis)
             for i, v in enumerate(vis):
-                vf = f.create_group("Visibility%d" % i)
+                vf = f.create_group(f"Visibility{i}")
                 convert_visibility_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group("Visibility%d" % 0)
+            vf = f.create_group(f"Visibility{0}")
             convert_visibility_to_hdf(vis, vf)
 
         f.flush()
@@ -359,13 +358,13 @@ def import_visibility_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         nvislist = f.attrs["number_data_models"]
         vislist = [
-            convert_hdf_to_visibility(f["Visibility%d" % i])
+            convert_hdf_to_visibility(f[f"Visibility{i}"])
             for i in range(nvislist)
         ]
         if nvislist == 1:
             return vislist[0]
-        else:
-            return vislist
+
+        return vislist
 
 
 def export_flagtable_to_hdf5(ft, filename):
@@ -381,11 +380,11 @@ def export_flagtable_to_hdf5(ft, filename):
         if isinstance(ft, list):
             f.attrs["number_data_models"] = len(ft)
             for i, v in enumerate(ft):
-                vf = f.create_group("FlagTable%d" % i)
+                vf = f.create_group(f"FlagTable{i}")
                 convert_flagtable_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group("FlagTable%d" % 0)
+            vf = f.create_group(f"FlagTable{0}")
             convert_flagtable_to_hdf(ft, vf)
         f.flush()
 
@@ -400,13 +399,13 @@ def import_flagtable_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         nftlist = f.attrs["number_data_models"]
         ftlist = [
-            convert_hdf_to_flagtable(f["FlagTable%d" % i])
+            convert_hdf_to_flagtable(f[f"FlagTable{i}"])
             for i in range(nftlist)
         ]
         if nftlist == 1:
             return ftlist[0]
-        else:
-            return ftlist
+
+        return ftlist
 
 
 def convert_gaintable_to_hdf(gt: GainTable, f):
@@ -427,7 +426,7 @@ def convert_gaintable_to_hdf(gt: GainTable, f):
     f.attrs["phasecentre_frame"] = gt.phasecentre.frame.name
     datavars = ["time", "gain", "weight", "residual", "interval", "frequency"]
     for var in datavars:
-        f["data_{}".format(var)] = gt[var].data
+        f[f"data_{var}"] = gt[var].data
     return f
 
 
@@ -478,11 +477,11 @@ def export_gaintable_to_hdf5(gt: Union[GainTable, List[GainTable]], filename):
         if isinstance(gt, list):
             f.attrs["number_data_models"] = len(gt)
             for i, g in enumerate(gt):
-                gf = f.create_group("GainTable%d" % i)
+                gf = f.create_group(f"GainTable{i}")
                 convert_gaintable_to_hdf(g, gf)
         else:
             f.attrs["number_data_models"] = 1
-            gf = f.create_group("GainTable%d" % 0)
+            gf = f.create_group(f"GainTable{0}")
             convert_gaintable_to_hdf(gt, gf)
 
         f.flush()
@@ -498,13 +497,13 @@ def import_gaintable_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         ngtlist = f.attrs["number_data_models"]
         gtlist = [
-            convert_hdf_to_gaintable(f["GainTable%d" % i])
+            convert_hdf_to_gaintable(f[f"GainTable{i}"])
             for i in range(ngtlist)
         ]
         if ngtlist == 1:
             return gtlist[0]
-        else:
-            return gtlist
+
+        return gtlist
 
 
 def convert_pointingtable_to_hdf(pt: PointingTable, f):
@@ -534,7 +533,7 @@ def convert_pointingtable_to_hdf(pt: PointingTable, f):
         "frequency",
     ]
     for var in datavars:
-        f["data_{}".format(var)] = pt[var].data
+        f[f"data_{var}"] = pt[var].data
     f = convert_configuration_to_hdf(pt.configuration, f)
     return f
 
@@ -595,11 +594,11 @@ def export_pointingtable_to_hdf5(pt: PointingTable, filename):
         if isinstance(pt, list):
             f.attrs["number_data_models"] = len(pt)
             for i, v in enumerate(pt):
-                vf = f.create_group("PointingTable%d" % i)
+                vf = f.create_group(f"PointingTable{i}")
                 convert_pointingtable_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group("PointingTable%d" % 0)
+            vf = f.create_group(f"PointingTable{0}")
             convert_pointingtable_to_hdf(pt, vf)
         f.flush()
 
@@ -614,13 +613,13 @@ def import_pointingtable_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         nptlist = f.attrs["number_data_models"]
         ptlist = [
-            convert_hdf_to_pointingtable(f["PointingTable%d" % i])
+            convert_hdf_to_pointingtable(f[f"PointingTable{i}"])
             for i in range(nptlist)
         ]
         if nptlist == 1:
             return ptlist[0]
-        else:
-            return ptlist
+
+        return ptlist
 
 
 def convert_skycomponent_to_hdf(sc: SkyComponent, f):
@@ -637,7 +636,7 @@ def convert_skycomponent_to_hdf(sc: SkyComponent, f):
         :param d: SkyCoord
         :return:
         """
-        return "%s, %s, %s" % (d.ra.deg, d.dec.deg, "icrs")
+        return f"{d.ra.deg}, {d.dec.deg}, {'icrs'}"
 
     if not isinstance(sc, SkyComponent):
         raise ValueError(f"sc is not a SkyComponent: {sc}")
@@ -704,7 +703,7 @@ def export_skycomponent_to_hdf5(sc: Union[SkyComponent, list], filename):
     with h5py.File(filename, "w") as f:
         f.attrs["number_data_models"] = len(sc)
         for i, s in enumerate(sc):
-            sf = f.create_group("SkyComponent%d" % i)
+            sf = f.create_group(f"SkyComponent{i}")
             convert_skycomponent_to_hdf(s, sf)
         f.flush()
 
@@ -719,13 +718,13 @@ def import_skycomponent_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         nsclist = f.attrs["number_data_models"]
         sclist = [
-            convert_hdf_to_skycomponent(f["SkyComponent%d" % i])
+            convert_hdf_to_skycomponent(f[f"SkyComponent{i}"])
             for i in range(nsclist)
         ]
         if nsclist == 1:
             return sclist[0]
-        else:
-            return sclist
+
+        return sclist
 
 
 def convert_image_to_hdf(im: Image, f):
@@ -768,8 +767,8 @@ def convert_hdf_to_image(f):
             data=data, polarisation_frame=polarisation_frame, wcs=wcs
         )
         return im
-    else:
-        return None
+
+    return None
 
 
 def export_image_to_hdf5(im, filename):
@@ -786,11 +785,11 @@ def export_image_to_hdf5(im, filename):
         if isinstance(im, list):
             f.attrs["number_data_models"] = len(im)
             for i, v in enumerate(im):
-                vf = f.create_group("Image%d" % i)
+                vf = f.create_group(f"Image{i}")
                 convert_image_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group("Image%d" % 0)
+            vf = f.create_group(f"Image{0}")
             convert_image_to_hdf(im, vf)
         f.flush()
         f.close()
@@ -805,13 +804,11 @@ def import_image_from_hdf5(filename):
 
     with h5py.File(filename, "r") as f:
         nimlist = f.attrs["number_data_models"]
-        imlist = [
-            convert_hdf_to_image(f["Image%d" % i]) for i in range(nimlist)
-        ]
+        imlist = [convert_hdf_to_image(f[f"Image{i}"]) for i in range(nimlist)]
         if nimlist == 1:
             return imlist[0]
-        else:
-            return imlist
+
+        return imlist
 
 
 def export_skymodel_to_hdf5(sm, filename):
@@ -827,7 +824,7 @@ def export_skymodel_to_hdf5(sm, filename):
     with h5py.File(filename, "w") as f:
         f.attrs["number_data_models"] = len(sm)
         for i, s in enumerate(sm):
-            sf = f.create_group("SkyModel%d" % i)
+            sf = f.create_group(f"SkyModel{i}")
             convert_skymodel_to_hdf(s, sf)
         f.flush()
         f.close()
@@ -848,10 +845,8 @@ def convert_skymodel_to_hdf(sm, f):
     if sm.components is not None:
         f.attrs["number_skycomponents"] = len(sm.components)
         for i, sc in enumerate(sm.components):
-            cf = f.create_group("skycomponent%d" % i)
-            convert_skycomponent_to_hdf(sm.components[i], cf)
-        else:
-            f.attrs["number_skycomponents"] = len(sm.components)
+            cf = f.create_group(f"skycomponent{i}")
+            convert_skycomponent_to_hdf(sc, cf)
     if sm.image is not None:
         cf = f.create_group("image")
         convert_image_to_hdf(sm.image, cf)
@@ -874,13 +869,12 @@ def import_skymodel_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         nsmlist = f.attrs["number_data_models"]
         smlist = [
-            convert_hdf_to_skymodel(f["SkyModel%d" % i])
-            for i in range(nsmlist)
+            convert_hdf_to_skymodel(f[f"SkyModel{i}"]) for i in range(nsmlist)
         ]
         if nsmlist == 1:
             return smlist[0]
-        else:
-            return smlist
+
+        return smlist
 
 
 def convert_hdf_to_skymodel(f):
@@ -896,9 +890,9 @@ def convert_hdf_to_skymodel(f):
     fixed = f.attrs["fixed"]
 
     ncomponents = f.attrs["number_skycomponents"]
-    components = list()
+    components = []
     for i in range(ncomponents):
-        cf = f[("skycomponent%d" % i)]
+        cf = f[(f"skycomponent{i}")]
         components.append(convert_hdf_to_skycomponent(cf))
     if "image" in f.keys():
         cf = f["image"]
@@ -979,11 +973,11 @@ def export_griddata_to_hdf5(gd, filename):
         if isinstance(gd, list):
             f.attrs["number_data_models"] = len(gd)
             for i, v in enumerate(gd):
-                vf = f.create_group("GridData%d" % i)
+                vf = f.create_group(f"GridData{i}")
                 convert_griddata_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group("GridData%d" % 0)
+            vf = f.create_group(f"GridData{0}")
             convert_griddata_to_hdf(gd, vf)
         f.flush()
         f.close()
@@ -999,13 +993,12 @@ def import_griddata_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         nimlist = f.attrs["number_data_models"]
         gdlist = [
-            convert_hdf_to_griddata(f["GridData%d" % i])
-            for i in range(nimlist)
+            convert_hdf_to_griddata(f[f"GridData{i}"]) for i in range(nimlist)
         ]
         if nimlist == 1:
             return gdlist[0]
-        else:
-            return gdlist
+
+        return gdlist
 
 
 def convert_convolutionfunction_to_hdf(cf: ConvolutionFunction, f):
@@ -1023,7 +1016,7 @@ def convert_convolutionfunction_to_hdf(cf: ConvolutionFunction, f):
     f.attrs["rascil_data_model"] = "ConvolutionFunction"
     f["data"] = cf["pixels"].data
     f.attrs["grid_wcs"] = numpy.string_(
-        cf.convolutionfunction_acc.cf_wcs.to_header_string()
+        cf.convolutionfunction_acc.conv_func_wcs.to_header_string()
     )
     f.attrs[
         "polarisation_frame"
@@ -1063,11 +1056,11 @@ def export_convolutionfunction_to_hdf5(cf, filename):
         if isinstance(cf, list):
             f.attrs["number_data_models"] = len(cf)
             for i, v in enumerate(cf):
-                vf = f.create_group("ConvolutionFunction%d" % i)
+                vf = f.create_group(f"ConvolutionFunction{i}")
                 convert_convolutionfunction_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group("ConvolutionFunction%d" % 0)
+            vf = f.create_group(f"ConvolutionFunction{0}")
             convert_convolutionfunction_to_hdf(cf, vf)
         f.flush()
         f.close()
@@ -1083,82 +1076,10 @@ def import_convolutionfunction_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         nimlist = f.attrs["number_data_models"]
         cflist = [
-            convert_hdf_to_convolutionfunction(f["ConvolutionFunction%d" % i])
+            convert_hdf_to_convolutionfunction(f[f"ConvolutionFunction{i}"])
             for i in range(nimlist)
         ]
         if nimlist == 1:
             return cflist[0]
-        else:
-            return cflist
 
-
-def memory_data_model_to_buffer(model, jbuff, dm):
-    """Copy a memory data model to a buffer data model
-
-    The file type is derived from the file extension. All are hdf only.
-
-    :param model: Memory data model to be sent to buffer
-    :param jbuff: JSON describing buffer
-    :param dm: JSON describing data model
-    """
-    name = jbuff["directory"] + dm["name"]
-
-    import os
-
-    _, file_extension = os.path.splitext(dm["name"])
-
-    if dm["data_model"] == "Visibility":
-        return export_visibility_to_hdf5(model, name)
-    elif dm["data_model"] == "Image":
-        return export_image_to_hdf5(model, name)
-    elif dm["data_model"] == "GridData":
-        return export_griddata_to_hdf5(model, name)
-    elif dm["data_model"] == "ConvolutionFunction":
-        return export_convolutionfunction_to_hdf5(model, name)
-    elif dm["data_model"] == "SkyModel":
-        return export_skymodel_to_hdf5(model, name)
-    elif dm["data_model"] == "GainTable":
-        return export_gaintable_to_hdf5(model, name)
-    elif dm["data_model"] == "FlagTable":
-        return export_flagtable_to_hdf5(model, name)
-    elif dm["data_model"] == "PointingTable":
-        return export_pointingtable_to_hdf5(model, name)
-    else:
-        raise ValueError("Data model %s not supported" % dm["data_model"])
-
-
-def buffer_data_model_to_memory(jbuff, dm):
-    """Copy a buffer data model into memory data model
-
-    The file type is derived from the file extension. All are hdf only.
-
-    :param jbuff: JSON describing buffer
-    :param dm: JSON describing data model
-    :return: data model
-    """
-    import os
-
-    name = os.path.join(jbuff["directory"], dm["name"])
-
-    import os
-
-    _, file_extension = os.path.splitext(dm["name"])
-
-    if dm["data_model"] == "Visibility":
-        return import_visibility_from_hdf5(name)
-    elif dm["data_model"] == "Image":
-        return import_image_from_hdf5(name)
-    elif dm["data_model"] == "SkyModel":
-        return import_skymodel_from_hdf5(name)
-    elif dm["data_model"] == "GainTable":
-        return import_gaintable_from_hdf5(name)
-    elif dm["data_model"] == "FlagTable":
-        return import_flagtable_from_hdf5(name)
-    elif dm["data_model"] == "PointingTable":
-        return import_pointingtable_from_hdf5(name)
-    elif dm["data_model"] == "GridData":
-        return import_griddata_from_hdf5(name)
-    elif dm["data_model"] == "ConvolutionFunction":
-        return import_convolutionfunction_from_hdf5(name)
-    else:
-        raise ValueError("Data model %s not supported" % dm["data_model"])
+        return cflist
