@@ -8,11 +8,11 @@ import astropy.units as u
 import numpy
 from astropy.coordinates import SkyCoord
 
-from rascil.data_models.polarisation_data_models import PolarisationFrame
-from rascil.processing_components.simulation import create_named_configuration
-from rascil.processing_components.visibility.base import create_visibility
+from src.ska_sdp_datamodels.polarisation_data_models import PolarisationFrame
+from src.processing_components.simulation import create_named_configuration
+from src.processing_components.visibility.base import create_visibility
 
-log = logging.getLogger("rascil-logger")
+log = logging.getLogger("src-logger")
 
 log.setLevel(logging.WARNING)
 

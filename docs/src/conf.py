@@ -241,7 +241,7 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "rascil.tex",
+        "src.tex",
         "RASCIL Documentation",
         "Tim Cornwell, Peter Wortmann, Bojan Nikolic, Feng Wang, Vlad Stolyarov, Danielle Fenech",
         "manual",

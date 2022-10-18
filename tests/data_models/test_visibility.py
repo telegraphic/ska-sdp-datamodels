@@ -2,8 +2,8 @@ import numpy
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 
-from rascil.data_models import PolarisationFrame
-from rascil.processing_components import create_visibility, create_named_configuration
+from src.ska_sdp_datamodels import PolarisationFrame
+from src.processing_components import create_visibility, create_named_configuration
 
 
 def test_visibility_copy():

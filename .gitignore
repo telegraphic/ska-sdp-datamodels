@@ -19,7 +19,7 @@ dask-worker-space
 /build
 *.so
 *.egg
-/rascil/data_models/.idea
+/src/ska_sdp_datamodels/.idea
 /sourcetree.txt
 /docs/api
 */*/notebooks/*_files
