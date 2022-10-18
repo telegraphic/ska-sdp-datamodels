@@ -342,7 +342,7 @@ def export_visibility_to_hdf5(vis, filename):
                 convert_visibility_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group(f"Visibility{0}")
+            vf = f.create_group("Visibility0")
             convert_visibility_to_hdf(vis, vf)
 
         f.flush()
@@ -384,7 +384,7 @@ def export_flagtable_to_hdf5(ft, filename):
                 convert_flagtable_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group(f"FlagTable{0}")
+            vf = f.create_group("FlagTable0")
             convert_flagtable_to_hdf(ft, vf)
         f.flush()
 
@@ -481,7 +481,7 @@ def export_gaintable_to_hdf5(gt: Union[GainTable, List[GainTable]], filename):
                 convert_gaintable_to_hdf(g, gf)
         else:
             f.attrs["number_data_models"] = 1
-            gf = f.create_group(f"GainTable{0}")
+            gf = f.create_group("GainTable0")
             convert_gaintable_to_hdf(gt, gf)
 
         f.flush()
@@ -598,7 +598,7 @@ def export_pointingtable_to_hdf5(pt: PointingTable, filename):
                 convert_pointingtable_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group(f"PointingTable{0}")
+            vf = f.create_group("PointingTable0")
             convert_pointingtable_to_hdf(pt, vf)
         f.flush()
 
@@ -636,7 +636,7 @@ def convert_skycomponent_to_hdf(sc: SkyComponent, f):
         :param d: SkyCoord
         :return:
         """
-        return f"{d.ra.deg}, {d.dec.deg}, {'icrs'}"
+        return f"{d.ra.deg}, {d.dec.deg}, icrs"
 
     if not isinstance(sc, SkyComponent):
         raise ValueError(f"sc is not a SkyComponent: {sc}")
@@ -789,7 +789,7 @@ def export_image_to_hdf5(im, filename):
                 convert_image_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group(f"Image{0}")
+            vf = f.create_group("Image0")
             convert_image_to_hdf(im, vf)
         f.flush()
         f.close()
@@ -977,7 +977,7 @@ def export_griddata_to_hdf5(gd, filename):
                 convert_griddata_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group(f"GridData{0}")
+            vf = f.create_group("GridData0")
             convert_griddata_to_hdf(gd, vf)
         f.flush()
         f.close()
@@ -1016,7 +1016,7 @@ def convert_convolutionfunction_to_hdf(cf: ConvolutionFunction, f):
     f.attrs["rascil_data_model"] = "ConvolutionFunction"
     f["data"] = cf["pixels"].data
     f.attrs["grid_wcs"] = numpy.string_(
-        cf.convolutionfunction_acc.conv_func_wcs.to_header_string()
+        cf.convolutionfunction_acc.cf_wcs.to_header_string()
     )
     f.attrs[
         "polarisation_frame"
@@ -1060,7 +1060,7 @@ def export_convolutionfunction_to_hdf5(cf, filename):
                 convert_convolutionfunction_to_hdf(v, vf)
         else:
             f.attrs["number_data_models"] = 1
-            vf = f.create_group(f"ConvolutionFunction{0}")
+            vf = f.create_group("ConvolutionFunction0")
             convert_convolutionfunction_to_hdf(cf, vf)
         f.flush()
         f.close()
