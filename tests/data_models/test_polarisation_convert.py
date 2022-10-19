@@ -1,5 +1,6 @@
 # pylint: disable=too-many-public-methods,
 # pylint: disable=missing-function-docstring,invalid-name
+# pylint: disable=missing-class-docstring
 
 """
 Unit processing_components for polarisation_convert

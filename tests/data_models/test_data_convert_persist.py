@@ -1,6 +1,7 @@
 # pylint: disable=attribute-defined-outside-init,invalid-name,
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,missing-class-docstring
 # pylint: disable=no-name-in-module,import-error
+# pylint: disable=too-many-instance-attributes
 
 """
 Unit tests for functions in data_convert_persist.
@@ -8,6 +9,7 @@ The functions facilitate persistence of data models using HDF5
 """
 
 import logging
+import os
 import unittest
 
 import astropy.units as u
@@ -32,6 +34,7 @@ from src.processing_components.griddata.operations import (
 )
 from src.processing_components.image import create_image
 from src.processing_components.imaging import dft_skycomponent_visibility
+from src.processing_components.parameters import rascil_path
 from src.processing_components.simulation import (
     create_named_configuration,
     simulate_gaintable,
@@ -98,8 +101,6 @@ class TestDataModelHelpers(unittest.TestCase):
         return True
 
     def setUp(self):
-        from src.processing_components.parameters import rascil_path
-
         self.results_dir = rascil_path("test_results")
 
         self.mid = create_named_configuration("MID", rmax=1000.0)
@@ -250,7 +251,6 @@ class TestDataModelHelpers(unittest.TestCase):
         im["pixels"].data[...] = rand
         if self.verbose:
             print(im)
-        import os
 
         # We cannot save dicts to a netcdf file
         im.attrs["clean_beam"] = ""
@@ -316,10 +316,10 @@ class TestDataModelHelpers(unittest.TestCase):
         )
         gd = create_griddata_from_image(im)
         export_griddata_to_hdf5(
-            gd, "%s/test_data_convert_persist_griddata.hdf" % self.results_dir
+            gd, f"{self.results_dir}/test_data_convert_persist_griddata.hdf"
         )
         newgd = import_griddata_from_hdf5(
-            "%s/test_data_convert_persist_griddata.hdf" % self.results_dir
+            f"{self.results_dir}/test_data_convert_persist_griddata.hdf"
         )
         assert self._data_model_equals(newgd, gd)
 

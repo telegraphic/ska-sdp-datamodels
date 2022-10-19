@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name
+
 """
 Functions for defining polarisation conventions
 
@@ -37,11 +39,11 @@ def polarisation_frame_from_names(names):
     :param names:
     :return:
     """
-    for frame in PolarisationFrame.polarisation_frames.keys():
+    for frame in PolarisationFrame.polarisation_frames:
         frame_names = PolarisationFrame(frame).names
         if sorted(names) == sorted(frame_names):
             return frame
-    raise ValueError("Polarisation {} not supported".format(names))
+    raise ValueError(f"Polarisation {names} not supported")
 
 
 def pol_matrix_multiply(cm, vec, polaxis=0):
@@ -58,7 +60,8 @@ def pol_matrix_multiply(cm, vec, polaxis=0):
     """
     if vec.shape[polaxis] == 1:
         return numpy.dot(cm, vec)
-    elif vec.shape[polaxis] == 2:
+
+    if vec.shape[polaxis] == 2:
         assert cm.shape == (2, 2)
 
     elif vec.shape[polaxis] == 4:
@@ -66,7 +69,7 @@ def pol_matrix_multiply(cm, vec, polaxis=0):
 
     else:
         raise ValueError(
-            "Unknown polarisation conversion {} {}".format(str(cm), str(vec))
+            f"Unknown polarisation conversion {str(cm)} {str(vec)}"
         )
 
     # This tensor swaps the first two axes so we need to tranpose back
@@ -157,8 +160,8 @@ def convert_linear_to_stokesI(linear):
     """
     if linear.shape[-1] == 2:
         return 0.5 * (linear[..., 0] + linear[..., 1])[..., numpy.newaxis]
-    else:
-        return 0.5 * (linear[..., 0] + linear[..., 3])[..., numpy.newaxis]
+
+    return 0.5 * (linear[..., 0] + linear[..., 3])[..., numpy.newaxis]
 
 
 def convert_stokes_to_circular(stokes, polaxis=1):
@@ -218,8 +221,8 @@ def convert_circular_to_stokesI(circular):
 
     if circular.shape[-1] == 2:
         return 0.5 * (circular[..., 0] + circular[..., 1])[..., numpy.newaxis]
-    else:
-        return 0.5 * (circular[..., 0] + circular[..., 3])[..., numpy.newaxis]
+
+    return 0.5 * (circular[..., 0] + circular[..., 3])[..., numpy.newaxis]
 
 
 def convert_stokesIQUV_to_stokesI(flux_iquv):
@@ -247,42 +250,46 @@ def convert_stokesI_to_stokesIQUV(flux_i):
     return flux_iquv
 
 
+# pylint: disable=too-many-branches,too-many-return-statements
 def convert_pol_frame(
     polvec, ipf: PolarisationFrame, opf: PolarisationFrame, polaxis=1
 ):
+    """
+    Convert betweem polarisation frames
+    """
     if ipf == opf:
         return polvec
 
     if ipf == PolarisationFrame("linear"):
         if opf == PolarisationFrame("stokesIQUV"):
             return convert_linear_to_stokes(polvec, polaxis)
-        elif opf == PolarisationFrame("stokesI"):
+        if opf == PolarisationFrame("stokesI"):
             return convert_linear_to_stokesI(polvec)
 
     if ipf == PolarisationFrame("linearnp"):
         if opf == PolarisationFrame("stokesIQ"):
             return convert_linear_to_stokes(polvec, polaxis)
-        elif opf == PolarisationFrame("stokesI"):
+        if opf == PolarisationFrame("stokesI"):
             return convert_linear_to_stokesI(polvec)
 
     if ipf == PolarisationFrame("circular"):
         if opf == PolarisationFrame("stokesIQUV"):
             return convert_circular_to_stokes(polvec, polaxis)
-        elif opf == PolarisationFrame("stokesI"):
+        if opf == PolarisationFrame("stokesI"):
             return convert_circular_to_stokesI(polvec)
 
     if ipf == PolarisationFrame("circularnp"):
         if opf == PolarisationFrame("stokesIV"):
             return convert_circular_to_stokes(polvec, polaxis)
-        elif opf == PolarisationFrame("stokesI"):
+        if opf == PolarisationFrame("stokesI"):
             return convert_circular_to_stokesI(polvec)
 
     if ipf == PolarisationFrame("stokesIQUV"):
         if opf == PolarisationFrame("linear"):
             return convert_stokes_to_linear(polvec, polaxis)
-        elif opf == PolarisationFrame("circular"):
+        if opf == PolarisationFrame("circular"):
             return convert_stokes_to_circular(polvec, polaxis)
-        elif opf == PolarisationFrame("stokesI"):
+        if opf == PolarisationFrame("stokesI"):
             return convert_stokesIQUV_to_stokesI(polvec)
 
     if ipf == PolarisationFrame("stokesIQ"):
@@ -296,12 +303,10 @@ def convert_pol_frame(
     if ipf == PolarisationFrame("stokesI"):
         if opf == PolarisationFrame("stokesI"):
             return polvec
-        elif opf == PolarisationFrame("stokesIQUV"):
+        if opf == PolarisationFrame("stokesIQUV"):
             return convert_stokesI_to_stokesIQUV(polvec)
 
-    raise ValueError(
-        "Unknown polarisation conversion: {} to {}".format(ipf, opf)
-    )
+    raise ValueError(f"Unknown polarisation conversion: {ipf} to {opf}")
 
 
 def correlate_polarisation(rec_frame: ReceptorFrame):
@@ -317,9 +322,7 @@ def correlate_polarisation(rec_frame: ReceptorFrame):
     elif rec_frame == ReceptorFrame("stokesI"):
         correlation = PolarisationFrame("stokesI")
     else:
-        raise ValueError(
-            "Unknown receptor frame %s for correlation" % rec_frame
-        )
+        raise ValueError(f"Unknown receptor frame {rec_frame} for correlation")
 
     return correlation
 
@@ -330,9 +333,11 @@ def congruent_polarisation(
     """Are these receptor and polarisation frames congruent?"""
     if rec_frame.type == "linear":
         return polarisation_frame.type in ["linear", "linearnp"]
-    elif rec_frame.type == "circular":
+
+    if rec_frame.type == "circular":
         return polarisation_frame.type in ["circular", "circularnp"]
-    elif rec_frame.type == "stokesI":
+
+    if rec_frame.type == "stokesI":
         return polarisation_frame.type == "stokesI"
 
     return False

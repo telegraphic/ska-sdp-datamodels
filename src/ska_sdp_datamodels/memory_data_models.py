@@ -1,3 +1,7 @@
+# pylint: disable=too-many-lines
+# pylint: disable=invalid-name,too-many-arguments
+# pylint: disable=too-many-ancestors,too-many-locals
+
 """
 The data models used in RASCIL:
 """
@@ -35,7 +39,7 @@ from src.ska_sdp_datamodels.polarisation_data_models import (
     ReceptorFrame,
 )
 from src.ska_sdp_datamodels.xarray_coordinate_support import (
-    cf_wcs,
+    conv_func_wcs,
     griddata_wcs,
     image_wcs,
 )
@@ -61,12 +65,11 @@ class XarrayAccessorMixin:
         """Return string describing sizes of data variables
         :return: string
         """
-        s = "Dataset size: {:.3f} GB\n".format(
-            self._obj.nbytes / 1024 / 1024 / 1024
-        )
+        s = f"Dataset size: {self._obj.nbytes / 1024 / 1024 / 1024:.3f} GB\n"
         for var in self._obj.data_vars:
-            s += "\t[{}]: \t{:.3f} GB\n".format(
-                var, self._obj[var].nbytes / 1024 / 1024 / 1024
+            s += (
+                f"\t[{var}]: "
+                f"\t{self._obj[var].nbytes / 1024 / 1024 / 1024:.3f} GB\n"
             )
         return s
 
@@ -80,6 +83,7 @@ class QualityAssessment:
 
     """
 
+    # pylint: disable=too-few-public-methods
     def __init__(self, origin=None, data=None, context=None):
         """QualityAssessment
 
@@ -96,11 +100,11 @@ class QualityAssessment:
     def __str__(self):
         """Default printer for QualityAssessment"""
         s = "Quality assessment:\n"
-        s += "\tOrigin: %s\n" % self.origin
-        s += "\tContext: %s\n" % self.context
+        s += f"\tOrigin: {self.origin}\n"
+        s += f"\tContext: {self.context}\n"
         s += "\tData:\n"
         for dataname in self.data.keys():
-            s += "\t\t%s: %r\n" % (dataname, str(self.data[dataname]))
+            s += f"\t\t{dataname}: {str(self.data[dataname])}\n"
         return s
 
 
@@ -187,7 +191,7 @@ class Configuration(xarray.Dataset):
 
         coords = {"id": list(range(nants)), "spatial": ["X", "Y", "Z"]}
 
-        datavars = dict()
+        datavars = {}
         datavars["names"] = xarray.DataArray(
             names, coords={"id": list(range(nants))}, dims=["id"]
         )
@@ -210,7 +214,7 @@ class Configuration(xarray.Dataset):
             stations, coords={"id": list(range(nants))}, dims=["id"]
         )
 
-        attrs = dict()
+        attrs = {}
         attrs["rascil_data_model"] = "Configuration"
         attrs["name"] = name  # Name of configuration
         attrs["location"] = location  # EarthLocation
@@ -235,9 +239,6 @@ class Configuration(xarray.Dataset):
 @xarray.register_dataset_accessor("configuration_acc")
 class ConfigurationAccessor(XarrayAccessorMixin):
     """Convenience methods to access the fields of the Configuration"""
-
-    def __init__(self, xarray_obj):
-        super().__init__(xarray_obj)
 
     @property
     def nants(self):
@@ -316,7 +317,7 @@ class GainTable(xarray.Dataset):
         :param configuration: Configuration
         :param jones_type: Type of gain: T, G, B, etc
         """
-        ntimes, nants, nchan, nrec, _ = gain.shape
+        nants = gain.shape[1]
         antennas = range(nants)
         coords = {
             "time": time,
@@ -326,7 +327,7 @@ class GainTable(xarray.Dataset):
             "receptor2": receptor_frame.names,
         }
 
-        datavars = dict()
+        datavars = {}
         datavars["gain"] = xarray.DataArray(
             gain,
             dims=["time", "antenna", "frequency", "receptor1", "receptor2"],
@@ -343,7 +344,7 @@ class GainTable(xarray.Dataset):
             Time(time / 86400.0, format="mjd", scale="utc").datetime64,
             dims="time",
         )
-        attrs = dict()
+        attrs = {}
         attrs["rascil_data_model"] = "GainTable"
         attrs["receptor_frame"] = receptor_frame
         attrs["phasecentre"] = phasecentre
@@ -364,14 +365,14 @@ class GainTable(xarray.Dataset):
         # to return size of Dataset.
         return int(self.nbytes)
 
-    def copy(self, deep=False, zero=False, data=None):
+    def copy(self, deep=False, data=None, zero=False):
         """
         Copy GainTable
 
         :param deep: perform deep-copy
-        :param zero: if True, set gain data to zero in copied object
         :param data: data to use in new object; see docstring of
                      xarray.core.dataset.Dataset.copy
+        :param zero: if True, set gain data to zero in copied object
         """
         new_gt = super().copy(deep=deep, data=data)
         if zero:
@@ -383,7 +384,7 @@ class GainTable(xarray.Dataset):
 
         :return: QualityAssessment
         """
-        if not numpy.max(self.weight.data) > 0.0:
+        if numpy.max(self.weight.data) <= 0.0:
             raise ValueError("qa_gain_table: All gaintable weights are zero")
 
         agt = numpy.abs(self.gain.data[self.weight.data > 0.0])
@@ -409,8 +410,9 @@ class GainTable(xarray.Dataset):
 
 @xarray.register_dataset_accessor("gaintable_acc")
 class GainTableAccessor(XarrayAccessorMixin):
-    def __init__(self, xarray_obj):
-        super().__init__(xarray_obj)
+    """
+    GainTable property accessor
+    """
 
     @property
     def ntimes(self):
@@ -507,7 +509,7 @@ class PointingTable(xarray.Dataset):
         :param pointingcentre: SkyCoord
         :param configuration: Configuration
         """
-        ntimes, nants, nchan, nrec, _ = pointing.shape
+        nants = pointing.shape[1]
         antennas = range(nants)
 
         coords = {
@@ -518,7 +520,7 @@ class PointingTable(xarray.Dataset):
             "angle": ["az", "el"],
         }
 
-        datavars = dict()
+        datavars = {}
         datavars["pointing"] = xarray.DataArray(
             pointing,
             dims=["time", "antenna", "frequency", "receptor", "angle"],
@@ -538,7 +540,7 @@ class PointingTable(xarray.Dataset):
             dims="time",
         )
 
-        attrs = dict()
+        attrs = {}
         attrs["rascil_data_model"] = "PointingTable"
         attrs["receptor_frame"] = receptor_frame
         attrs["pointing_frame"] = pointing_frame
@@ -559,14 +561,14 @@ class PointingTable(xarray.Dataset):
         # to return size of Dataset.
         return int(self.nbytes)
 
-    def copy(self, deep=False, zero=False, data=None):
+    def copy(self, deep=False, data=None, zero=False):
         """
         Copy PointingTable
 
         :param deep: perform deep-copy
-        :param zero: if True, set pointing data to zero in copied object
         :param data: data to use in new object; see docstring of
                      xarray.core.dataset.Dataset.copy
+        :param zero: if True, set pointing data to zero in copied object
         """
         new_pointing_table = super().copy(deep=deep, data=data)
         if zero:
@@ -600,8 +602,9 @@ class PointingTable(xarray.Dataset):
 
 @xarray.register_dataset_accessor("pointingtable_acc")
 class PointingTableAccessor(XarrayAccessorMixin):
-    def __init__(self, xarray_obj):
-        super().__init__(xarray_obj)
+    """
+    PointingTable property accessor
+    """
 
     @property
     def nants(self):
@@ -616,7 +619,7 @@ class PointingTableAccessor(XarrayAccessorMixin):
     @property
     def nrec(self):
         """Number of receptors"""
-        return self.receptor_frame.nrec
+        return self._obj["receptor_frame"].nrec
 
 
 class Image(xarray.Dataset):
@@ -714,21 +717,21 @@ class Image(xarray.Dataset):
         }
 
         assert data.shape[0] == nchan, (
-            "Number of frequency channels {} and data "
-            "shape {} are incompatible".format(len(frequency), data.shape)
+            f"Number of frequency channels {len(frequency)} and data "
+            f"shape {data.shape} are incompatible"
         )
-        assert (
-            data.shape[1] == npol
-        ), "Polarisation frame {} and data shape {} are incompatible".format(
-            polarisation_frame.type, data.shape
+        assert data.shape[1] == npol, (
+            f"Polarisation frame {polarisation_frame.type} "
+            f"and data shape {data.shape} are incompatible"
         )
+
         assert coords["x"][0] != coords["x"][-1]
         assert coords["y"][0] != coords["y"][-1]
 
         assert len(coords["y"]) == ny
         assert len(coords["x"]) == nx
 
-        data_vars = dict()
+        data_vars = {}
         data_vars["pixels"] = xarray.DataArray(data, dims=dims, coords=coords)
 
         if isinstance(clean_beam, dict):
@@ -783,9 +786,7 @@ class Image(xarray.Dataset):
                 "Image: is_canonical: Image is not canonical 4D image "
                 "with axes RA---SIN, DEC--SIN, STOKES, FREQ"
             )
-            log.debug(
-                "Image: is_canonical: axes are: {}".format(wcs.wcs.ctype)
-            )
+            log.debug("Image: is_canonical: axes are: %s", wcs.wcs.ctype)
 
         return canonical
 
@@ -831,8 +832,9 @@ class Image(xarray.Dataset):
                 )
             else:
                 log.warning(
-                    f"export_to_fits: clean_beam is incompletely "
-                    f"specified: {clean_beam}, not writing"
+                    "export_to_fits: clean_beam is incompletely "
+                    "specified: %s, not writing",
+                    clean_beam,
                 )
         if self["pixels"].data.dtype == "complex":
             fits.writeto(
@@ -879,8 +881,9 @@ class Image(xarray.Dataset):
 
 @xarray.register_dataset_accessor("image_acc")
 class ImageAccessor(XarrayAccessorMixin):
-    def __init__(self, xarray_obj):
-        super().__init__(xarray_obj)
+    """
+    Image property accessor
+    """
 
     @property
     def shape(self):
@@ -1017,12 +1020,12 @@ class GridData(xarray.Dataset):
             ),
         }
 
-        attrs = dict()
+        attrs = {}
 
         attrs["rascil_data_model"] = "GridData"
         attrs["_polarisation_frame"] = polarisation_frame.type
 
-        data_vars = dict()
+        data_vars = {}
         data_vars["pixels"] = xarray.DataArray(data, dims=dims, coords=coords)
 
         return cls(data_vars, coords=coords, attrs=attrs)
@@ -1061,8 +1064,9 @@ class GridData(xarray.Dataset):
 
 @xarray.register_dataset_accessor("griddata_acc")
 class GridDataAccessor(XarrayAccessorMixin):
-    def __init__(self, xarray_obj):
-        super().__init__(xarray_obj)
+    """
+    GridDataAccessor property accessor
+    """
 
     @property
     def nchan(self):
@@ -1223,7 +1227,7 @@ class ConvolutionFunction(xarray.Dataset):
         assert coords["u"][0] != coords["u"][-1]
         assert coords["v"][0] != coords["v"][-1]
 
-        attrs = dict()
+        attrs = {}
         attrs["rascil_data_model"] = "ConvolutionFunction"
         attrs["_polarisation_frame"] = polarisation_frame.type
 
@@ -1252,12 +1256,10 @@ class ConvolutionFunction(xarray.Dataset):
                 support,
                 support,
             ), (
-                "Polarisation frame {} and data shape "
-                "{} are incompatible".format(
-                    polarisation_frame.type, data.shape
-                )
+                f"Polarisation frame {polarisation_frame.type} and data shape "
+                f"{data.shape} are incompatible"
             )
-        data_vars = dict()
+        data_vars = {}
         data_vars["pixels"] = xarray.DataArray(data, dims=dims, coords=coords)
 
         return cls(data_vars, coords=coords, attrs=attrs)
@@ -1295,8 +1297,9 @@ class ConvolutionFunction(xarray.Dataset):
 
 @xarray.register_dataset_accessor("convolutionfunction_acc")
 class ConvolutionFunctionAccessor(XarrayAccessorMixin):
-    def __init__(self, xarray_obj):
-        super().__init__(xarray_obj)
+    """
+    ConvolutionFunction property accessor
+    """
 
     @property
     def nchan(self):
@@ -1314,7 +1317,7 @@ class ConvolutionFunctionAccessor(XarrayAccessorMixin):
 
         :return:
         """
-        return cf_wcs(self._obj)
+        return conv_func_wcs(self._obj)
 
     @property
     def shape(self):
@@ -1342,10 +1345,10 @@ class SkyComponent:
     drawn from the GLEAM catalog::
 
         sc = create_low_test_skycomponents_from_gleam(flux_limit=1.0,
-                                                    polarisation_frame=PolarisationFrame("stokesIQUV"),
-                                                    frequency=frequency, kind='cubic',
-                                                    phasecentre=phasecentre,
-                                                    radius=0.1)
+                                            polarisation_frame=PolarisationFrame("stokesIQUV"),
+                                            frequency=frequency, kind='cubic',
+                                            phasecentre=phasecentre,
+                                            radius=0.1)
         model = create_image_from_visibility(vis, cellsize=0.001, npixel=512, frequency=frequency,
                                             polarisation_frame=PolarisationFrame('stokesIQUV'))
 
@@ -1388,17 +1391,13 @@ class SkyComponent:
 
         assert len(self.frequency.shape) == 1, frequency
         assert len(self.flux.shape) == 2, flux
-        assert (
-            self.frequency.shape[0] == self.flux.shape[0]
-        ), "Frequency shape %s, flux shape %s" % (
-            self.frequency.shape,
-            self.flux.shape,
+        assert self.frequency.shape[0] == self.flux.shape[0], (
+            f"Frequency shape {self.frequency.shape}, "
+            f"flux shape {self.flux.shape}"
         )
-        assert (
-            polarisation_frame.npol == self.flux.shape[1]
-        ), "Polarisation is %s, flux shape %s" % (
-            polarisation_frame.type,
-            self.flux.shape,
+        assert polarisation_frame.npol == self.flux.shape[1], (
+            f"Polarisation is {polarisation_frame.type}, "
+            f"flux shape {self.flux.shape}"
         )
 
     @property
@@ -1414,14 +1413,14 @@ class SkyComponent:
     def __str__(self):
         """Default printer for SkyComponent"""
         s = "SkyComponent:\n"
-        s += "\tName: %s\n" % self.name
-        s += "\tFlux: %s\n" % self.flux
-        s += "\tFrequency: %s\n" % self.frequency
-        s += "\tDirection: %s\n" % self.direction
-        s += "\tShape: %s\n" % self.shape
+        s += f"\tName: {self.name}\n"
+        s += f"\tFlux: {self.flux}\n"
+        s += f"\tFrequency: {self.frequency}\n"
+        s += f"\tDirection: {self.direction}\n"
+        s += f"\tShape: {self.shape}\n"
 
-        s += "\tParams: %s\n" % self.params
-        s += "\tPolarisation frame: %s\n" % str(self.polarisation_frame.type)
+        s += f"\tParams: {self.params}\n"
+        s += f"\tPolarisation frame: {str(self.polarisation_frame.type)}\n"
         return s
 
 
@@ -1450,10 +1449,12 @@ class SkyModel:
         """
         if components is None:
             components = []
+        if not isinstance(components, (list, tuple)):
+            components = [components]
 
         self.image = image
 
-        self.components = [sc for sc in components]
+        self.components = components
         self.gaintable = gaintable
 
         self.mask = mask
@@ -1490,8 +1491,8 @@ class SkyModel:
 
     def __str__(self):
         """Default printer for SkyModel"""
-        s = "SkyModel: fixed: %s\n" % self.fixed
-        for i, sc in enumerate(self.components):
+        s = f"SkyModel: fixed: {self.fixed}\n"
+        for _, sc in enumerate(self.components):
             s += str(sc)
         s += "\n"
 
@@ -1547,7 +1548,7 @@ class Visibility(xarray.Dataset):
             polarisation_frame:  linear
             source:              unknown
             meta:                None
-    """  # noqa:E501
+    """  # noqa:E501 pylint: disable=line-too-long
 
     __slots__ = ("_imaging_weight",)
 
@@ -1615,7 +1616,7 @@ class Visibility(xarray.Dataset):
             "spatial": ["u", "v", "w"],
         }
 
-        datavars = dict()
+        datavars = {}
         datavars["integration_time"] = xarray.DataArray(
             integration_time.astype(low_precision),
             dims=["time"],
@@ -1647,7 +1648,7 @@ class Visibility(xarray.Dataset):
             channel_bandwidth, dims=["frequency"], attrs={"units": "Hz"}
         )
 
-        attrs = dict()
+        attrs = {}
         attrs["rascil_data_model"] = "Visibility"
         attrs["configuration"] = configuration  # Antenna/station configuration
         attrs["source"] = source
@@ -1659,6 +1660,9 @@ class Visibility(xarray.Dataset):
 
     @property
     def imaging_weight(self):
+        """
+        Legacy data attribute. Deprecated.
+        """
         warnings.warn(
             "imaging_weight is deprecated, please use weight instead",
             DeprecationWarning,
@@ -1698,20 +1702,20 @@ class Visibility(xarray.Dataset):
         # to return size of Dataset.
         return int(self.nbytes)
 
-    def copy(self, deep=False, zero=False, data=None):
+    def copy(self, deep=False, data=None, zero=False):
         """
         Copy Visibility
 
         :param deep: perform deep-copy
-        :param zero: if True, set visibility data to zero in copied object
         :param data: data to use in new object; see docstring of
                      xarray.core.dataset.Dataset.copy
+        :param zero: if True, set visibility data to zero in copied object
         """
         new_vis = super().copy(deep=deep, data=data)
         if zero:
             new_vis["vis"].data[...] = 0.0
 
-        new_vis.__setattr__("_imaging_weight", self._imaging_weight)
+        setattr(new_vis, "_imaging_weight", self._imaging_weight)
         return new_vis
 
     def qa_visibility(self, context=None) -> QualityAssessment:
@@ -1815,13 +1819,13 @@ class Visibility(xarray.Dataset):
             self.baselines.antenna1.isin(ids), drop=True
         ).where(self.baselines.antenna2.isin(ids), drop=True)
         sub_bvis = self.sel({"baselines": baselines}, drop=True)
-        sub_bvis.__setattr__("_imaging_weight", self._imaging_weight)
+        setattr(sub_bvis, "_imaging_weight", self._imaging_weight)
 
         # The baselines coord now is missing the antenna1, antenna2 keys
         # so we add those back
-        def generate_baselines(id):
-            for a1 in id:
-                for a2 in id:
+        def generate_baselines(baseline_id):
+            for a1 in baseline_id:
+                for a2 in baseline_id:
                     if a2 >= a1:
                         yield a1, a2
 
@@ -1847,11 +1851,11 @@ class Visibility(xarray.Dataset):
             for (dimension, vis_slice), (_, imaging_weight_slice) in zip(
                 grouped_dataset, group_imaging_weight
             ):
-                vis_slice.__setattr__("_imaging_weight", imaging_weight_slice)
+                setattr(vis_slice, "_imaging_weight", imaging_weight_slice)
                 yield dimension, vis_slice
         else:
             for dimension, vis_slice in grouped_dataset:
-                vis_slice.__setattr__("_imaging_weight", None)
+                setattr(vis_slice, "_imaging_weight", None)
                 yield dimension, vis_slice
 
     def groupbybins(
@@ -1865,7 +1869,10 @@ class Visibility(xarray.Dataset):
         squeeze=True,
         restore_coord_dims=False,
     ):
-
+        """
+        Overwriting groupbybins method.
+        See docstring of Dataset.groupbybins
+        """
         grouped_dataset = super().groupby_bins(
             group,
             bins,
@@ -1894,16 +1901,20 @@ class Visibility(xarray.Dataset):
             for (dimension, vis_slice), (_, imaging_weight_slice) in zip(
                 grouped_dataset, group_imaging_weight
             ):
-                vis_slice.__setattr__("_imaging_weight", imaging_weight_slice)
+                setattr(vis_slice, "_imaging_weight", imaging_weight_slice)
                 yield dimension, vis_slice
         else:
             for dimension, vis_slice in grouped_dataset:
-                vis_slice.__setattr__("_imaging_weight", None)
+                setattr(vis_slice, "_imaging_weight", None)
                 yield dimension, vis_slice
 
 
 @xarray.register_dataset_accessor("visibility_acc")
 class VisibilityAccessor(XarrayAccessorMixin):
+    """
+    Visibility property accessor
+    """
+
     def __init__(self, xarray_obj):
         super().__init__(xarray_obj)
         self._uvw_lambda = None
@@ -1955,7 +1966,10 @@ class VisibilityAccessor(XarrayAccessorMixin):
             dependency of uvw for the calculation
         """
         if self._uvw_lambda is None:
-            k = (self._obj["frequency"].data / const.c).value
+            k = (
+                self._obj["frequency"].data
+                / const.c  # pylint: disable=no-member
+            ).value
             uvw = self._obj["uvw"].data
             if self.nchan == 1:
                 self._uvw_lambda = (uvw * k)[..., numpy.newaxis, :]
@@ -2080,7 +2094,7 @@ class FlagTable(xarray.Dataset):
             "polarisation": polarisation_frame.names,
         }
 
-        datavars = dict()
+        datavars = {}
         datavars["flags"] = xarray.DataArray(
             flags, dims=["time", "baselines", "frequency", "polarisation"]
         )
@@ -2095,7 +2109,7 @@ class FlagTable(xarray.Dataset):
             dims="time",
         )
 
-        attrs = dict()
+        attrs = {}
         attrs["rascil_data_model"] = "FlagTable"
         attrs["_polarisation_frame"] = polarisation_frame.type
         attrs["configuration"] = configuration  # Antenna/station configuration
@@ -2114,20 +2128,21 @@ class FlagTable(xarray.Dataset):
         # to return size of Dataset.
         return int(self.nbytes)
 
-    def copy(self, deep=False, zero=False, data=None):
+    def copy(self, deep=False, data=None, zero=False):
         """
         Copy FlagTable
 
         :param deep: perform deep-copy
-        :param zero: if True, set flags to zero in copied object
         :param data: data to use in new object; see docstring of
                      xarray.core.dataset.Dataset.copy
+        :param zero: if True, set flags to zero in copied object
         """
         new_ft = super().copy(deep=deep, data=data)
         if zero:
             new_ft.data["flags"][...] = 0
         return new_ft
 
+    # pylint: disable=invalid-name
     def qa_flag_table(self, context=None) -> QualityAssessment:
         """Assess the quality of FlagTable
 
@@ -2151,8 +2166,9 @@ class FlagTable(xarray.Dataset):
 
 @xarray.register_dataset_accessor("flagtable_acc")
 class FlagTableAccessor(XarrayAccessorMixin):
-    def __init__(self, xarray_obj):
-        super().__init__(xarray_obj)
+    """
+    FlagTable property accessor.
+    """
 
     @property
     def nchan(self):
@@ -2175,7 +2191,7 @@ class FlagTableAccessor(XarrayAccessorMixin):
     @property
     def nants(self):
         """Number of antennas"""
-        return self.attrs["configuration"].configuration_acc.nants
+        return self._obj.attrs["configuration"].configuration_acc.nants
 
     @property
     def nbaselines(self):
