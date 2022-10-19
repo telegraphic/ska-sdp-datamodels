@@ -1,7 +1,10 @@
-""" Xarray coordinate support
+# pylint: disable=invalid-name
+
+"""
+Xarray coordinate support
 """
 
-__all__ = ["image_wcs", "griddata_wcs", "cf_wcs"]
+__all__ = ["image_wcs", "griddata_wcs", "conv_func_wcs"]
 
 import numpy
 from astropy.wcs import WCS
@@ -36,7 +39,7 @@ def image_wcs(ds):
     else:
         channel_bandwidth = freq
 
-    projection = ds._projection
+    projection = ds._projection  # pylint: disable=protected-access
     # The negation in the longitude is needed by definition of RA, DEC
     if ds.spectral_type == "MOMENT":
         w.wcs.crpix = ds.attrs["refpixel"]
@@ -104,7 +107,8 @@ def griddata_wcs(ds):
     return wcs
 
 
-def cf_wcs(ds):
+# pylint: disable=too-many-branches,too-many-locals
+def conv_func_wcs(ds):
     """
     :param ds: Dataset
     :return: WCS coordinates for ConvolutionFunction

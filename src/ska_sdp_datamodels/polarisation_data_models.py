@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name
+
 """
 Data models specifically used for Polarisation
 """
@@ -26,11 +28,11 @@ class ReceptorFrame:
         :param name: Name of Polarisation
         """
 
-        if name in self.rec_frames.keys():
+        if name in self.rec_frames:
             self.type = name
             self.translations = self.rec_frames[name]
         else:
-            raise ValueError("Unknown receptor frame %s" % str(name))
+            raise ValueError(f"Unknown receptor frame {str(name)}")
 
     @property
     def nrec(self):
@@ -38,7 +40,8 @@ class ReceptorFrame:
         return len(list(self.translations.keys()))
 
     def valid(self, name):
-        return name in self.rec_frames.keys()
+        """Is name a valid rec_frame key?"""
+        return name in self.rec_frames
 
     @property
     def names(self):
@@ -93,11 +96,11 @@ class PolarisationFrame:
         :param name: Name of Polarisation
         """
 
-        if name in self.polarisation_frames.keys():
+        if name in self.polarisation_frames:
             self.type = name
             self.translations = self.polarisation_frames[name]
         else:
-            raise ValueError("Unknown polarisation frame %s" % str(name))
+            raise ValueError(f"Unknown polarisation frame {name}")
 
     def __eq__(self, a):
         if a is None:
