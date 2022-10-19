@@ -19,7 +19,10 @@
 #
 import os
 import sys
-from unittest import mock
+
+# Define build directories
+sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath("../../src"))
 
 
 def setup(app):
@@ -54,6 +57,7 @@ autodoc_mock_imports = [
     "pytest",
     "numpy",
 ]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
