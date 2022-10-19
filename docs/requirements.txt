@@ -1,3 +1,7 @@
+# packages needed to be installed
+# so that the docs can render the API correctly
+# without the need of mocking every single import
+
 sphinx
 sphinx-argparse
 sphinx-rtd-theme

@@ -18,10 +18,13 @@ by the large range of capabilities available from xarray. These include:
  - Arbitrary meta data as attributes
 
 We have chosen to make data classes derive from xarray.Dataset. Instead of adding
-class methods to the data class, which would introduce some interface fragility
+some of the class methods to the data class, which would introduce some interface fragility
 as xarray changes over time, we have used data accessors to control access to
-methods specific to the class. This design is suggested in the xarray documentation
-on extending xarray. Examples::
+these methods specific to the class. This design is suggested in the xarray documentation
+on extending xarray.
+
+
+Examples::
 
     # Flagged visibility
     vis.visibility_acc.flagged_vis

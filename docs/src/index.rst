@@ -21,7 +21,9 @@ rich API for applications. For more details including how to update existing scr
 Installation Instructions
 =========================
 
-To install the repository, use git::
+The package is installable via pip.
+
+If you would like to view the source code or install from git, use::
 
     git clone https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels.git
 

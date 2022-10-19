@@ -19,3 +19,7 @@ See :py:mod:`ska_sdp_datamodels.memory_data_models` for the following definition
 * GainTable for gain solutions (as e.g. output from solve_gaintable): :py:class:`ska_sdp_datamodels.memory_data_models.GainTable`
 * PointingTable for pointing information: :py:class:`ska_sdp_datamodels.memory_data_models.PointingTable`
 * FlagTable for flagging information: :py:class:`ska_sdp_datamodels.memory_data_models.FlagTable`
+
+Polarisation-specific data models are introduced in :py:mod:`ska_sdp_datamodels.polarisation_data_models`
+* ReceptorFrame: :py:class:`ska_sdp_datamodels.polarisation_data_models.ReceptorFrame`
+* PolarisationFrame: :py:class:`ska_sdp_datamodels.polarisation_data_models.PolarisationFrame`
