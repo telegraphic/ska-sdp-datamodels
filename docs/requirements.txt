@@ -2,3 +2,5 @@ sphinx
 sphinx-argparse
 sphinx-rtd-theme
 sphinx-automodapi
+numpy
+astropy
