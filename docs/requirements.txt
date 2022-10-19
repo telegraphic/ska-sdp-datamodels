@@ -4,3 +4,6 @@ sphinx-rtd-theme
 sphinx-automodapi
 numpy
 astropy
+pandas
+xarray
+h5py

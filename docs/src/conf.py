@@ -56,6 +56,9 @@ autodoc_mock_imports = [
     "astropy",
     "pytest",
     "numpy",
+    "pandas",
+    "xarray",
+    "h5py",
 ]
 
 
