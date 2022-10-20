@@ -6,7 +6,7 @@ SKA SDP Python-based Data Models
 ################################
 
 This is a `repository <https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels.git>`_
-for the Python-based Data Models used in the SKA SDP.The aim of this repository is to
+for the Python-based Data Models used in the SKA SDP. The aim of this repository is to
 provide a set of universal data models that can be used across various workflows
 and pipelines in the SDP architecture.
 
@@ -30,9 +30,12 @@ If you would like to view the source code or install from git, use::
 
     git clone https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels.git
 
-Please ensure you have all the dependency packages installed. T
-he installation is managed through `poetry <https://python-poetry.org/docs/>`_.
+Please ensure you have all the dependency packages installed. The installation is managed
+through `poetry <https://python-poetry.org/docs/>`_.
 Refer to their page for instructions.
+
+Sections
+========
 
 .. toctree::
    :maxdepth: 1
@@ -42,7 +45,3 @@ Refer to their page for instructions.
    xarray
    helper_functions
    api
-
-* :ref:`genindex`
-* :ref:`modindex`
-

@@ -17,6 +17,9 @@ See :py:mod:`ska_sdp_datamodels.memory_data_models` for the following definition
 * PointingTable for pointing information: :py:class:`ska_sdp_datamodels.memory_data_models.PointingTable`
 * FlagTable for flagging information: :py:class:`ska_sdp_datamodels.memory_data_models.FlagTable`
 
-Polarisation-specific data models are introduced in :py:mod:`ska_sdp_datamodels.polarisation_data_models` :
+Polarisation-specific data models are introduced in :py:mod:`ska_sdp_datamodels.polarisation_data_models`:
+
 * ReceptorFrame: :py:class:`ska_sdp_datamodels.polarisation_data_models.ReceptorFrame`
 * PolarisationFrame: :py:class:`ska_sdp_datamodels.polarisation_data_models.PolarisationFrame`
+
+See :ref:`polarisation_handling` for more information.

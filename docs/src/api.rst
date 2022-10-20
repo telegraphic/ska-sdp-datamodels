@@ -11,5 +11,8 @@ The API is specified in the data_models directory.
 
    data_models/index.rst
 
+Indexes
+=======
+
 * :ref:`genindex`
 * :ref:`modindex`
