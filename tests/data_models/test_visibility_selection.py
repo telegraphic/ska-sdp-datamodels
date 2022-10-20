@@ -15,7 +15,7 @@ from src.processing_components.simulation import create_named_configuration
 from src.processing_components.visibility.base import create_visibility
 from src.ska_sdp_datamodels.polarisation_data_models import PolarisationFrame
 
-log = logging.getLogger("src-logger")
+log = logging.getLogger("data-models-logger")
 
 log.setLevel(logging.WARNING)
 
