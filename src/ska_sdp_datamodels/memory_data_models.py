@@ -122,7 +122,7 @@ class Configuration(xarray.Dataset):
             offset    (id, spatial) float64 0.0 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0 0.0
             stations  (id) <U3 '0' '1' '2' '3' '4' '5' ... '110' '111' '112' '113' '114'
         Attributes:
-            rascil_data_model:  Configuration
+            data_model:  Configuration
             name:               MID
             location:           (5109237.71471275, 2006795.66194638, -3239109.1838011...
             receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
@@ -209,7 +209,7 @@ class Configuration(xarray.Dataset):
         )
 
         attrs = {}
-        attrs["rascil_data_model"] = "Configuration"
+        attrs["data_model"] = "Configuration"
         attrs["name"] = name  # Name of configuration
         attrs["location"] = location  # EarthLocation
         attrs["receptor_frame"] = receptor_frame
@@ -263,7 +263,7 @@ class GainTable(xarray.Dataset):
             interval   (time) float32 99.72697 99.72697 99.72697
             datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
-            rascil_data_model:  GainTable
+            data_model:  GainTable
             receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
             phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
             configuration:      <xarray.Configuration> Dimensions:   (id: 115, spati...
@@ -339,7 +339,7 @@ class GainTable(xarray.Dataset):
             dims="time",
         )
         attrs = {}
-        attrs["rascil_data_model"] = "GainTable"
+        attrs["data_model"] = "GainTable"
         attrs["receptor_frame"] = receptor_frame
         attrs["phasecentre"] = phasecentre
         attrs["configuration"] = configuration
@@ -457,7 +457,7 @@ class PointingTable(xarray.Dataset):
             interval   (time) float64 99.73 99.73 99.73
             datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
-            rascil_data_model:  PointingTable
+            data_model:  PointingTable
             receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
             pointing_frame:     azel
             pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
@@ -535,7 +535,7 @@ class PointingTable(xarray.Dataset):
         )
 
         attrs = {}
-        attrs["rascil_data_model"] = "PointingTable"
+        attrs["data_model"] = "PointingTable"
         attrs["receptor_frame"] = receptor_frame
         attrs["pointing_frame"] = pointing_frame
         attrs["pointingcentre"] = pointingcentre
@@ -641,7 +641,7 @@ class Image(xarray.Dataset):
         Data variables:
             pixels        (chan, pol, y, x) float64 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0
         Attributes:
-            rascil_data_model:  Image
+            data_model:  Image
             frame:              icrs
     """  # noqa: E501
 
@@ -733,7 +733,7 @@ class Image(xarray.Dataset):
                     raise KeyError(f"Image: clean_beam must have key {key}")
 
         attrs = {
-            "rascil_data_model": "Image",
+            "data_model": "Image",
             "_polarisation_frame": polarisation_frame.type,
             "_projection": (wcs.wcs.ctype[0], wcs.wcs.ctype[1]),
             "spectral_type": wcs.wcs.ctype[3],
@@ -949,7 +949,7 @@ class GridData(xarray.Dataset):
         Data variables:
             pixels        (chan, pol, m, l) float64 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0
         Attributes:
-            rascil_data_model:  Image
+            data_model:  Image
     """  # noqa: E501
 
     __slots__ = ()
@@ -995,7 +995,7 @@ class GridData(xarray.Dataset):
 
         attrs = {}
 
-        attrs["rascil_data_model"] = "GridData"
+        attrs["data_model"] = "GridData"
         attrs["_polarisation_frame"] = polarisation_frame.type
 
         data_vars = {}
@@ -1102,7 +1102,7 @@ class ConvolutionFunction(xarray.Dataset):
         Data variables:
             pixels        (frequency, polarisation, w, dv, du, v, u) complex128 0j .....
         Attributes:
-            rascil_data_model:   ConvolutionFunction
+            data_model:   ConvolutionFunction
             grid_wcs:            WCS Keywords Number of WCS axes: 7 CTYPE : 'UU' ...
             projection_wcs:      WCS Keywords Number of WCS axes: 4 CTYPE : 'RA--...
             polarisation_frame:  stokesI
@@ -1188,7 +1188,7 @@ class ConvolutionFunction(xarray.Dataset):
         assert coords["v"][0] != coords["v"][-1]
 
         attrs = {}
-        attrs["rascil_data_model"] = "ConvolutionFunction"
+        attrs["data_model"] = "ConvolutionFunction"
         attrs["_polarisation_frame"] = polarisation_frame.type
 
         nchan = len(frequency)
@@ -1603,7 +1603,7 @@ class Visibility(xarray.Dataset):
         )
 
         attrs = {}
-        attrs["rascil_data_model"] = "Visibility"
+        attrs["data_model"] = "Visibility"
         attrs["configuration"] = configuration  # Antenna/station configuration
         attrs["source"] = source
         attrs["phasecentre"] = phasecentre
@@ -2061,7 +2061,7 @@ class FlagTable(xarray.Dataset):
         )
 
         attrs = {}
-        attrs["rascil_data_model"] = "FlagTable"
+        attrs["data_model"] = "FlagTable"
         attrs["_polarisation_frame"] = polarisation_frame.type
         attrs["configuration"] = configuration  # Antenna/station configuration
 

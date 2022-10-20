@@ -69,7 +69,7 @@ class PolarisationFrame:
                     the data dimensions in actual coordinates
         polarisation_frames: Dictionary containing
                     the source reference frames information
-        fits_to_rascil: PolarisationFrames that fit
+        fits_to_datamodels: PolarisationFrames that fit
                     the data dimensions in the code
 
     """
@@ -94,7 +94,7 @@ class PolarisationFrame:
         "stokesIQ": {"I": 0, "Q": 1},
         "stokesI": {"I": 0},
     }
-    fits_to_rascil = {
+    fits_to_datamodels = {
         "circular": [0, 3, 1, 2],  # RR, LL, RL, LR
         "circularnp": [0, 1],  # RR, LL,
         "linear": [0, 3, 1, 2],  # XX, YY, XY, YX
