@@ -3,7 +3,7 @@
 # pylint: disable=too-many-ancestors,too-many-locals
 
 """
-The data models used in RASCIL:
+Memory data models
 """
 
 __all__ = [
@@ -73,25 +73,18 @@ class XarrayAccessorMixin:
 class QualityAssessment:
     """Quality assessment
 
-    :param origin: str, origin e.g. "continuum_imaging_pipeline"
-    :param data: Data containing standard fields
-    :param context: Context of QualityAssessment e.g. "Cycle 5"
+    :param origin: str, name of the origin function
+    :param data: dict, data containing standard fields
+    :param context: str, context of QualityAssessment e.g. "Cycle 5"
 
     """
 
     # pylint: disable=too-few-public-methods
     def __init__(self, origin=None, data=None, context=None):
-        """QualityAssessment
-
-        :param origin:
-        :param data:
-        :param context:
-        """
-        self.origin = (
-            origin  # Name of function originating QualityAssessment assessment
-        )
-        self.data = data  # Dictionary containing standard fields
-        self.context = context  # Context string
+        """QualityAssessment data class initialisation"""
+        self.origin = origin
+        self.data = data
+        self.context = context
 
     def __str__(self):
         """Default printer for QualityAssessment"""
@@ -106,7 +99,7 @@ class QualityAssessment:
 
 class Configuration(xarray.Dataset):
     """
-    A Configuration describes an array configuration.
+    A Configuration describes an array configuration
 
     Here is an example::
 
@@ -124,7 +117,7 @@ class Configuration(xarray.Dataset):
             offset    (id, spatial) float64 0.0 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0 0.0
             stations  (id) <U3 '0' '1' '2' '3' '4' '5' ... '110' '111' '112' '113' '114'
         Attributes:
-            rascil_data_model:  Configuration
+            data_model:  Configuration
             name:               MID
             location:           (5109237.71471275, 2006795.66194638, -3239109.1838011...
             receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
@@ -211,7 +204,7 @@ class Configuration(xarray.Dataset):
         )
 
         attrs = {}
-        attrs["rascil_data_model"] = "Configuration"
+        attrs["data_model"] = "Configuration"
         attrs["name"] = name  # Name of configuration
         attrs["location"] = location  # EarthLocation
         attrs["receptor_frame"] = receptor_frame
@@ -244,7 +237,7 @@ class ConfigurationAccessor(XarrayAccessorMixin):
 
 class GainTable(xarray.Dataset):
     """
-    Gain table with: time, antenna,  weight columns
+    Gain table with: time, antenna, weight columns
 
     The weight is usually that output from gain solvers.
 
@@ -265,7 +258,7 @@ class GainTable(xarray.Dataset):
             interval   (time) float32 99.72697 99.72697 99.72697
             datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
-            rascil_data_model:  GainTable
+            data_model:  GainTable
             receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
             phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
             configuration:      <xarray.Configuration> Dimensions:   (id: 115, spati...
@@ -341,7 +334,7 @@ class GainTable(xarray.Dataset):
             dims="time",
         )
         attrs = {}
-        attrs["rascil_data_model"] = "GainTable"
+        attrs["data_model"] = "GainTable"
         attrs["receptor_frame"] = receptor_frame
         attrs["phasecentre"] = phasecentre
         attrs["configuration"] = configuration
@@ -459,7 +452,7 @@ class PointingTable(xarray.Dataset):
             interval   (time) float64 99.73 99.73 99.73
             datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
-            rascil_data_model:  PointingTable
+            data_model:  PointingTable
             receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
             pointing_frame:     azel
             pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
@@ -537,7 +530,7 @@ class PointingTable(xarray.Dataset):
         )
 
         attrs = {}
-        attrs["rascil_data_model"] = "PointingTable"
+        attrs["data_model"] = "PointingTable"
         attrs["receptor_frame"] = receptor_frame
         attrs["pointing_frame"] = pointing_frame
         attrs["pointingcentre"] = pointingcentre
@@ -574,7 +567,7 @@ class PointingTable(xarray.Dataset):
     def qa_pointing_table(self, context=None) -> QualityAssessment:
         """Assess the quality of a PointingTable
 
-        :return: QA
+        :return: QualityAssessment
         """
         apt = numpy.abs(self.pointing[self.weight > 0.0])
         ppt = numpy.angle(self.pointing[self.weight > 0.0])
@@ -620,12 +613,13 @@ class PointingTableAccessor(XarrayAccessorMixin):
 
 class GridData(xarray.Dataset):
     """Class to hold Gridded data for Fourier processing
+
     - Has four or more coordinates: [chan, pol, z, y, x]
-    where x can be u, l; y can be v, m; z can be w, n
+    where x can be u, l; y can be v, m; z can be w, n.
 
     The conventions for indexing in WCS and numpy are opposite.
-    - In astropy.wcs, the order is (longitude, latitude, polarisation, frequency)
-    - in numpy, the order is (frequency, polarisation, depth, latitude, longitude)
+    - In astropy.wcs, the order is (longitude, latitude, polarisation, frequency);
+    - in numpy, the order is (frequency, polarisation, depth, latitude, longitude).
 
     .. warning::
         The polarisation_frame is kept in two places, the
@@ -647,7 +641,7 @@ class GridData(xarray.Dataset):
         Data variables:
             pixels        (chan, pol, m, l) float64 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0
         Attributes:
-            rascil_data_model:  Image
+            data_model:  Image
     """  # noqa: E501
 
     __slots__ = ()
@@ -693,7 +687,7 @@ class GridData(xarray.Dataset):
 
         attrs = {}
 
-        attrs["rascil_data_model"] = "GridData"
+        attrs["data_model"] = "GridData"
         attrs["_polarisation_frame"] = polarisation_frame.type
 
         data_vars = {}
@@ -716,7 +710,6 @@ class GridData(xarray.Dataset):
     def qa_grid_data(self, context="") -> QualityAssessment:
         """Assess the quality of a griddata
 
-        :param gd:
         :return: QualityAssessment
         """
         data = {
@@ -745,18 +738,12 @@ class GridDataAccessor(XarrayAccessorMixin):
         return len(self._obj.frequency)
 
     def npol(self):
-        """Number of polarisations
-
-        :return: Number of polarisations
-        """
+        """Number of polarisations"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"]).npol
 
     @property
     def polarisation_frame(self):
-        """Polarisation frame (from coords)
-
-        :return:
-        """
+        """Polarisation frame (from coords)"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"])
 
     @property
@@ -766,18 +753,12 @@ class GridDataAccessor(XarrayAccessorMixin):
 
     @property
     def griddata_wcs(self):
-        """Return the equivalent WCS
-
-        :return:
-        """
+        """Return the equivalent WCS coordinates"""
         return griddata_wcs(self._obj)
 
     @property
     def projection_wcs(self):
-        """Return the equivalent WCS
-
-        :return:
-        """
+        """Return the projected WCS coordinates on image"""
         return image_wcs(self._obj)
 
 
@@ -785,15 +766,15 @@ class ConvolutionFunction(xarray.Dataset):
     """
     Class to hold Convolution function for Fourier processing
     - Has four or more coordinates: [chan, pol, z, y, x]
-    where x can be u, l; y can be v, m; z can be w, n
+    where x can be u, l; y can be v, m; z can be w, n.
 
     The cf has axes [chan, pol, dy, dx, y, x] where
     z, y, x are spatial axes in either sky or Fourier plane.
     The order in the WCS is reversed so the grid_WCS describes
-    UU, VV, WW, STOKES, FREQ axes
+    UU, VV, WW, STOKES, FREQ axes.
 
-    The axes UU,VV have the same physical stride as the image.
-    The axes DUU, DVV are subsampled.
+    The axes UU,VV have the same physical stride as the Image.
+    The axes DUU, DVV are sub-sampled.
 
     Convolution function holds the original sky
     plane projection in the projection_wcs.
@@ -813,7 +794,7 @@ class ConvolutionFunction(xarray.Dataset):
         Data variables:
             pixels        (frequency, polarisation, w, dv, du, v, u) complex128 0j .....
         Attributes:
-            rascil_data_model:   ConvolutionFunction
+            data_model:   ConvolutionFunction
             grid_wcs:            WCS Keywords Number of WCS axes: 7 CTYPE : 'UU' ...
             projection_wcs:      WCS Keywords Number of WCS axes: 4 CTYPE : 'RA--...
             polarisation_frame:  stokesI
@@ -899,7 +880,7 @@ class ConvolutionFunction(xarray.Dataset):
         assert coords["v"][0] != coords["v"][-1]
 
         attrs = {}
-        attrs["rascil_data_model"] = "ConvolutionFunction"
+        attrs["data_model"] = "ConvolutionFunction"
         attrs["_polarisation_frame"] = polarisation_frame.type
 
         nchan = len(frequency)
@@ -948,7 +929,7 @@ class ConvolutionFunction(xarray.Dataset):
         return int(self.nbytes)
 
     def qa_convolution_function(self, context="") -> QualityAssessment:
-        """Assess the quality of a convolutionfunction
+        """Assess the quality of a ConvolutionFunction
 
         :return: QualityAssessment
         """
@@ -984,10 +965,7 @@ class ConvolutionFunctionAccessor(XarrayAccessorMixin):
 
     @property
     def cf_wcs(self):
-        """Return the equivalent WCS
-
-        :return:
-        """
+        """Return the equivalent WCS coordinates"""
         return conv_func_wcs(self._obj)
 
     @property
@@ -997,10 +975,7 @@ class ConvolutionFunctionAccessor(XarrayAccessorMixin):
 
     @property
     def polarisation_frame(self):
-        """Polarisation frame (from coords)
-
-        :return:
-        """
+        """Polarisation frame (from coords)"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"])
 
 
@@ -1009,7 +984,7 @@ class SkyComponent:
     SkyComponents are used to represent compact
     sources on the sky. They possess direction,
     flux as a function of frequency and polarisation,
-    shape (with params), and polarisation frame.
+    shape (with params), and polarisation frame
 
     For example, the following creates and predicts
     the visibility from a collection of point sources
@@ -1180,7 +1155,7 @@ class SkyModel:
 
 class Visibility(xarray.Dataset):
     """
-    Visibility xarray Dataset class
+    Visibility xarray.Dataset class
 
     Visibility is defined to hold an observation with one direction.
 
@@ -1189,7 +1164,7 @@ class Visibility(xarray.Dataset):
     new delay tracking centre.
 
     Polarisation frame is the same for the entire data set and can be
-    stokesI, circular, circularnp, linear, linearnp
+    stokesI, circular, circularnp, linear, linearnp.
 
     The configuration is stored as an attribute.
 
@@ -1320,7 +1295,7 @@ class Visibility(xarray.Dataset):
         )
 
         attrs = {}
-        attrs["rascil_data_model"] = "Visibility"
+        attrs["data_model"] = "Visibility"
         attrs["configuration"] = configuration  # Antenna/station configuration
         attrs["source"] = source
         attrs["phasecentre"] = phasecentre
@@ -1612,10 +1587,7 @@ class VisibilityAccessor(XarrayAccessorMixin):
 
     @property
     def polarisation_frame(self):
-        """Polarisation frame (from coords)
-
-        :return:
-        """
+        """Polarisation frame (from coords)"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"])
 
     @property
@@ -1722,9 +1694,9 @@ class FlagTable(xarray.Dataset):
     """Flag table class
 
     Flags, time, integration_time, frequency, channel_bandwidth, pol,
-    in an xarray.
+    in the format of a xarray.
 
-    The configuration is also an attribute
+    The configuration is also an attribute.
     """
 
     __slots__ = ()
@@ -1781,7 +1753,7 @@ class FlagTable(xarray.Dataset):
         )
 
         attrs = {}
-        attrs["rascil_data_model"] = "FlagTable"
+        attrs["data_model"] = "FlagTable"
         attrs["_polarisation_frame"] = polarisation_frame.type
         attrs["configuration"] = configuration  # Antenna/station configuration
 
@@ -1853,10 +1825,7 @@ class FlagTableAccessor(XarrayAccessorMixin):
 
     @property
     def polarisation_frame(self):
-        """Polarisation frame (from coords)
-
-        :return:
-        """
+        """Polarisation frame (from coords)"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"])
 
     @property
