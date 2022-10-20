@@ -1,10 +1,7 @@
 .. _data_structure:
 
-.. toctree::
-   :maxdepth: 2
-
 Data containers used in ska-sdp-datamodels
-==============================
+===========================================
 
 ska-sdp-datamodels holds data in python Classes. The bulk data and attributes are usually kept in a xarray.Dataset.
 For each xarray based class there is an accessor which holds class specific methods and properties.
@@ -20,6 +17,6 @@ See :py:mod:`ska_sdp_datamodels.memory_data_models` for the following definition
 * PointingTable for pointing information: :py:class:`ska_sdp_datamodels.memory_data_models.PointingTable`
 * FlagTable for flagging information: :py:class:`ska_sdp_datamodels.memory_data_models.FlagTable`
 
-Polarisation-specific data models are introduced in :py:mod:`ska_sdp_datamodels.polarisation_data_models`
+Polarisation-specific data models are introduced in :py:mod:`ska_sdp_datamodels.polarisation_data_models` :
 * ReceptorFrame: :py:class:`ska_sdp_datamodels.polarisation_data_models.ReceptorFrame`
 * PolarisationFrame: :py:class:`ska_sdp_datamodels.polarisation_data_models.PolarisationFrame`

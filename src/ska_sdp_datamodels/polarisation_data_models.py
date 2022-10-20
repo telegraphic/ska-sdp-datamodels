@@ -8,10 +8,14 @@ __all__ = ["ReceptorFrame", "PolarisationFrame"]
 
 
 class ReceptorFrame:
-    """Define polarisation frames for receptors
+    """Polarisation frames for receptors
 
-    circular, linear, and stokesI. The latter is
+    This includes circular, linear, and stokesI. The latter is
     non-physical but useful for some types of testing.
+
+    Attributes:
+        rec_frames: Dictionary containing all the supported polarisations
+
     """
 
     rec_frames = {
@@ -34,28 +38,39 @@ class ReceptorFrame:
         else:
             raise ValueError(f"Unknown receptor frame {str(name)}")
 
-    @property
-    def nrec(self):
-        """Number of receptors (should be 2)"""
-        return len(list(self.translations.keys()))
+    def __eq__(self, a):
+        return self.type == a.type
 
     def valid(self, name):
         """Is name a valid rec_frame key?"""
         return name in self.rec_frames
 
     @property
+    def nrec(self):
+        """Number of receptors (should be 2)"""
+        return len(list(self.translations.keys()))
+
+    @property
     def names(self):
         """Names"""
         return list(self.translations.keys())
 
-    def __eq__(self, a):
-        return self.type == a.type
-
 
 class PolarisationFrame:
-    """Define polarisation frames post correlation
+    """
+    Polarisation Frame data class
 
-    stokesI, stokesIQUV, linear, circular
+    Defines polarisation frames post correlation: include
+    stokesI, stokesIQUV, linear, circular.
+
+    TODO: Check if this is correct
+    Attributes:
+        fits_codes: PolarisationFrames that fit
+                    the data dimensions in actual coordinates
+        polarisation_frames: Dictionary containing
+                    the source reference frames information
+        fits_to_datamodels: PolarisationFrames that fit
+                    the data dimensions in the code
 
     """
 
@@ -79,7 +94,7 @@ class PolarisationFrame:
         "stokesIQ": {"I": 0, "Q": 1},
         "stokesI": {"I": 0},
     }
-    fits_to_rascil = {
+    fits_to_datamodels = {
         "circular": [0, 3, 1, 2],  # RR, LL, RL, LR
         "circularnp": [0, 1],  # RR, LL,
         "linear": [0, 3, 1, 2],  # XX, YY, XY, YX

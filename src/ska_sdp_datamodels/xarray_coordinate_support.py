@@ -18,7 +18,7 @@ def image_wcs(ds):
     :return: WCS coordinates for Image data model
     """
 
-    assert ds.rascil_data_model == "Image", ds.rascil_data_model
+    assert ds.data_model == "Image", ds.data_model
 
     w = WCS(naxis=4)
     nchan, npol, ny, nx = ds["pixels"].shape
@@ -74,7 +74,7 @@ def griddata_wcs(ds):
     :param ds: Dataset
     :return: WCS coordinates for GridData
     """
-    assert ds.rascil_data_model == "GridData", ds.rascil_data_model
+    assert ds.data_model == "GridData", ds.data_model
 
     # "frequency", "polarisation", "w", "v", "u"
     nchan, npol, ny, nx = ds["pixels"].shape
@@ -113,7 +113,7 @@ def conv_func_wcs(ds):
     :param ds: Dataset
     :return: WCS coordinates for ConvolutionFunction
     """
-    assert ds.rascil_data_model == "ConvolutionFunction", ds.rascil_data_model
+    assert ds.data_model == "ConvolutionFunction", ds.data_model
 
     # "frequency", "polarisation", "w", "v", "u"
     nchan, npol, nz, ndv, ndu, ny, nx = ds["pixels"].shape

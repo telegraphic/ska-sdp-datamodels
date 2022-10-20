@@ -36,8 +36,8 @@ log = logging.getLogger("src-logger")
 def polarisation_frame_from_names(names):
     """Derive polarisation_name from names
 
-    :param names:
-    :return:
+    :param names: str, e.g. "linear"
+    :return: PolarisationFrame
     """
     for frame in PolarisationFrame.polarisation_frames:
         frame_names = PolarisationFrame(frame).names
@@ -106,11 +106,14 @@ def pol_matrix_multiply(cm, vec, polaxis=0):
 def convert_stokes_to_linear(stokes, polaxis=1):
     """Convert Stokes IQUV to Linear (complex image)
 
+    Based on Equation 4.58 from Thompson's book (TMS):
+    Thompson, A. R., Moran, J. M., and Swenson, G. W.,
+    Interferometry and Synthesis in Radio Astronomy,
+    doi:10.1007/978-3-319-44431-4
+
     :param stokes: [...,4] Stokes vector in I,Q,U,V (can be complex)
     :param polaxis: Axis of stokes with polarisation (default 1)
     :return: linear vector in XX, XY, YX, YY sequence
-
-    Equation 4.58 TMS
     """
     if stokes.shape[polaxis] == 2:
         conversion_matrix = numpy.array([[1, 1], [1, -1]])
@@ -126,11 +129,11 @@ def convert_stokes_to_linear(stokes, polaxis=1):
 def convert_linear_to_stokes(linear, polaxis=1):
     """Convert Linear to Stokes IQUV (complex image)
 
+    Equation 4.58 TMS, inverted with numpy.linalg.inv.
+
     :param linear: [...,4] linear vector in XX, XY, YX, YY sequence
     :param polaxis: Axis of linear with polarisation (default 1)
     :return: Complex I,Q,U,V
-
-    Equation 4.58 TMS, inverted with numpy.linalg.inv
     """
 
     if linear.shape[polaxis] == 2:
@@ -153,10 +156,10 @@ def convert_linear_to_stokes(linear, polaxis=1):
 def convert_linear_to_stokesI(linear):
     """Convert Linear to Stokes I
 
+    Equation 4.58 TMS, inverted with numpy.linalg.inv.
+
     :param linear: [...,4] linear vector in XX, XY, YX, YY sequence
     :return: Complex I
-
-    Equation 4.58 TMS, inverted with numpy.linalg.inv
     """
     if linear.shape[-1] == 2:
         return 0.5 * (linear[..., 0] + linear[..., 1])[..., numpy.newaxis]
@@ -167,11 +170,11 @@ def convert_linear_to_stokesI(linear):
 def convert_stokes_to_circular(stokes, polaxis=1):
     """Convert Stokes IQUV to Circular (complex image)
 
+    Equation 4.59 TMS.
+
     :param stokes: [...,4] Stokes vector in I,Q,U,V (can be complex)
     :param polaxis: Axis of stokes with polarisation (default 1)
     :return: circular vector in RR, RL, LR, LL sequence
-
-    Equation 4.59 TMS
     """
     if stokes.shape[polaxis] == 2:
         conversion_matrix = numpy.array([[1, 1], [1, -1]])
@@ -186,11 +189,11 @@ def convert_stokes_to_circular(stokes, polaxis=1):
 def convert_circular_to_stokes(circular, polaxis=1):
     """Convert Circular to Stokes IQUV (complex image)
 
+    Equation 4.58 TMS, inverted with numpy.linalg.inv.
+
     :param circular: [...,4] linear vector in RR, RL, LR, LL sequence
     :param polaxis: Axis of circular with polarisation (default 1)
     :return: Complex I,Q,U,V
-
-    Equation 4.58 TMS, inverted with numpy.linalg.inv
     """
 
     if circular.shape[polaxis] == 2:
@@ -213,10 +216,10 @@ def convert_circular_to_stokes(circular, polaxis=1):
 def convert_circular_to_stokesI(circular):
     """Convert Circular to Stokes I
 
+    Equation 4.58 TMS, inverted with numpy.linalg.inv.
+
     :param circular: [...,4] linear vector in RR, RL, LR, LL sequence
     :return: Complex I
-
-    Equation 4.58 TMS, inverted with numpy.linalg.inv
     """
 
     if circular.shape[-1] == 2:
@@ -255,7 +258,14 @@ def convert_pol_frame(
     polvec, ipf: PolarisationFrame, opf: PolarisationFrame, polaxis=1
 ):
     """
-    Convert betweem polarisation frames
+    Convert between polarisation frames.
+
+    :param polvec: Polarisation vector
+    :param ipf: Input PolarisationFrame
+    :param opf: Output PolarisationFrame
+    :param polaxis: Axis of stokes with polarisation (default 1)
+
+    :return: numpy array of shape after conversion
     """
     if ipf == opf:
         return polvec
