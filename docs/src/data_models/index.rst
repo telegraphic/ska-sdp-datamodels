@@ -1,10 +1,10 @@
-.. _rascil_data_models_lower:
+.. _data_models_lower:
 
-.. py:currentmodule:: rascil.data_models
+.. py:currentmodule:: ska_sdp_datamodels
 
-===========
-Data models
-===========
+===============
+Data models API
+===============
 
 .. toctree::
    :maxdepth: 1

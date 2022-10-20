@@ -60,7 +60,6 @@ from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.units import Quantity
 from astropy.wcs import WCS
 
-from src.processing_components import generate_baselines
 from src.ska_sdp_datamodels.memory_data_models import (
     Configuration,
     ConvolutionFunction,
@@ -79,6 +78,17 @@ from src.ska_sdp_datamodels.polarisation_data_models import (
 )
 
 log = logging.getLogger("src-logger")
+
+
+def _generate_baselines(nant):
+    """Generate mapping from antennas to baselines
+    Note that we need to include auto-correlations
+    since some input measurement sets
+    may contain auto-correlations
+    """
+    for ant1 in range(0, nant):
+        for ant2 in range(ant1, nant):
+            yield ant1, ant2
 
 
 def convert_configuration_to_hdf(config: Configuration, f):
@@ -223,6 +233,7 @@ def convert_hdf_to_visibility(f):
     :param f: hdf group
     :return: Visibility
     """
+
     assert f.attrs["rascil_data_model"] == "Visibility", "Not a Visibility"
     s = f.attrs["phasecentre_coords"].split()
     ss = [float(s[0]), float(s[1])] * u.deg
@@ -243,7 +254,8 @@ def convert_hdf_to_visibility(f):
     flags = f["data_flags"][()]
 
     baselines = pandas.MultiIndex.from_tuples(
-        generate_baselines(nants), names=("antenna1", "antenna2")
+        _generate_baselines(nants),
+        names=("antenna1", "antenna2"),
     )
 
     vis = Visibility.constructor(
@@ -303,7 +315,7 @@ def convert_hdf_to_flagtable(f):
     nants = f.attrs["nants"]
 
     baselines = pandas.MultiIndex.from_tuples(
-        generate_baselines(nants), names=("antenna1", "antenna2")
+        _generate_baselines(nants), names=("antenna1", "antenna2")
     )
     polarisation_frame = PolarisationFrame(f.attrs["polarisation_frame"])
     frequency = f["data_frequency"][()]

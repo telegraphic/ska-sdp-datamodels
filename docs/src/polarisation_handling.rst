@@ -1,4 +1,4 @@
-.. _rascil_polarisation_handling:
+.. polarisation_handling:
 
 Polarisation handling
 *********************
@@ -8,13 +8,12 @@ Polarisation handling is intended to implement the Hamaker-Bregman-Sault formali
 For imaging:
 
  * Types of polarisation allowed are stokesIQUV, stokesI, linear, circular.
- * These are defined in :py:class:`rascil.data_models.polarisation.PolarisationFrame`
+ * These are defined in :py:class:`ska_sdp_datamodels.polarisation_data_models.PolarisationFrame`
  * Images may be defined as stokesI, stokesIQUV, linear, or circular
- * To convert from Stokes image to polarised image see :py:func:`rascil.processing_components.image.operations.convert_stokes_to_polimage`
- * To convert from polarised image to Stokes image :py:func:`rascil.processing_components.image.operations.convert_polimage_to_stokes`
  * SkyComponents may be defined as stokesI, stokesIQUV, linear, or circular
  * Visibility may be defined as stokesI, stokesIQUV, linear, or circular.
  * Dish/station voltage patterns are described by images in which each pixel is a 2 x 2 complex matrix.
+ * For converting different polarisation frames, see functions in polarisation_convert.py.
 
 For calibration, the Jones matrices allowed are:
 
