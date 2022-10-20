@@ -5,8 +5,7 @@ description = "SKA SDP Python-based Data Models"
 authors = ["SKA SDP Developers"]
 license = "Apache 2.0"
 repository = "https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels"
-# Uncomment once set up
-#documentation = "https://developer.skao.int/projects/ska-sdp-datamodels/en/latest/"
+documentation = "https://developer.skao.int/projects/ska-sdp-datamodels/en/latest/"
 
 [[tool.poetry.source]]
 name = "ska"
