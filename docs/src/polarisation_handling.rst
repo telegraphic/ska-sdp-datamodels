@@ -1,7 +1,7 @@
 .. polarisation_handling:
 
 Polarisation handling
-============================
+=====================
 
 Polarisation handling is intended to implement the Hamaker-Bregman-Sault formalism.
 

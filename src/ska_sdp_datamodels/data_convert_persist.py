@@ -675,7 +675,7 @@ def convert_hdf_to_skycomponent(f):
 
         :param s: String
 
-        :return: SkyCoord
+        :return: astropy SkyCoord object
         """
         ra, dec, frame = s.split(",")
         d = SkyCoord(ra, dec, unit="deg", frame=frame.strip())
@@ -1076,7 +1076,7 @@ def import_convolutionfunction_from_hdf5(filename):
     """Import ConvolutionFunction(s) from HDF5 format
 
     :param filename: Name of HDF5 file
-    :return: single cf or list of cfs
+    :return: single convolution function or list of convolution functions
     """
 
     with h5py.File(filename, "r") as f:

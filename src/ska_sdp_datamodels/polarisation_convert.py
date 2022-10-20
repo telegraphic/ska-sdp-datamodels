@@ -37,7 +37,7 @@ def polarisation_frame_from_names(names):
     """Derive polarisation_name from names
 
     :param names: str, e.g. "linear"
-    :return: PolarisationFrames
+    :return: PolarisationFrame
     """
     for frame in PolarisationFrame.polarisation_frames:
         frame_names = PolarisationFrame(frame).names

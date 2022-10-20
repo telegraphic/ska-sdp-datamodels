@@ -3,7 +3,7 @@
 # pylint: disable=too-many-ancestors,too-many-locals
 
 """
-The data models used in ska-sdp-datamodels
+Memory data models
 """
 
 __all__ = [
@@ -77,8 +77,7 @@ class XarrayAccessorMixin:
 class QualityAssessment:
     """Quality assessment
 
-    :param origin: str, name of origin function
-                    e.g. "continuum_imaging_pipeline"
+    :param origin: str, name of the origin function
     :param data: dict, data containing standard fields
     :param context: str, context of QualityAssessment e.g. "Cycle 5"
 

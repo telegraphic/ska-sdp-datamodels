@@ -3,7 +3,7 @@
 .. toctree::
 
 SKA SDP Python-based Data Models
-###########################################################
+################################
 
 This is a `repository <https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels.git>`_
 for the Python-based Data Models used in the SKA SDP.The aim of this repository is to
@@ -35,7 +35,7 @@ he installation is managed through `poetry <https://python-poetry.org/docs/>`_.
 Refer to their page for instructions.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    data_structure
    polarisation_handling

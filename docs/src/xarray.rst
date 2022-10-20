@@ -1,7 +1,7 @@
 .. _xarray:
 
 Use of xarray
-============================
+=============
 
 ska-sdp-datamodels uses the `Xarray <https:/www.dask.org>`_ library instead of numpy in the
 data classes. All data classes are derived from xarray.Dataset. This change is motivated
@@ -42,7 +42,7 @@ Examples::
     gt.gaintable_acc.nrec
 
 Usage Examples
--------------------------
+---------------
 
 The steps required are:
 

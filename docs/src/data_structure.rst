@@ -1,7 +1,7 @@
 .. _data_structure:
 
 Data containers used in ska-sdp-datamodels
-==============================
+===========================================
 
 ska-sdp-datamodels holds data in python Classes. The bulk data and attributes are usually kept in a xarray.Dataset.
 For each xarray based class there is an accessor which holds class specific methods and properties.
