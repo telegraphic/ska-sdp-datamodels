@@ -113,13 +113,3 @@ Warnings and Limitations
 The current main limitation of the xarray implementation is that, some of the class methods and operations
 can return a raw xarray.Dataset instead of a subclass instance. So please make sure variables
 return the expected data structure when using xarray.
-
-Under what circumstances do we lose the nature of a class derived from Dataset
-when calling an xarray function or Dataset method on it ? To a few exceptions:
-- Dataset methods return a subclass instance. Exception: where()
-- Numpy ufuncs return a raw Dataset
-- Binary arithmetic operations return a raw Dataset
-- Functions in the xarray base namespace return a raw Dataset. Exception: concat()
-
-Reduction functions/methods should arguably not return a subclass instance but a raw Dataset instead.
-For example: mean, std, reduce. However, they do return a subclass instance when called on a Dataset subclass.
