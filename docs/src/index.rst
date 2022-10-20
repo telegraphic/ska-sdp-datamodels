@@ -7,7 +7,7 @@ SKA SDP Python-based Data Models
 
 This is a `repository <https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels.git>`_
 for the Python-based Data Models used in the SKA SDP pipelines and workflows.
-It is modeled after the standard data models used in `RASCIL <https://gitlab.com/ska-telescope/external/rascil-main.git>`_
+It is modeled after the standard data models used in `RASCIL <https://gitlab.com/ska-telescope/external/rascil-main.git>`_.
 
 The code is written in Python. The interfaces all operate with familiar data structures such as image,
 visibility table, gain table, etc. The python source code is directly accessible from these documentation pages:
