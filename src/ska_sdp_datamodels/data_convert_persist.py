@@ -85,6 +85,8 @@ def _generate_baselines(nant):
     Note that we need to include auto-correlations
     since some input measurement sets
     may contain auto-correlations
+
+    :param nant: Number of antennas
     """
     for ant1 in range(0, nant):
         for ant2 in range(ant1, nant):
@@ -102,8 +104,8 @@ def convert_configuration_to_hdf(config: Configuration, f):
     def _convert_earthlocation_to_string(el: EarthLocation):
         """Convert Earth Location to string
 
-        :param el:
-        :return:
+        :param el: Earth Location
+        :return: String
         """
         return f"{el.x}, {el.y}, {el.z}"
 
@@ -143,11 +145,10 @@ def convert_configuration_from_hdf(f):
     """
 
     def _convert_earthlocation_from_string(s: str):
-        """Convert Earth Location to string
+        """Convert Earth Location from string
 
         :param s: String
-
-        :return:
+        :return: Earth Location
         """
         x, y, z = s.split(",")
         el = EarthLocation(x=Quantity(x), y=Quantity(y), z=Quantity(z))
@@ -339,9 +340,9 @@ def convert_hdf_to_flagtable(f):
 def export_visibility_to_hdf5(vis, filename):
     """Export a Visibility to HDF5 format
 
-    :param vis:
-    :param filename:
-    :return:
+    :param vis: Visibility
+    :param filename: Name of HDF5 file
+    :return: None
     """
 
     if not isinstance(vis, collections.abc.Iterable):
@@ -363,7 +364,7 @@ def export_visibility_to_hdf5(vis, filename):
 def import_visibility_from_hdf5(filename):
     """Import Visibility(s) from HDF5 format
 
-    :param filename:
+    :param filename: Name of HDF5 file
     :return: If only one then a Visibility, otherwise a list of Visibility's
     """
 
@@ -382,8 +383,8 @@ def import_visibility_from_hdf5(filename):
 def export_flagtable_to_hdf5(ft, filename):
     """Export a FlagTable or list to HDF5 format
 
-    :param ft:
-    :param filename:
+    :param ft: FlagTable
+    :param filename: Name of HDF5 file
     """
 
     if not isinstance(ft, collections.abc.Iterable):
@@ -404,7 +405,7 @@ def export_flagtable_to_hdf5(ft, filename):
 def import_flagtable_from_hdf5(filename):
     """Import FlagTable(s) from HDF5 format
 
-    :param filename:
+    :param filename: Name of HDF5 file
     :return: If only one then a FlagTable, otherwise a list of FlagTable's
     """
 
@@ -479,8 +480,8 @@ def export_gaintable_to_hdf5(gt: Union[GainTable, List[GainTable]], filename):
     """Export a GainTable or list to HDF5 format
 
     :param gt: GainTable or list
-    :param filename:
-    :return:
+    :param filename: Name of HDF5 file
+    :return: None
     """
 
     if not isinstance(gt, collections.abc.Iterable):
@@ -502,7 +503,7 @@ def export_gaintable_to_hdf5(gt: Union[GainTable, List[GainTable]], filename):
 def import_gaintable_from_hdf5(filename):
     """Import GainTable(s) from HDF5 format
 
-    :param filename:
+    :param filename: Name of HDF5 file
     :return: single gaintable or list of gaintables
     """
 
@@ -595,9 +596,9 @@ def convert_hdf_to_pointingtable(f):
 def export_pointingtable_to_hdf5(pt: PointingTable, filename):
     """Export a PointingTable or list to HDF5 format
 
-    :param pt:
-    :param filename:
-    :return:
+    :param pt: Pointing Table
+    :param filename: Name of HDF5 file
+    :return: None
     """
 
     if not isinstance(pt, collections.abc.Iterable):
@@ -618,7 +619,7 @@ def export_pointingtable_to_hdf5(pt: PointingTable, filename):
 def import_pointingtable_from_hdf5(filename):
     """Import PointingTable(s) from HDF5 format
 
-    :param filename:
+    :param filename: Name of HDF5 file
     :return: single pointingtable or list of pointingtables
     """
 
@@ -646,7 +647,7 @@ def convert_skycomponent_to_hdf(sc: SkyComponent, f):
         """Convert SkyCoord to string
 
         :param d: SkyCoord
-        :return:
+        :return: String
         """
         return f"{d.ra.deg}, {d.dec.deg}, icrs"
 
@@ -676,7 +677,7 @@ def convert_hdf_to_skycomponent(f):
 
         :param s: String
 
-        :return:
+        :return: SkyCoord
         """
         ra, dec, frame = s.split(",")
         d = SkyCoord(ra, dec, unit="deg", frame=frame.strip())
@@ -706,8 +707,8 @@ def export_skycomponent_to_hdf5(sc: Union[SkyComponent, list], filename):
     """Export a SkyComponent or list to HDF5 format
 
     :param sc: SkyComponent
-    :param filename:
-    :return:
+    :param filename: Name of HDF5 file
+    :return: None
     """
 
     if not isinstance(sc, collections.abc.Iterable):
@@ -723,7 +724,7 @@ def export_skycomponent_to_hdf5(sc: Union[SkyComponent, list], filename):
 def import_skycomponent_from_hdf5(filename):
     """Import SkyComponent(s) from HDF5 format
 
-    :param filename:
+    :param filename: Name of HDF5 file
     :return: single skycomponent or list of skycomponents
     """
 
@@ -786,9 +787,9 @@ def convert_hdf_to_image(f):
 def export_image_to_hdf5(im, filename):
     """Export an Image or list to HDF5 format
 
-    :param im:
-    :param filename:
-    :return:
+    :param im: Image
+    :param filename: Name of HDF5 file
+    :return: None
     """
 
     if not isinstance(im, collections.abc.Iterable):
@@ -810,7 +811,7 @@ def export_image_to_hdf5(im, filename):
 def import_image_from_hdf5(filename):
     """Import Image(s) from HDF5 format
 
-    :param filename:
+    :param filename: Name of HDF5 file
     :return: single image or list of images
     """
 
@@ -827,7 +828,7 @@ def export_skymodel_to_hdf5(sm, filename):
     """Export a Skymodel or list to HDF5 format
 
     :param sm: SkyModel or list of SkyModels
-    :param filename:
+    :param filename: Name of HDF5 file
     """
 
     if not isinstance(sm, collections.abc.Iterable):
@@ -874,7 +875,7 @@ def convert_skymodel_to_hdf(sm, f):
 def import_skymodel_from_hdf5(filename):
     """Import a Skymodel or list from HDF5 format
 
-    :param filename:
+    :param filename: Name of HDF5 file
     :return: SkyModel
     """
 
@@ -932,7 +933,7 @@ def convert_hdf_to_skymodel(f):
 
 
 def convert_griddata_to_hdf(gd: GridData, f):
-    """Convert a GridDatato an HDF file
+    """Convert a GridData to an HDF file
 
     :param gd: GridData
     :param f: hdf group
@@ -974,9 +975,9 @@ def convert_hdf_to_griddata(f):
 def export_griddata_to_hdf5(gd, filename):
     """Export a GridData or list to HDF5 format
 
-    :param gd:
-    :param filename:
-    :return:
+    :param gd: GridData
+    :param filename: Name of HDF5 file
+    :return:None
     """
 
     if not isinstance(gd, collections.abc.Iterable):
@@ -998,8 +999,8 @@ def export_griddata_to_hdf5(gd, filename):
 def import_griddata_from_hdf5(filename):
     """Import GridData(s) from HDF5 format
 
-    :param filename:
-    :return: single image or list of images
+    :param filename: Name of HDF5 file
+    :return: single griddata or list of griddatas
     """
 
     with h5py.File(filename, "r") as f:
@@ -1057,9 +1058,9 @@ def convert_hdf_to_convolutionfunction(f):
 def export_convolutionfunction_to_hdf5(cf, filename):
     """Export a ConvolutionFunction to HDF5 format
 
-    :param cf:
-    :param filename:
-    :return:
+    :param cf: ConvolutionFunction
+    :param filename: Name of HDF5 file
+    :return: None
     """
 
     if not isinstance(cf, collections.abc.Iterable):
@@ -1081,8 +1082,8 @@ def export_convolutionfunction_to_hdf5(cf, filename):
 def import_convolutionfunction_from_hdf5(filename):
     """Import ConvolutionFunction(s) from HDF5 format
 
-    :param filename:
-    :return: single image or list of images
+    :param filename: Name of HDF5 file
+    :return: single cf or list of cfs
     """
 
     with h5py.File(filename, "r") as f:

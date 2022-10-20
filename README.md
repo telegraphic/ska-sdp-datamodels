@@ -5,6 +5,11 @@ These models were originally developed in [RASCIL](https://gitlab.com/ska-telesc
 They were migrated during PI16 (autumn 2022) to provide an independent library 
 and easy access to the models.
 
+The [Documentation](https://developer.skao.int/projects/ska-sdp-datamodels/en/latest/) includes usage 
+examples, API, and installation directions.
+
+The CI/CD occurs on  [Gitlab](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels.git). 
+
 ## Standard CI machinery
 
 This repository is set up to use the
