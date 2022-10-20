@@ -106,7 +106,10 @@ def pol_matrix_multiply(cm, vec, polaxis=0):
 def convert_stokes_to_linear(stokes, polaxis=1):
     """Convert Stokes IQUV to Linear (complex image)
 
-    Based on Equation 4.58 in Thompson's book (TMS).
+    Based on Equation 4.58 from Thompson's book (TMS):
+    Thompson, A. R., Moran, J. M., and Swenson, G. W.,
+    Interferometry and Synthesis in Radio Astronomy,
+    doi:10.1007/978-3-319-44431-4
 
     :param stokes: [...,4] Stokes vector in I,Q,U,V (can be complex)
     :param polaxis: Axis of stokes with polarisation (default 1)
