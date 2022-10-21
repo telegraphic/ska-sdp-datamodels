@@ -119,9 +119,14 @@ class Image(xarray.Dataset):
         data_vars["pixels"] = xarray.DataArray(data, dims=dims, coords=coords)
 
         if isinstance(clean_beam, dict):
+            missing_keys = []
             for key in ["bmaj", "bmin", "bpa"]:
                 if key not in clean_beam.keys():
-                    raise KeyError(f"Image: clean_beam must have key {key}")
+                    missing_keys.append(key)
+            if missing_keys:
+                raise KeyError(
+                    f"Image: clean_beam must have key(s): {missing_keys}"
+                )
 
         attrs = {
             "data_model": "Image",
@@ -174,12 +179,11 @@ class Image(xarray.Dataset):
 
         return canonical
 
-    def export_to_fits(self, fitsfile: str = "imaging.fits"):
-        """Write an image to fits
+    def export_to_fits(self, fits_file: str = "imaging.fits"):
+        """
+        Write an image to fits
 
-        :param fitsfile: Name of output fits file in storage
-        :returns: None
-
+        :param fits_file: Name of output FITS file in storage
         """
         header = self.image_acc.wcs.to_header()
         clean_beam = self.attrs["clean_beam"]
@@ -222,21 +226,22 @@ class Image(xarray.Dataset):
                 )
         if self["pixels"].data.dtype == "complex":
             fits.writeto(
-                filename=fitsfile,
+                filename=fits_file,
                 data=numpy.real(self["pixels"].data),
                 header=header,
                 overwrite=True,
             )
         else:
             fits.writeto(
-                filename=fitsfile,
+                filename=fits_file,
                 data=self["pixels"].data,
                 header=header,
                 overwrite=True,
             )
 
     def qa_image(self, context="") -> QualityAssessment:
-        """Assess the quality of an image
+        """
+        Assess the quality of an image
 
         QualityAssessment is a standard set of statistics of an image;
         max, min, maxabs, rms, sum, medianabs, medianabsdevmedian, median
