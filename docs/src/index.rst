@@ -16,7 +16,7 @@ The interfaces all operate with familiar data structures such as image,
 visibility table, gain table, etc. The python source code is directly accessible from these documentation pages:
 see the source link in the top right corner.
 
-The data classes are built on the `Xarray <https:/xarray.pydata.org>`_ library, offering a
+The data classes are built on the `xarray <https://docs.xarray.dev/en/stable/#>`_ library, offering a
 rich API for applications. For more details including how to update existing scripts, see
 :ref:`Use of xarray <xarray>`.
 

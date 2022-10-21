@@ -5,9 +5,9 @@
 .. toctree::
    :maxdepth: 3
 
-============
-Polarisation
-============
+========================
+Polarisation Data Models
+========================
 
 .. automodapi::    ska_sdp_datamodels.polarisation_data_models
    :no-inheritance-diagram:

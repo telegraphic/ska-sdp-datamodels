@@ -3,7 +3,7 @@
 Use of xarray
 =============
 
-ska-sdp-datamodels uses the `Xarray <https:/www.dask.org>`_ library instead of numpy in the
+ska-sdp-datamodels uses the `xarray <https://docs.xarray.dev/en/stable/#>`_ library instead of numpy in the
 data classes. All data classes are derived from xarray.Dataset. This change is motivated
 by the large range of capabilities available from xarray. These include:
 
