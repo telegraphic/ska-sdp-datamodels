@@ -15,6 +15,28 @@ N_POL = 2
 Y = 512
 X = 256
 
+WCS_HEADER = {
+    "CTYPE1": "RA---SIN",
+    "CTYPE2": "DEC--SIN",
+    "CTYPE3": "STOKES",
+    "CTYPE4": "FREQ",
+    "CUNIT1": "deg",
+    "CUNIT2": "deg",
+    "CUNIT4": "Hz",
+    "CRPIX1": 1,
+    "CRPIX2": 1,
+    "CRPIX3": 1,
+    "CRPIX4": 1,
+    "CRVAL1": 40.0,
+    "CRVAL2": 0.0,
+    "CRVAL3": 80.0,
+    "CRVAL4": 20.0,
+    "CDELT1": -0.1,
+    "CDELT2": 0.1,
+    "CDELT3": -0.1,
+    "CDELT4": 0.1,
+}
+
 
 @pytest.fixture(scope="module", name="result_image")
 def fixture_image():
@@ -70,3 +92,57 @@ def test_constructor_data_vars(result_image):
     assert "pixels" in result_data_vars.keys()
     assert isinstance(result_data_vars["pixels"], DataArray)
     assert (result_data_vars["pixels"].data == 1.0).all()
+
+
+def test_constructor_attr_ra_dec():
+    """
+    Test realistic RA, DEC calculations,
+    or at least that they're affected by input
+    """
+
+
+def test_constructor_attr_clean_beam():
+    """
+    Test clean_beam attribute when clean beam is
+    provided as input
+    """
+
+
+def test_constructor_freq_chan_bandwidth():
+    """
+    Test frequency and channel bandwidth changes
+    based on input.
+    """
+
+
+def test_is_canonical_true():
+    """
+    WCS Header contains canonical information
+    --> image is canonical
+    """
+    data = numpy.ones((N_CHAN, N_POL, Y, X))
+    pol_frame = PolarisationFrame("stokesIV")
+    wcs = WCS(header=WCS_HEADER, naxis=4)
+    image = Image.constructor(data, pol_frame, wcs, clean_beam=None)
+
+    assert image.is_canonical() is True
+
+
+def test_is_canonical_false():
+    """
+    WCS Header contains non-canonical information
+    --> image is not canonical
+    """
+    new_header = WCS_HEADER.copy()
+    new_header["CTYPE1"] = "GLON-CAR"
+    new_header["CTYPE2"] = "GLAT-CAR"
+    del new_header["CTYPE3"]
+    del new_header["CTYPE4"]
+    del new_header["CUNIT4"]
+
+    data = numpy.ones((N_CHAN, N_POL, Y, X))
+    pol_frame = PolarisationFrame("stokesIV")
+    wcs = WCS(header=new_header, naxis=4)
+    image = Image.constructor(data, pol_frame, wcs, clean_beam=None)
+
+    assert image.is_canonical() is False

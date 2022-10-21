@@ -23,14 +23,15 @@ log = logging.getLogger("data-models-logger")
 
 
 class Image(xarray.Dataset):
-    """Image class with pixels as an xarray.DataArray and the AstroPy`implementation of
-    a World Coodinate System <http://docs.astropy.org/en/stable/wcs>`_
+    """
+    Image class with pixels as an xarray.DataArray and the AstroPy`implementation of
+    a World Coordinate System <http://docs.astropy.org/en/stable/wcs>`_
 
-    The actual image values are kept in a data_var of the xarray.Dataset called "pixels"
+    The actual image values are kept in a data_var of the xarray.Dataset called "pixels".
 
     Many operations can be done conveniently using xarray processing_components on Image or on
     numpy operations on Image["pixels"].data. If the "pixels" data variable is chunked then
-    Dask is automatically used whereever possible to distribute processing.
+    Dask is automatically used wherever possible to distribute processing.
 
     Here is an example::
 
@@ -47,8 +48,8 @@ class Image(xarray.Dataset):
         Data variables:
             pixels        (chan, pol, y, x) float64 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0
         Attributes:
-            rascil_data_model:  Image
-            frame:              icrs
+            data_model:     Image
+            frame:          icrs
     """  # noqa: E501
 
     __slots__ = ()
@@ -78,7 +79,6 @@ class Image(xarray.Dataset):
         )
         show_image(im.where(r < 0.3, 0.0))
         plt.show()
-
 
         :param data: pixel values; dims = [nchan, npol, ny, nx]
         :param polarisation_frame: as a PolarisationFrame object
@@ -271,50 +271,32 @@ class ImageAccessor(XarrayAccessorMixin):
 
     @property
     def shape(self):
-        """Shape of array
-
-        :return:
-        """
+        """Shape of array"""
         return self._obj["pixels"].data.shape
 
     @property
     def nchan(self):
-        """Number of channels
-
-        :return: Number of channels
-        """
+        """Number of channels"""
         return len(self._obj.frequency)
 
     @property
     def npol(self):
-        """Number of polarisations
-
-        :return: Number of polarisations
-        """
+        """Number of polarisations"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"]).npol
 
     @property
     def polarisation_frame(self):
-        """Polarisation frame (from coords)
-
-        :return:
-        """
+        """Polarisation frame (from coords)"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"])
 
     @property
     def projection(self):
-        """Projection (from coords)
-
-        :return:
-        """
+        """Projection (from coords)"""
         return self._obj.attrs["_projection"]
 
     @property
     def phasecentre(self):
-        """Return the phasecentre as a SkyCoord
-
-        :return:
-        """
+        """Return the phasecentre as a SkyCoord"""
         return SkyCoord(
             numpy.rad2deg(self._obj.attrs["ra"]) * u.deg,
             numpy.rad2deg(self._obj.attrs["dec"]) * u.deg,
@@ -324,8 +306,5 @@ class ImageAccessor(XarrayAccessorMixin):
 
     @property
     def wcs(self):
-        """Return the equivalent WCS
-
-        :return:
-        """
+        """Return the equivalent WCS"""
         return image_wcs(self._obj)
