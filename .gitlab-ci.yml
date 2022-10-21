@@ -12,17 +12,16 @@ stages:
   - pages
 
 include:
-#  # For Python, only include linting and testing stages
+  # Run python jobs
   - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/python-lint.gitlab-ci.yml'
-#  - project: 'ska-telescope/templates-repository'
-#    file: 'gitlab-ci/includes/python-test.gitlab-ci.yml'
+    file: 'gitlab-ci/includes/python.gitlab-ci.yml'
 #  - project: 'ska-telescope/templates-repository'
 #    file: 'gitlab-ci/includes/oci-image.gitlab-ci.yml'
-     # Include documentation
+  # Include documentation
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/docs.gitlab-ci.yml'
 #  - project: 'ska-telescope/templates-repository'
 #    file: 'gitlab-ci/includes/release.gitlab-ci.yml'
+  # Run finalizer, inc. ci-metrics
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
