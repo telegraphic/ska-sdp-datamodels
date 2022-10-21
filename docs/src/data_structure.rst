@@ -8,7 +8,6 @@ For each xarray based class there is an accessor which holds class specific meth
 
 See :py:mod:`ska_sdp_datamodels.memory_data_models` for the following definitions:
 
-* Image (data and WCS header): :py:class:`ska_sdp_datamodels.memory_data_models.Image`
 * SkyComponent (data for a point source or a Gaussian source): :py:class:`ska_sdp_datamodels.memory_data_models.SkyComponent`
 * SkyModel (collection of SkyComponents and Images): :py:class:`ska_sdp_datamodels.memory_data_models.SkyModel`
 * Baseline-based visibility table, shape (ntimes, nbaselines, nchan, npol), length ntime): :py:class:`ska_sdp_datamodels.memory_data_models.Visibility`
@@ -17,6 +16,11 @@ See :py:mod:`ska_sdp_datamodels.memory_data_models` for the following definition
 * PointingTable for pointing information: :py:class:`ska_sdp_datamodels.memory_data_models.PointingTable`
 * FlagTable for flagging information: :py:class:`ska_sdp_datamodels.memory_data_models.FlagTable`
 
+Image is found at :py:mod:`ska_sdp_datamodels.image_model`:
+
+* Image (data and WCS header): :py:class:`ska_sdp_datamodels.image_model.Image`
+
 Polarisation-specific data models are introduced in :py:mod:`ska_sdp_datamodels.polarisation_data_models` :
+
 * ReceptorFrame: :py:class:`ska_sdp_datamodels.polarisation_data_models.ReceptorFrame`
 * PolarisationFrame: :py:class:`ska_sdp_datamodels.polarisation_data_models.PolarisationFrame`
