@@ -13,5 +13,6 @@ Data models API
    data_convert_persist.rst
    polarisation_data_models.rst
    polarisation_convert.rst
+   xarray_coordinate_support.rst
 
 
