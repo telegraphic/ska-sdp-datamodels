@@ -9,7 +9,7 @@ __all__ = ["image_wcs", "griddata_wcs", "conv_func_wcs"]
 import numpy
 from astropy.wcs import WCS
 
-from src.ska_sdp_datamodels.polarisation_data_models import PolarisationFrame
+from ska_sdp_datamodels.science_data_model import PolarisationFrame
 
 
 def image_wcs(ds):

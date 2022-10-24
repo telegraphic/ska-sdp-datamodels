@@ -25,7 +25,7 @@ import logging
 
 import numpy
 
-from src.ska_sdp_datamodels.polarisation_data_models import (
+from ska_sdp_datamodels.science_data_model import (
     PolarisationFrame,
     ReceptorFrame,
 )

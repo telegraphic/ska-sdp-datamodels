@@ -12,6 +12,10 @@ import numpy
 from numpy import random
 from numpy.testing import assert_array_almost_equal
 
+from ska_sdp_datamodels.science_data_model import (
+    PolarisationFrame,
+    ReceptorFrame,
+)
 from src.ska_sdp_datamodels.polarisation_convert import (
     congruent_polarisation,
     convert_circular_to_stokes,
@@ -21,10 +25,6 @@ from src.ska_sdp_datamodels.polarisation_convert import (
     convert_stokes_to_linear,
     correlate_polarisation,
     polarisation_frame_from_names,
-)
-from src.ska_sdp_datamodels.polarisation_data_models import (
-    PolarisationFrame,
-    ReceptorFrame,
 )
 
 

@@ -9,8 +9,8 @@ from astropy.io import fits
 from astropy.wcs import WCS
 from xarray import DataArray
 
-from ska_sdp_datamodels.image_model import Image
-from ska_sdp_datamodels.polarisation_data_models import PolarisationFrame
+from ska_sdp_datamodels.image import Image
+from ska_sdp_datamodels.science_data_model import PolarisationFrame
 
 N_CHAN = 100
 N_POL = 2

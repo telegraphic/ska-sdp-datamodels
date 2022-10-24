@@ -60,22 +60,16 @@ from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.units import Quantity
 from astropy.wcs import WCS
 
-from ska_sdp_datamodels.image_model import Image
-from src.ska_sdp_datamodels.memory_data_models import (
-    Configuration,
-    ConvolutionFunction,
-    FlagTable,
-    GainTable,
-    GridData,
-    PointingTable,
-    SkyComponent,
-    SkyModel,
-    Visibility,
-)
-from src.ska_sdp_datamodels.polarisation_data_models import (
+from ska_sdp_datamodels.calibration import GainTable, PointingTable
+from ska_sdp_datamodels.configuration import Configuration
+from ska_sdp_datamodels.gridded_visibility import ConvolutionFunction, GridData
+from ska_sdp_datamodels.image import FlagTable, Image
+from ska_sdp_datamodels.science_data_model import (
     PolarisationFrame,
     ReceptorFrame,
 )
+from ska_sdp_datamodels.sky_model import SkyComponent, SkyModel
+from ska_sdp_datamodels.visibility import Visibility
 
 log = logging.getLogger("src-logger")
 

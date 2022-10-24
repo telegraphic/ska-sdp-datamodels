@@ -17,6 +17,8 @@ import numpy
 import xarray
 from astropy.coordinates import SkyCoord
 
+from ska_sdp_datamodels.science_data_model import PolarisationFrame
+from ska_sdp_datamodels.sky_model import SkyComponent, SkyModel
 from src.processing_components.calibration.operations import (
     create_gaintable_from_visibility,
 )
@@ -63,8 +65,6 @@ from src.ska_sdp_datamodels.data_convert_persist import (
     import_skymodel_from_hdf5,
     import_visibility_from_hdf5,
 )
-from src.ska_sdp_datamodels.memory_data_models import SkyComponent, SkyModel
-from src.ska_sdp_datamodels.polarisation_data_models import PolarisationFrame
 
 log = logging.getLogger("src-logger")
 
