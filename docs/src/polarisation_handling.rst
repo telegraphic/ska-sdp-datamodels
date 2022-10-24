@@ -1,4 +1,4 @@
-.. polarisation_handling:
+.. _polarisation_handling:
 
 Polarisation handling
 =====================
