@@ -39,6 +39,7 @@ Sections
 
 .. toctree::
    :maxdepth: 1
+   :caption: Sections
 
    data_structure
    polarisation_handling
