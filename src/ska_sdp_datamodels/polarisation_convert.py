@@ -30,7 +30,7 @@ from src.ska_sdp_datamodels.polarisation_data_models import (
     ReceptorFrame,
 )
 
-log = logging.getLogger("src-logger")
+log = logging.getLogger("data-models-logger")
 
 
 def polarisation_frame_from_names(names):

@@ -60,13 +60,13 @@ from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.units import Quantity
 from astropy.wcs import WCS
 
+from ska_sdp_datamodels.image_model import Image
 from src.ska_sdp_datamodels.memory_data_models import (
     Configuration,
     ConvolutionFunction,
     FlagTable,
     GainTable,
     GridData,
-    Image,
     PointingTable,
     SkyComponent,
     SkyModel,

@@ -12,3 +12,5 @@ Memory data models
 .. automodapi::    ska_sdp_datamodels.memory_data_models
    :no-inheritance-diagram:
 
+.. automodapi::     ska_sdp_datamodels.image_model
+   :no-inheritance-diagram:
