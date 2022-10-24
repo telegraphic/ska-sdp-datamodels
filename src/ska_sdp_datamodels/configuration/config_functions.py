@@ -8,7 +8,7 @@ import numpy
 from astropy.coordinates import EarthLocation
 from astropy.units import Quantity
 
-from ska_sdp_datamodels.configuration import Configuration
+from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
 
 

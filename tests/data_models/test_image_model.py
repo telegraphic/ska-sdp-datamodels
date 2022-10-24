@@ -159,8 +159,8 @@ def test_export_to_fits(result_image):
     read back in, contains the data from result_image
     and header values match those of result_image's WCS.
     """
-    with tempfile.TemporaryDirectory():
-        test_fits = "test_export_to_fits_result.fits"
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_fits = f"{temp_dir}/test_export_to_fits_result.fits"
         result_image.export_to_fits(test_fits)
 
         imported_image = fits.open(test_fits)[0]

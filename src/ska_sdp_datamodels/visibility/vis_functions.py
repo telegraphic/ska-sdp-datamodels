@@ -19,7 +19,7 @@ from ska_sdp_datamodels.configuration import (
     convert_configuration_to_hdf,
 )
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
-from ska_sdp_datamodels.visibility import FlagTable, Visibility
+from ska_sdp_datamodels.visibility.vis_model import FlagTable, Visibility
 
 
 def _generate_baselines(nant):

@@ -18,7 +18,7 @@ from ska_sdp_datamodels.calibration import (
 )
 from ska_sdp_datamodels.image import convert_hdf_to_image, convert_image_to_hdf
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
-from ska_sdp_datamodels.sky_model import SkyComponent, SkyModel
+from ska_sdp_datamodels.sky_model.sky_model import SkyComponent, SkyModel
 
 
 def convert_skycomponent_to_hdf(sc: SkyComponent, f):

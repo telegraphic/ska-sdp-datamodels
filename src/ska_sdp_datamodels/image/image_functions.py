@@ -11,7 +11,7 @@ import numpy
 import xarray
 from astropy.wcs import WCS
 
-from ska_sdp_datamodels.image import Image
+from ska_sdp_datamodels.image.image_model import Image
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
 
 
