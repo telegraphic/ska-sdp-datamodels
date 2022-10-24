@@ -17,8 +17,37 @@ import numpy
 import xarray
 from astropy.coordinates import SkyCoord
 
+from ska_sdp_datamodels.calibration import (
+    export_gaintable_to_hdf5,
+    export_pointingtable_to_hdf5,
+    import_gaintable_from_hdf5,
+    import_pointingtable_from_hdf5,
+)
+from ska_sdp_datamodels.gridded_visibility import (
+    export_convolutionfunction_to_hdf5,
+    export_griddata_to_hdf5,
+    import_convolutionfunction_from_hdf5,
+    import_griddata_from_hdf5,
+)
+from ska_sdp_datamodels.image import (
+    export_image_to_hdf5,
+    import_image_from_hdf5,
+)
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
-from ska_sdp_datamodels.sky_model import SkyComponent, SkyModel
+from ska_sdp_datamodels.sky_model import (
+    SkyComponent,
+    SkyModel,
+    export_skycomponent_to_hdf5,
+    export_skymodel_to_hdf5,
+    import_skycomponent_from_hdf5,
+    import_skymodel_from_hdf5,
+)
+from ska_sdp_datamodels.visibility import (
+    export_flagtable_to_hdf5,
+    export_visibility_to_hdf5,
+    import_flagtable_from_hdf5,
+    import_visibility_from_hdf5,
+)
 from src.processing_components.calibration.operations import (
     create_gaintable_from_visibility,
 )
@@ -45,61 +74,42 @@ from src.processing_components.simulation.pointing import (
     simulate_pointingtable,
 )
 from src.processing_components.visibility.base import create_visibility
-from src.ska_sdp_datamodels.data_convert_persist import (
-    export_convolutionfunction_to_hdf5,
-    export_flagtable_to_hdf5,
-    export_gaintable_to_hdf5,
-    export_griddata_to_hdf5,
-    export_image_to_hdf5,
-    export_pointingtable_to_hdf5,
-    export_skycomponent_to_hdf5,
-    export_skymodel_to_hdf5,
-    export_visibility_to_hdf5,
-    import_convolutionfunction_from_hdf5,
-    import_flagtable_from_hdf5,
-    import_gaintable_from_hdf5,
-    import_griddata_from_hdf5,
-    import_image_from_hdf5,
-    import_pointingtable_from_hdf5,
-    import_skycomponent_from_hdf5,
-    import_skymodel_from_hdf5,
-    import_visibility_from_hdf5,
-)
 
 log = logging.getLogger("src-logger")
 
 log.setLevel(logging.INFO)
 
 
+def _data_model_equals(ds_new, ds_ref):
+    """Check if two xarray objects are identical except to values
+
+    Precision in lost in HDF files at close to the machine
+    precision so we cannot reliably use xarray.equals().
+    So this function is specific to this set of tests
+
+    Throws AssertionError or returns True
+
+    :param ds_ref: xarray Dataset or DataArray
+    :param ds_new: xarray Dataset or DataArray
+    :return: True or False
+    """
+    for coord in ds_ref.coords:
+        assert coord in ds_new.coords
+    for coord in ds_new.coords:
+        assert coord in ds_ref.coords
+    for var in ds_ref.data_vars:
+        assert var in ds_new.data_vars
+    for var in ds_new.data_vars:
+        assert var in ds_ref.data_vars
+    for attr in ds_ref.attrs.keys():
+        assert attr in ds_new.attrs.keys()
+    for attr in ds_new.attrs.keys():
+        assert attr in ds_ref.attrs.keys()
+
+    return True
+
+
 class TestDataModelHelpers(unittest.TestCase):
-    def _data_model_equals(self, ds_new, ds_ref):
-        """Check if two xarray objects are identical except to values
-
-        Precision in lost in HDF files at close to the machine
-        precision so we cannot reliably use xarray.equals().
-        So this function is specific to this set of tests
-
-        Throws AssertionError or returns True
-
-        :param ds_ref: xarray Dataset or DataArray
-        :param ds_new: xarray Dataset or DataArray
-        :return: True or False
-        """
-        for coord in ds_ref.coords:
-            assert coord in ds_new.coords
-        for coord in ds_new.coords:
-            assert coord in ds_ref.coords
-        for var in ds_ref.data_vars:
-            assert var in ds_new.data_vars
-        for var in ds_new.data_vars:
-            assert var in ds_ref.data_vars
-        for attr in ds_ref.attrs.keys():
-            assert attr in ds_new.attrs.keys()
-        for attr in ds_new.attrs.keys():
-            assert attr in ds_ref.attrs.keys()
-
-        return True
-
     def setUp(self):
         self.results_dir = rascil_path("test_results")
 
@@ -150,7 +160,7 @@ class TestDataModelHelpers(unittest.TestCase):
         newvis = import_visibility_from_hdf5(
             f"{self.results_dir}/test_data_convert_persist_visibility.hdf"
         )
-        assert self._data_model_equals(newvis, self.vis)
+        assert _data_model_equals(newvis, self.vis)
 
     def test_readwritegaintable(self):
         self.vis = create_visibility(
@@ -174,7 +184,7 @@ class TestDataModelHelpers(unittest.TestCase):
         newgt = import_gaintable_from_hdf5(
             f"{self.results_dir}/test_data_convert_persist_gaintable.hdf"
         )
-        assert self._data_model_equals(newgt, gt)
+        assert _data_model_equals(newgt, gt)
 
     def test_readwriteflagtable(self):
         self.vis = create_visibility(
@@ -195,7 +205,7 @@ class TestDataModelHelpers(unittest.TestCase):
         newft = import_flagtable_from_hdf5(
             f"{self.results_dir}/test_data_convert_persist_flagtable.hdf"
         )
-        assert self._data_model_equals(newft, ft)
+        assert _data_model_equals(newft, ft)
 
     def test_readwritepointingtable(self):
         self.vis = create_visibility(
@@ -218,7 +228,7 @@ class TestDataModelHelpers(unittest.TestCase):
         newpt = import_pointingtable_from_hdf5(
             f"{self.results_dir}/test_data_convert_persist_pointingtable.hdf"
         )
-        assert self._data_model_equals(newpt, pt)
+        assert _data_model_equals(newpt, pt)
 
     def test_readwriteimage(self):
         im = create_image(
@@ -234,7 +244,7 @@ class TestDataModelHelpers(unittest.TestCase):
         newim = import_image_from_hdf5(
             f"{self.results_dir}/test_data_convert_persist_image.hdf"
         )
-        assert self._data_model_equals(newim, im)
+        assert _data_model_equals(newim, im)
 
     def test_readwriteimage_zarr(self):
         """
@@ -321,7 +331,7 @@ class TestDataModelHelpers(unittest.TestCase):
         newgd = import_griddata_from_hdf5(
             f"{self.results_dir}/test_data_convert_persist_griddata.hdf"
         )
-        assert self._data_model_equals(newgd, gd)
+        assert _data_model_equals(newgd, gd)
 
     def test_readwriteconvolutionfunction(self):
         # This fails on comparison of the v axis.
@@ -344,7 +354,7 @@ class TestDataModelHelpers(unittest.TestCase):
             f"test_data_convert_persist_convolutionfunction.hdf"
         )
 
-        assert self._data_model_equals(newcf, cf)
+        assert _data_model_equals(newcf, cf)
 
 
 if __name__ == "__main__":

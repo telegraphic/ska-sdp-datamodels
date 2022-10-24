@@ -34,7 +34,7 @@ log = logging.getLogger("data-models-logger")
 
 
 def polarisation_frame_from_names(names):
-    """Derive polarisation_name from names
+    """Derive polarisation_frame from names
 
     :param names: str, e.g. "linear"
     :return: PolarisationFrame
