@@ -3,7 +3,7 @@
 Use of xarray
 =============
 
-ska-sdp-datamodels uses the `Xarray <https:/www.dask.org>`_ library instead of numpy in the
+ska-sdp-datamodels uses the `xarray <https://docs.xarray.dev/en/stable/#>`_ library instead of numpy in the
 data classes. All data classes are derived from xarray.Dataset. This change is motivated
 by the large range of capabilities available from xarray. These include:
 
@@ -41,8 +41,9 @@ Examples::
     # Gaintable number of receptors
     gt.gaintable_acc.nrec
 
+
 Usage Examples
----------------
+++++++++++++++
 
 The steps required are:
 
@@ -103,7 +104,7 @@ The steps required are:
     newvis = xarray.concat(chan_vis, dim=dim, data_vars="minimal")
 
 Warnings and Limitations
--------------------------
+++++++++++++++++++++++++
 
 The current main limitation of the xarray implementation is that, some of the class methods and operations
 can return a raw xarray.Dataset instead of a subclass instance. So please make sure variables
