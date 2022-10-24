@@ -3,13 +3,17 @@
 API
 ===
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Data models
 
-The API is specified in the data_models directory.
+   data_model_api/data_model_packages.rst
 
 .. toctree::
    :maxdepth: 1
+   :caption: Xarray coordinate support functions
 
-   data_models/index.rst
+   data_model_api/xarray_coordinate_support.rst
 
 Indexes
 +++++++

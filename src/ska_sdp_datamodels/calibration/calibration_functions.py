@@ -13,7 +13,10 @@ import xarray
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 
-from ska_sdp_datamodels.calibration.calibration_model import GainTable, PointingTable
+from ska_sdp_datamodels.calibration.calibration_model import (
+    GainTable,
+    PointingTable,
+)
 from ska_sdp_datamodels.configuration import (
     convert_configuration_from_hdf,
     convert_configuration_to_hdf,

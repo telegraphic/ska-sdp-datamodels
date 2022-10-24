@@ -8,7 +8,7 @@ Polarisation handling is intended to implement the Hamaker-Bregman-Sault formali
 For imaging:
 
  * Types of polarisation allowed are stokesIQUV, stokesI, linear, circular.
- * These are defined in :py:class:`ska_sdp_datamodels.polarisation_data_models.PolarisationFrame`
+ * These are defined in :py:class:`ska_sdp_datamodels.science_data_model.PolarisationFrame`
  * Images may be defined as stokesI, stokesIQUV, linear, or circular
  * SkyComponents may be defined as stokesI, stokesIQUV, linear, or circular
  * Visibility may be defined as stokesI, stokesIQUV, linear, or circular.

@@ -12,7 +12,10 @@ import numpy
 import xarray
 from astropy.wcs import WCS
 
-from ska_sdp_datamodels.gridded_visibility.grid_vis_model import ConvolutionFunction, GridData
+from ska_sdp_datamodels.gridded_visibility.grid_vis_model import (
+    ConvolutionFunction,
+    GridData,
+)
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
 
 
