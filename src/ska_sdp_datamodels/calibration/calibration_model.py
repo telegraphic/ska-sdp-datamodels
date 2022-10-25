@@ -149,34 +149,6 @@ class GainTable(xarray.Dataset):
             new_gt["gain"].data[...] = 0.0
         return new_gt
 
-    def qa_gain_table(self, context=None) -> QualityAssessment:
-        """Assess the quality of a gaintable
-
-        :return: QualityAssessment
-        """
-        if numpy.max(self.weight.data) <= 0.0:
-            raise ValueError("qa_gain_table: All gaintable weights are zero")
-
-        agt = numpy.abs(self.gain.data[self.weight.data > 0.0])
-        pgt = numpy.angle(self.gain.data[self.weight.data > 0.0])
-        rgt = self.residual.data[numpy.sum(self.weight.data, axis=1) > 0.0]
-        data = {
-            "shape": self.gain.shape,
-            "maxabs-amp": numpy.max(agt),
-            "minabs-amp": numpy.min(agt),
-            "rms-amp": numpy.std(agt),
-            "medianabs-amp": numpy.median(agt),
-            "maxabs-phase": numpy.max(pgt),
-            "minabs-phase": numpy.min(pgt),
-            "rms-phase": numpy.std(pgt),
-            "medianabs-phase": numpy.median(pgt),
-            "residual": numpy.max(rgt),
-        }
-        qa = QualityAssessment(
-            origin="qa_gain_table", data=data, context=context
-        )
-        return qa
-
 
 @xarray.register_dataset_accessor("gaintable_acc")
 class GainTableAccessor(XarrayAccessorMixin):
@@ -208,6 +180,36 @@ class GainTableAccessor(XarrayAccessorMixin):
     def receptors(self):
         """Receptors"""
         return self._obj["receptor1"]
+
+    def qa_gain_table(self, context=None) -> QualityAssessment:
+        """Assess the quality of a gaintable
+
+        :return: QualityAssessment
+        """
+        weight_data = self._obj.weight.data
+        if numpy.max(weight_data) <= 0.0:
+            raise ValueError("qa_gain_table: All gaintable weights are zero")
+
+        gain_data = self._obj.gain.data
+        agt = numpy.abs(gain_data[weight_data > 0.0])
+        pgt = numpy.angle(gain_data[weight_data > 0.0])
+        rgt = self._obj.residual.data[numpy.sum(weight_data, axis=1) > 0.0]
+        data = {
+            "shape": self._obj.gain.shape,
+            "maxabs-amp": numpy.max(agt),
+            "minabs-amp": numpy.min(agt),
+            "rms-amp": numpy.std(agt),
+            "medianabs-amp": numpy.median(agt),
+            "maxabs-phase": numpy.max(pgt),
+            "minabs-phase": numpy.min(pgt),
+            "rms-phase": numpy.std(pgt),
+            "medianabs-phase": numpy.median(pgt),
+            "residual": numpy.max(rgt),
+        }
+        qa = QualityAssessment(
+            origin="qa_gain_table", data=data, context=context
+        )
+        return qa
 
 
 class PointingTable(xarray.Dataset):
@@ -345,30 +347,6 @@ class PointingTable(xarray.Dataset):
             new_pointing_table.data["pt"][...] = 0.0
         return new_pointing_table
 
-    def qa_pointing_table(self, context=None) -> QualityAssessment:
-        """Assess the quality of a PointingTable
-
-        :return: QualityAssessment
-        """
-        apt = numpy.abs(self.pointing[self.weight > 0.0])
-        ppt = numpy.angle(self.pointing[self.weight > 0.0])
-        data = {
-            "shape": self.pointing.shape,
-            "maxabs-amp": numpy.max(apt),
-            "minabs-amp": numpy.min(apt),
-            "rms-amp": numpy.std(apt),
-            "medianabs-amp": numpy.median(apt),
-            "maxabs-phase": numpy.max(ppt),
-            "minabs-phase": numpy.min(ppt),
-            "rms-phase": numpy.std(ppt),
-            "medianabs-phase": numpy.median(ppt),
-            "residual": numpy.max(self.residual),
-        }
-        qa = QualityAssessment(
-            origin="qa_pointingtable", data=data, context=context
-        )
-        return qa
-
 
 @xarray.register_dataset_accessor("pointingtable_acc")
 class PointingTableAccessor(XarrayAccessorMixin):
@@ -390,3 +368,29 @@ class PointingTableAccessor(XarrayAccessorMixin):
     def nrec(self):
         """Number of receptors"""
         return self._obj["receptor_frame"].nrec
+
+    def qa_pointing_table(self, context=None) -> QualityAssessment:
+        """Assess the quality of a PointingTable
+
+        :return: QualityAssessment
+        """
+        weight = self._obj.weight
+        pointing = self._obj.pointing
+        apt = numpy.abs(pointing[weight > 0.0])
+        ppt = numpy.angle(pointing[weight > 0.0])
+        data = {
+            "shape": pointing.shape,
+            "maxabs-amp": numpy.max(apt),
+            "minabs-amp": numpy.min(apt),
+            "rms-amp": numpy.std(apt),
+            "medianabs-amp": numpy.median(apt),
+            "maxabs-phase": numpy.max(ppt),
+            "minabs-phase": numpy.min(ppt),
+            "rms-phase": numpy.std(ppt),
+            "medianabs-phase": numpy.median(ppt),
+            "residual": numpy.max(self._obj.residual),
+        }
+        qa = QualityAssessment(
+            origin="qa_pointingtable", data=data, context=context
+        )
+        return qa

@@ -155,119 +155,6 @@ class Image(xarray.Dataset):
         # to return size of Dataset.
         return int(self.nbytes)
 
-    def is_canonical(self):
-        """Is this Image canonical format?"""
-        wcs = self.image_acc.wcs
-
-        canonical = True
-        canonical = canonical and len(self["pixels"].data.shape) == 4
-        canonical = (
-            canonical
-            and wcs.wcs.ctype[0] == "RA---SIN"
-            and wcs.wcs.ctype[1] == "DEC--SIN"
-        )
-        canonical = canonical and wcs.wcs.ctype[2] == "STOKES"
-        canonical = canonical and (
-            wcs.wcs.ctype[3] == "FREQ" or wcs.wcs.ctype[3] == "MOMENT"
-        )
-
-        if not canonical:
-            log.debug(
-                "Image: is_canonical: Image is not canonical 4D image "
-                "with axes RA---SIN, DEC--SIN, STOKES, FREQ"
-            )
-            log.debug("Image: is_canonical: axes are: %s", wcs.wcs.ctype)
-
-        return canonical
-
-    def export_to_fits(self, fits_file: str = "imaging.fits"):
-        """
-        Write an image to fits
-
-        :param fits_file: Name of output FITS file in storage
-        """
-        header = self.image_acc.wcs.to_header()
-        clean_beam = self.attrs["clean_beam"]
-
-        if clean_beam is not None and not isinstance(clean_beam, dict):
-            raise ValueError(f"clean_beam is not a dict or None: {clean_beam}")
-
-        if isinstance(clean_beam, dict):
-            if (
-                "bmaj" in clean_beam.keys()
-                and "bmin" in clean_beam.keys()
-                and "bpa" in clean_beam.keys()
-            ):
-                header.append(
-                    fits.Card(
-                        "BMAJ",
-                        clean_beam["bmaj"],
-                        "[deg] CLEAN beam major axis",
-                    )
-                )
-                header.append(
-                    fits.Card(
-                        "BMIN",
-                        clean_beam["bmin"],
-                        "[deg] CLEAN beam minor axis",
-                    )
-                )
-                header.append(
-                    fits.Card(
-                        "BPA",
-                        clean_beam["bpa"],
-                        "[deg] CLEAN beam position angle",
-                    )
-                )
-            else:
-                log.warning(
-                    "export_to_fits: clean_beam is incompletely "
-                    "specified: %s, not writing",
-                    clean_beam,
-                )
-        if self["pixels"].data.dtype == "complex":
-            fits.writeto(
-                filename=fits_file,
-                data=numpy.real(self["pixels"].data),
-                header=header,
-                overwrite=True,
-            )
-        else:
-            fits.writeto(
-                filename=fits_file,
-                data=self["pixels"].data,
-                header=header,
-                overwrite=True,
-            )
-
-    def qa_image(self, context="") -> QualityAssessment:
-        """
-        Assess the quality of an image
-
-        QualityAssessment is a standard set of statistics of an image;
-        max, min, maxabs, rms, sum, medianabs, medianabsdevmedian, median
-
-        :return: QualityAssessment
-        """
-        im_data = self["pixels"].data
-        data = {
-            "shape": str(self["pixels"].data.shape),
-            "size": self.nbytes,
-            "max": numpy.max(im_data),
-            "min": numpy.min(im_data),
-            "maxabs": numpy.max(numpy.abs(im_data)),
-            "rms": numpy.std(im_data),
-            "sum": numpy.sum(im_data),
-            "medianabs": numpy.median(numpy.abs(im_data)),
-            "medianabsdevmedian": numpy.median(
-                numpy.abs(im_data - numpy.median(im_data))
-            ),
-            "median": numpy.median(im_data),
-        }
-
-        qa = QualityAssessment(origin="qa_image", data=data, context=context)
-        return qa
-
 
 @xarray.register_dataset_accessor("image_acc")
 class ImageAccessor(XarrayAccessorMixin):
@@ -314,3 +201,116 @@ class ImageAccessor(XarrayAccessorMixin):
     def wcs(self):
         """Return the equivalent WCS"""
         return image_wcs(self._obj)
+
+    def is_canonical(self):
+        """Is this Image canonical format?"""
+        wcs = self.wcs
+
+        canonical = True
+        canonical = canonical and len(self._obj["pixels"].data.shape) == 4
+        canonical = (
+            canonical
+            and wcs.wcs.ctype[0] == "RA---SIN"
+            and wcs.wcs.ctype[1] == "DEC--SIN"
+        )
+        canonical = canonical and wcs.wcs.ctype[2] == "STOKES"
+        canonical = canonical and (
+            wcs.wcs.ctype[3] == "FREQ" or wcs.wcs.ctype[3] == "MOMENT"
+        )
+
+        if not canonical:
+            log.debug(
+                "Image: is_canonical: Image is not canonical 4D image "
+                "with axes RA---SIN, DEC--SIN, STOKES, FREQ"
+            )
+            log.debug("Image: is_canonical: axes are: %s", wcs.wcs.ctype)
+
+        return canonical
+
+    def export_to_fits(self, fits_file: str = "imaging.fits"):
+        """
+        Write an image to fits
+
+        :param fits_file: Name of output FITS file in storage
+        """
+        header = self.wcs.to_header()
+        clean_beam = self._obj.attrs["clean_beam"]
+
+        if clean_beam is not None and not isinstance(clean_beam, dict):
+            raise ValueError(f"clean_beam is not a dict or None: {clean_beam}")
+
+        if isinstance(clean_beam, dict):
+            if (
+                "bmaj" in clean_beam.keys()
+                and "bmin" in clean_beam.keys()
+                and "bpa" in clean_beam.keys()
+            ):
+                header.append(
+                    fits.Card(
+                        "BMAJ",
+                        clean_beam["bmaj"],
+                        "[deg] CLEAN beam major axis",
+                    )
+                )
+                header.append(
+                    fits.Card(
+                        "BMIN",
+                        clean_beam["bmin"],
+                        "[deg] CLEAN beam minor axis",
+                    )
+                )
+                header.append(
+                    fits.Card(
+                        "BPA",
+                        clean_beam["bpa"],
+                        "[deg] CLEAN beam position angle",
+                    )
+                )
+            else:
+                log.warning(
+                    "export_to_fits: clean_beam is incompletely "
+                    "specified: %s, not writing",
+                    clean_beam,
+                )
+        if self._obj["pixels"].data.dtype == "complex":
+            fits.writeto(
+                filename=fits_file,
+                data=numpy.real(self._obj["pixels"].data),
+                header=header,
+                overwrite=True,
+            )
+        else:
+            fits.writeto(
+                filename=fits_file,
+                data=self._obj["pixels"].data,
+                header=header,
+                overwrite=True,
+            )
+
+    def qa_image(self, context="") -> QualityAssessment:
+        """
+        Assess the quality of an image
+
+        QualityAssessment is a standard set of statistics of an image;
+        max, min, maxabs, rms, sum, medianabs, medianabsdevmedian, median
+
+        :return: QualityAssessment
+        """
+        im_data = self._obj["pixels"].data
+        data = {
+            "shape": str(im_data.shape),
+            "size": self._obj.nbytes,
+            "max": numpy.max(im_data),
+            "min": numpy.min(im_data),
+            "maxabs": numpy.max(numpy.abs(im_data)),
+            "rms": numpy.std(im_data),
+            "sum": numpy.sum(im_data),
+            "medianabs": numpy.median(numpy.abs(im_data)),
+            "medianabsdevmedian": numpy.median(
+                numpy.abs(im_data - numpy.median(im_data))
+            ),
+            "median": numpy.median(im_data),
+        }
+
+        qa = QualityAssessment(origin="qa_image", data=data, context=context)
+        return qa
