@@ -231,123 +231,6 @@ class Visibility(xarray.Dataset):
         setattr(new_vis, "_imaging_weight", self._imaging_weight)
         return new_vis
 
-    def qa_visibility(self, context=None) -> QualityAssessment:
-        """Assess the quality of Visibility"""
-
-        avis = numpy.abs(self["vis"].data)
-        data = {
-            "maxabs": numpy.max(avis),
-            "minabs": numpy.min(avis),
-            "rms": numpy.std(avis),
-            "medianabs": numpy.median(avis),
-        }
-        qa = QualityAssessment(
-            origin="qa_visibility", data=data, context=context
-        )
-        return qa
-
-    def performance_visibility(self):
-        """Get info about the visibility
-
-        This works on a single visibility because we
-        probably want to send this function to
-        the cluster instead of bringing the data back
-        :return: bvis info as a dictionary
-        """
-        bv_info = {
-            "number_times": self.visibility_acc.ntimes,
-            "number_baselines": len(self.baselines),
-            "nchan": self.visibility_acc.nchan,
-            "npol": self.visibility_acc.npol,
-            "polarisation_frame": self.visibility_acc.polarisation_frame.type,
-            "nvis": self.visibility_acc.ntimes
-            * len(self.baselines)
-            * self.visibility_acc.nchan
-            * self.visibility_acc.npol,
-            "size": self.nbytes,
-        }
-        return bv_info
-
-    def select_uv_range(self, uvmin=0.0, uvmax=1.0e15):
-        """Visibility selection functions
-
-        To select by row number::
-            selected_bvis = bvis.isel({"time": slice(5, 7)})
-        To select by frequency channel::
-            selected_bvis = bvis.isel({"frequency": slice(1, 3)})
-        To select by frequency::
-            selected_bvis = bvis.sel({"frequency": slice(0.9e8, 1.2e8)})
-        To select by frequency and polarisation::
-            selected_bvis = bvis.sel(
-              {"frequency": slice(0.9e8, 1.2e8), "polarisation": ["XX", "YY"]}
-            ).dropna(dim="frequency", how="all")
-
-        Select uv range: flag in-place all visibility data
-        outside uvrange uvmin, uvmax (wavelengths)
-        The flags are set to 1 for all data outside the specified uvrange
-
-        :param uvmin: Minimum uv to flag
-        :param uvmax: Maximum uv to flag
-        :return: Visibility (with flags applied)
-        """
-        uvdist_lambda = numpy.hypot(
-            self.visibility_acc.uvw_lambda[..., 0],
-            self.visibility_acc.uvw_lambda[..., 1],
-        )
-        if uvmax is not None:
-            self["flags"].data[numpy.where(uvdist_lambda >= uvmax)] = 1
-        if uvmin is not None:
-            self["flags"].data[numpy.where(uvdist_lambda <= uvmin)] = 1
-
-    def select_r_range(self, rmin=None, rmax=None):
-        """
-        Select a visibility with stations in a range
-        of distance from the array centre
-        r is the distance from the array centre in metres
-
-        :param rmax: Maximum r
-        :param rmin: Minimum r
-        :return: Selected Visibility
-        """
-        if rmin is None and rmax is None:
-            return self
-
-        # Calculate radius from array centre (in 3D)
-        # and set it as a data variable
-        xyz0 = self.configuration.xyz - self.configuration.xyz.mean("id")
-        r = numpy.sqrt(xarray.dot(xyz0, xyz0, dims="spatial"))
-        config = self.configuration.assign(radius=r)
-        # Now use it for selection
-        if rmax is None:
-            sub_config = config.where(config["radius"] > rmin, drop=True)
-        elif rmin is None:
-            sub_config = config.where(config["radius"] < rmax, drop=True)
-        else:
-            sub_config = config.where(
-                config["radius"] > rmin, drop=True
-            ).where(config["radius"] < rmax, drop=True)
-
-        ids = list(sub_config.id.data)
-        baselines = self.baselines.where(
-            self.baselines.antenna1.isin(ids), drop=True
-        ).where(self.baselines.antenna2.isin(ids), drop=True)
-        sub_bvis = self.sel({"baselines": baselines}, drop=True)
-        setattr(sub_bvis, "_imaging_weight", self._imaging_weight)
-
-        # The baselines coord now is missing the antenna1, antenna2 keys
-        # so we add those back
-        def generate_baselines(baseline_id):
-            for a1 in baseline_id:
-                for a2 in baseline_id:
-                    if a2 >= a1:
-                        yield a1, a2
-
-        sub_bvis["baselines"] = pandas.MultiIndex.from_tuples(
-            generate_baselines(ids),
-            names=("antenna1", "antenna2"),
-        )
-        return sub_bvis
-
     def groupby(
         self, group, squeeze: bool = True, restore_coord_dims: bool = None
     ):
@@ -556,6 +439,126 @@ class VisibilityAccessor(XarrayAccessorMixin):
         """Number of visibilities (in total)"""
         return numpy.product(self._obj.vis.shape)
 
+    def qa_visibility(self, context=None) -> QualityAssessment:
+        """Assess the quality of Visibility"""
+
+        avis = numpy.abs(self._obj["vis"].data)
+        data = {
+            "maxabs": numpy.max(avis),
+            "minabs": numpy.min(avis),
+            "rms": numpy.std(avis),
+            "medianabs": numpy.median(avis),
+        }
+        qa = QualityAssessment(
+            origin="qa_visibility", data=data, context=context
+        )
+        return qa
+
+    def performance_visibility(self):
+        """Get info about the visibility
+
+        This works on a single visibility because we
+        probably want to send this function to
+        the cluster instead of bringing the data back
+        :return: bvis info as a dictionary
+        """
+        bv_info = {
+            "number_times": self.ntimes,
+            "number_baselines": len(self._obj.baselines),
+            "nchan": self.nchan,
+            "npol": self.npol,
+            "polarisation_frame": self.polarisation_frame.type,
+            "nvis": self.ntimes * self.nbaselines * self.nchan * self.npol,
+            "size": self._obj.nbytes,
+        }
+        return bv_info
+
+    def select_uv_range(self, uvmin=0.0, uvmax=1.0e15):
+        """Visibility selection functions
+
+        To select by row number::
+            selected_bvis = bvis.isel({"time": slice(5, 7)})
+        To select by frequency channel::
+            selected_bvis = bvis.isel({"frequency": slice(1, 3)})
+        To select by frequency::
+            selected_bvis = bvis.sel({"frequency": slice(0.9e8, 1.2e8)})
+        To select by frequency and polarisation::
+            selected_bvis = bvis.sel(
+              {"frequency": slice(0.9e8, 1.2e8), "polarisation": ["XX", "YY"]}
+            ).dropna(dim="frequency", how="all")
+
+        Select uv range: flag in-place all visibility data
+        outside uvrange uvmin, uvmax (wavelengths)
+        The flags are set to 1 for all data outside the specified uvrange
+
+        :param uvmin: Minimum uv to flag
+        :param uvmax: Maximum uv to flag
+        :return: Visibility (with flags applied)
+        """
+        uvdist_lambda = numpy.hypot(
+            self.uvw_lambda[..., 0],
+            self.uvw_lambda[..., 1],
+        )
+        if uvmax is not None:
+            self._obj["flags"].data[numpy.where(uvdist_lambda >= uvmax)] = 1
+        if uvmin is not None:
+            self._obj["flags"].data[numpy.where(uvdist_lambda <= uvmin)] = 1
+
+    def select_r_range(self, rmin=None, rmax=None):
+        """
+        Select a visibility with stations in a range
+        of distance from the array centre
+        r is the distance from the array centre in metres
+
+        :param rmax: Maximum r
+        :param rmin: Minimum r
+        :return: Selected Visibility
+        """
+        if rmin is None and rmax is None:
+            return self._obj
+
+        # Calculate radius from array centre (in 3D)
+        # and set it as a data variable
+        xyz0 = self._obj.configuration.xyz - self._obj.configuration.xyz.mean(
+            "id"
+        )
+        r = numpy.sqrt(xarray.dot(xyz0, xyz0, dims="spatial"))
+        config = self._obj.configuration.assign(radius=r)
+        # Now use it for selection
+        if rmax is None:
+            sub_config = config.where(config["radius"] > rmin, drop=True)
+        elif rmin is None:
+            sub_config = config.where(config["radius"] < rmax, drop=True)
+        else:
+            sub_config = config.where(
+                config["radius"] > rmin, drop=True
+            ).where(config["radius"] < rmax, drop=True)
+
+        ids = list(sub_config.id.data)
+        baselines = self._obj.baselines.where(
+            self._obj.baselines.antenna1.isin(ids), drop=True
+        ).where(self._obj.baselines.antenna2.isin(ids), drop=True)
+        sub_bvis = self._obj.sel({"baselines": baselines}, drop=True)
+        setattr(
+            sub_bvis,
+            "_imaging_weight",
+            self._obj._imaging_weight,  # pylint: disable=protected-access
+        )
+
+        # The baselines coord now is missing the antenna1, antenna2 keys
+        # so we add those back
+        def generate_baselines(baseline_id):
+            for a1 in baseline_id:
+                for a2 in baseline_id:
+                    if a2 >= a1:
+                        yield a1, a2
+
+        sub_bvis["baselines"] = pandas.MultiIndex.from_tuples(
+            generate_baselines(ids),
+            names=("antenna1", "antenna2"),
+        )
+        return sub_bvis
+
 
 class FlagTable(xarray.Dataset):
     """Flag table class
@@ -653,27 +656,6 @@ class FlagTable(xarray.Dataset):
             new_ft.data["flags"][...] = 0
         return new_ft
 
-    # pylint: disable=invalid-name
-    def qa_flag_table(self, context=None) -> QualityAssessment:
-        """Assess the quality of FlagTable
-
-        :param context:
-        :param ft: FlagTable to be assessed
-        :return: QualityAssessment
-        """
-        aflags = numpy.abs(self.flags)
-        data = {
-            "maxabs": numpy.max(aflags),
-            "minabs": numpy.min(aflags),
-            "mean": numpy.mean(aflags),
-            "sum": numpy.sum(aflags),
-            "medianabs": numpy.median(aflags),
-        }
-        qa = QualityAssessment(
-            origin="qa_flagtable", data=data, context=context
-        )
-        return qa
-
 
 @xarray.register_dataset_accessor("flagtable_acc")
 class FlagTableAccessor(XarrayAccessorMixin):
@@ -705,3 +687,23 @@ class FlagTableAccessor(XarrayAccessorMixin):
     def nbaselines(self):
         """Number of Baselines"""
         return len(self["baselines"])
+
+    def qa_flag_table(self, context=None) -> QualityAssessment:
+        """Assess the quality of FlagTable
+
+        :param context:
+        :param ft: FlagTable to be assessed
+        :return: QualityAssessment
+        """
+        aflags = numpy.abs(self._obj.flags)
+        data = {
+            "maxabs": numpy.max(aflags),
+            "minabs": numpy.min(aflags),
+            "mean": numpy.mean(aflags),
+            "sum": numpy.sum(aflags),
+            "medianabs": numpy.median(aflags),
+        }
+        qa = QualityAssessment(
+            origin="qa_flagtable", data=data, context=context
+        )
+        return qa

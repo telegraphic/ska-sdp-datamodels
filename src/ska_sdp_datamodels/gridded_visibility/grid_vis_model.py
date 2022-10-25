@@ -115,24 +115,6 @@ class GridData(xarray.Dataset):
         # to return size of Dataset.
         return int(self.nbytes)
 
-    def qa_grid_data(self, context="") -> QualityAssessment:
-        """Assess the quality of a griddata
-
-        :return: QualityAssessment
-        """
-        data = {
-            "shape": str(self["pixels"].data.shape),
-            "max": numpy.max(self.data),
-            "min": numpy.min(self.data),
-            "rms": numpy.std(self.data),
-            "sum": numpy.sum(self.data),
-            "medianabs": numpy.median(numpy.abs(self.data)),
-            "median": numpy.median(self.data),
-        }
-
-        qa = QualityAssessment(origin="qa_image", data=data, context=context)
-        return qa
-
 
 @xarray.register_dataset_accessor("griddata_acc")
 class GridDataAccessor(XarrayAccessorMixin):
@@ -168,6 +150,25 @@ class GridDataAccessor(XarrayAccessorMixin):
     def projection_wcs(self):
         """Return the projected WCS coordinates on image"""
         return image_wcs(self._obj)
+
+    def qa_grid_data(self, context="") -> QualityAssessment:
+        """Assess the quality of a griddata
+
+        :return: QualityAssessment
+        """
+        grid_data = self._obj.data
+        data = {
+            "shape": str(self._obj["pixels"].data.shape),
+            "max": numpy.max(grid_data),
+            "min": numpy.min(grid_data),
+            "rms": numpy.std(grid_data),
+            "sum": numpy.sum(grid_data),
+            "medianabs": numpy.median(numpy.abs(grid_data)),
+            "median": numpy.median(grid_data),
+        }
+
+        qa = QualityAssessment(origin="qa_image", data=data, context=context)
+        return qa
 
 
 class ConvolutionFunction(xarray.Dataset):
@@ -336,24 +337,6 @@ class ConvolutionFunction(xarray.Dataset):
         # to return size of Dataset.
         return int(self.nbytes)
 
-    def qa_convolution_function(self, context="") -> QualityAssessment:
-        """Assess the quality of a ConvolutionFunction
-
-        :return: QualityAssessment
-        """
-        data = {
-            "shape": str(self["pixels"].data.shape),
-            "max": numpy.max(self.data),
-            "min": numpy.min(self.data),
-            "rms": numpy.std(self.data),
-            "sum": numpy.sum(self.data),
-            "medianabs": numpy.median(numpy.abs(self.data)),
-            "median": numpy.median(self.data),
-        }
-
-        qa = QualityAssessment(origin="qa_image", data=data, context=context)
-        return qa
-
 
 @xarray.register_dataset_accessor("convolutionfunction_acc")
 class ConvolutionFunctionAccessor(XarrayAccessorMixin):
@@ -385,3 +368,22 @@ class ConvolutionFunctionAccessor(XarrayAccessorMixin):
     def polarisation_frame(self):
         """Polarisation frame (from coords)"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"])
+
+    def qa_convolution_function(self, context="") -> QualityAssessment:
+        """Assess the quality of a ConvolutionFunction
+
+        :return: QualityAssessment
+        """
+        conv_func_data = self._obj.data
+        data = {
+            "shape": str(self._obj["pixels"].data.shape),
+            "max": numpy.max(conv_func_data),
+            "min": numpy.min(conv_func_data),
+            "rms": numpy.std(conv_func_data),
+            "sum": numpy.sum(conv_func_data),
+            "medianabs": numpy.median(numpy.abs(conv_func_data)),
+            "median": numpy.median(conv_func_data),
+        }
+
+        qa = QualityAssessment(origin="qa_image", data=data, context=context)
+        return qa

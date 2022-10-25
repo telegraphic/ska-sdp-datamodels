@@ -202,7 +202,6 @@ class ImageAccessor(XarrayAccessorMixin):
         """Return the equivalent WCS"""
         return image_wcs(self._obj)
 
-    # Class methods
     def is_canonical(self):
         """Is this Image canonical format?"""
         wcs = self.wcs
