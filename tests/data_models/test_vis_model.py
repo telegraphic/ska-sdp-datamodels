@@ -8,7 +8,7 @@ import astropy.units as u
 import numpy
 from astropy.coordinates import SkyCoord
 
-from ska_sdp_datamodels.polarisation_data_models import PolarisationFrame
+from ska_sdp_datamodels.science_data_model import PolarisationFrame
 from src.processing_components import (
     create_named_configuration,
     create_visibility,

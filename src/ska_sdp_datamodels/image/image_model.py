@@ -1,7 +1,8 @@
 # pylint: disable=too-many-ancestors,too-many-locals,invalid-name
+# pylint: disable=too-many-arguments
 
 """
-Image() data model.
+Image and FlagTable data models.
 """
 
 import logging
@@ -12,11 +13,11 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 
-from ska_sdp_datamodels.memory_data_models import (
+from ska_sdp_datamodels.science_data_model import (
+    PolarisationFrame,
     QualityAssessment,
-    XarrayAccessorMixin,
 )
-from ska_sdp_datamodels.polarisation_data_models import PolarisationFrame
+from ska_sdp_datamodels.xarray_accessor import XarrayAccessorMixin
 from ska_sdp_datamodels.xarray_coordinate_support import image_wcs
 
 log = logging.getLogger("data-models-logger")

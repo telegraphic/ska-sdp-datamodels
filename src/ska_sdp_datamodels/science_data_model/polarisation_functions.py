@@ -25,7 +25,7 @@ import logging
 
 import numpy
 
-from src.ska_sdp_datamodels.polarisation_data_models import (
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
     ReceptorFrame,
 )
@@ -34,7 +34,7 @@ log = logging.getLogger("data-models-logger")
 
 
 def polarisation_frame_from_names(names):
-    """Derive polarisation_name from names
+    """Derive polarisation_frame from names
 
     :param names: str, e.g. "linear"
     :return: PolarisationFrame

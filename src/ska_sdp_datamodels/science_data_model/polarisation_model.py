@@ -4,8 +4,6 @@
 Data models specifically used for Polarisation
 """
 
-__all__ = ["ReceptorFrame", "PolarisationFrame"]
-
 
 class ReceptorFrame:
     """Polarisation frames for receptors
