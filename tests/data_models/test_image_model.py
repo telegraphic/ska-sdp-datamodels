@@ -130,7 +130,7 @@ def test_is_canonical_true(result_image):
     WCS Header contains canonical information
     --> image is canonical.
     """
-    assert result_image.is_canonical() is True
+    assert result_image.image_acc.is_canonical() is True
 
 
 def test_is_canonical_false():
@@ -150,7 +150,7 @@ def test_is_canonical_false():
     wcs = WCS(header=new_header, naxis=4)
     image = Image.constructor(data, pol_frame, wcs, clean_beam=None)
 
-    assert image.is_canonical() is False
+    assert image.image_acc.is_canonical() is False
 
 
 def test_export_to_fits(result_image):
@@ -161,7 +161,7 @@ def test_export_to_fits(result_image):
     """
     with tempfile.TemporaryDirectory() as temp_dir:
         test_fits = f"{temp_dir}/test_export_to_fits_result.fits"
-        result_image.export_to_fits(test_fits)
+        result_image.image_acc.export_to_fits(test_fits)
 
         imported_image = fits.open(test_fits)[0]
 
@@ -199,7 +199,7 @@ def test_qa_image(result_image):
         "median": 1.0,
     }
 
-    result_qa = result_image.qa_image(context="Test")
+    result_qa = result_image.image_acc.qa_image(context="Test")
 
     assert result_qa.context == "Test"
     del result_qa.data[
