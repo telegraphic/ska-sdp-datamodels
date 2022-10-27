@@ -190,68 +190,6 @@ def create_configuration_from_file(
     return fc
 
 
-def create_configuration_from_SKAfile(
-    antfile: str,
-    mount: str = "azel",
-    names: str = "%d",
-    vp_type: Union[str, dict] = "Unknown",
-    rmax=None,
-    name="",
-    location=None,
-) -> Configuration:
-    """
-    Define configuration from a SKA format file
-
-    :param antfile: Antenna file name
-    :param mount: mount type: 'azel', 'xy', 'equatorial'
-    :param names: Antenna names e.g. "VLA%d"
-    :param vp_type: String or rule to map name to voltage pattern type
-    :param rmax: Maximum distance from array centre (m)
-    :param name: Name of array
-    :param location: EarthLocation of array
-    :return: Configuration
-    """
-
-    antdiamlonglat = numpy.genfromtxt(
-        antfile, usecols=[0, 1, 2], delimiter="\t"
-    )
-
-    if not antdiamlonglat.shape[1] == 3:
-        raise ValueError(
-            f"Antenna array has wrong shape {antdiamlonglat.shape}"
-        )
-    antxyz = numpy.zeros([antdiamlonglat.shape[0] - 1, 3])
-    diameters = numpy.zeros([antdiamlonglat.shape[0] - 1])
-    for ant in range(antdiamlonglat.shape[0] - 1):
-        loc = EarthLocation(
-            lon=antdiamlonglat[ant, 1], lat=antdiamlonglat[ant, 2], height=0.0
-        ).geocentric
-        antxyz[ant] = [
-            loc[0].to(units.m).value,
-            loc[1].to(units.m).value,
-            loc[2].to(units.m).value,
-        ]
-        diameters[ant] = antdiamlonglat[ant, 0]
-
-    nants = antxyz.shape[0]
-    anames = [names % ant for ant in range(nants)]
-    mounts = numpy.repeat(mount, nants)
-    antxyz, diameters, anames, mounts = _limit_rmax(
-        antxyz, diameters, anames, mounts, rmax
-    )
-
-    fc = Configuration.constructor(
-        location=location,
-        names=anames,
-        mount=mounts,
-        xyz=antxyz,
-        vp_type=_find_vptype_from_name(names, vp_type),
-        diameter=diameters,
-        name=name,
-    )
-    return fc
-
-
 def create_configuration_from_MIDfile(
     antfile: str,
     location=None,
@@ -379,54 +317,6 @@ def create_configuration_from_LLAfile(
         vp_type=_find_vptype_from_name(anames, vp_type),
         diameter=diameters,
         name=name,
-    )
-    return fc
-
-
-def create_LOFAR_configuration(
-    antfile: str, location, rmax=1e6, skip=1
-) -> Configuration:
-    """
-    Define configuration from the LOFAR configuration file
-
-    :param antfile: Antenna file
-    :param location: EarthLocation
-    :param rmax: Maximum distance from array centre (m)
-    :param skip: Antennas/stations to skip
-    :return: Configuration
-    """
-
-    antxyz = numpy.genfromtxt(
-        antfile, skip_header=2, usecols=[1, 2, 3], delimiter=","
-    )
-    nants = antxyz.shape[0]
-    if not antxyz.shape[1] == 3:
-        raise ValueError(f"Antenna array has wrong shape {antxyz.shape}")
-    antxyz = ecef_to_enu(location, antxyz)
-    anames = numpy.genfromtxt(
-        antfile, dtype="str", skip_header=2, usecols=[0], delimiter=","
-    )
-    mounts = numpy.repeat("XY", nants)
-    diameters = numpy.repeat(35.0, nants)
-
-    antxyz, diameters, mounts, anames = _limit_rmax(
-        antxyz, diameters, anames, mounts, rmax
-    )
-
-    antxyz = antxyz[::skip]
-    diameters = diameters[::skip]
-    anames = anames[::skip]
-    mounts = mounts[::skip]
-
-    vp_type = {"HBA": "HBA", "LBA": "LBA"}
-    fc = Configuration.constructor(
-        location=location,
-        names=anames,
-        mount=mounts,
-        xyz=antxyz,
-        vp_type=_find_vptype_from_name(anames, vp_type),
-        diameter=diameters,
-        name="LOFAR",
     )
     return fc
 

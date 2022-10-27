@@ -20,14 +20,6 @@ def test_visibility_groupby_time(visibility):
     assert (times == visibility.time).all()
 
 
-def test_visibility_groupby_bins_time(visibility):
-    """
-    TODO
-    """
-    for result in visibility.groupby_bins("time", 3):
-        log.info(result[0])
-
-
 def test_visibility_iselect_time(visibility):
     """
     Sub-select Visibility object using Dataset.isel,
