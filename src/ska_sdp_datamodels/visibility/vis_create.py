@@ -30,10 +30,10 @@ def create_visibility(
     times: numpy.array,
     frequency: numpy.array,
     phasecentre: SkyCoord,
+    channel_bandwidth: numpy.array,
     weight: float = 1.0,
     polarisation_frame: PolarisationFrame = None,
     integration_time=1.0,
-    channel_bandwidth=1e6,
     zerow=False,
     elevation_limit=15.0 * numpy.pi / 180.0,
     source="unknown",
@@ -41,31 +41,36 @@ def create_visibility(
     utc_time=None,
     times_are_ha=True,
 ) -> Visibility:
-    """Create a Visibility from Configuration, hour angles, and direction of source
+    """
+    Create a Visibility from Configuration, hour angles,
+    and direction of source
 
     Note that we keep track of the integration time for BDA purposes
 
-    The input times are hour angles in radians, these are converted to UTC MJD in seconds, using utc_time as
+    The input times are hour angles in radians, these are
+    converted to UTC MJD in seconds, using utc_time as
     the approximate time.
 
     :param config: Configuration of antennas
     :param times: time or hour angles in radians
-    :param times_are_ha: The times are hour angles (default) instead of utc time (in radians)
     :param frequency: frequencies (Hz] [nchan]
-    :param weight: weight of a single sample
     :param phasecentre: phasecentre of observation (SkyCoord)
     :param channel_bandwidth: channel bandwidths: (Hz] [nchan]
-    :param integration_time: Integration time ('auto' or value in s)
+    :param weight: weight of a single sample
     :param polarisation_frame: PolarisationFrame('stokesI')
-    :param integration_time: in seconds
+    :param integration_time: Integration time ('auto' or value in s)
     :param zerow: bool - set w to zero
     :param elevation_limit: in degrees
     :param source: Source name
     :param meta: Meta data as a dictionary
-    :param utc_time: Time of ha definition default is Time("2000-01-01T00:00:00", format='isot', scale='utc')
+    :param utc_time: Time of ha definition default is
+                Time("2000-01-01T00:00:00", format='isot', scale='utc')
+    :param times_are_ha: The times are hour angles (default)
+                instead of utc time (in radians)
     :return: Visibility
     """
-    assert phasecentre is not None, "Must specify phase centre"
+    if phasecentre is None:
+        raise ValueError("Must specify phase centre")
 
     if utc_time is None:
         utc_time_zero = Time("2000-01-01T00:00:00", format="isot", scale="utc")
@@ -101,15 +106,21 @@ def create_visibility(
 
         _, elevation = hadec_to_azel(ha, phasecentre.dec.rad, latitude)
         if elevation_limit is None or (elevation > elevation_limit):
+            # check if at this time target is above an elevation_limit
             ntimes += 1
         else:
+            # if target is below, flag it
             n_flagged += 1
 
-    assert ntimes > 0, "No unflagged points"
+    if ntimes == 0:
+        raise ValueError(
+            "No targets above elevation_limit; all points are flagged"
+        )
 
     if elevation_limit is not None and n_flagged > 0:
         log.info(
-            "create_visibility: flagged %d/%d times below elevation limit %f (rad)"
+            "create_visibility: flagged %d/%d times "
+            "below elevation limit %f (rad)"
             % (n_flagged, ntimes, 180.0 * elevation_limit / numpy.pi)
         )
     else:

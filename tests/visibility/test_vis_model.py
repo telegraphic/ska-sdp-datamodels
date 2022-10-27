@@ -7,8 +7,8 @@ Unit tests for Visibility object
 import astropy.units as u
 import numpy
 from astropy.coordinates import SkyCoord
-from ska_sdp_datamodels.configuration import create_named_configuration
 
+from ska_sdp_datamodels.configuration import create_named_configuration
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
 from ska_sdp_datamodels.visibility import create_visibility
 
