@@ -1,4 +1,4 @@
-.. _xarray:
+.. _xarray_doc:
 
 Use of xarray
 =============
@@ -89,7 +89,7 @@ The steps required are:
 
 - Here is a simple example of how the capabilities of xarray can be used:
 
-.. code:: ipython3
+.. code:: python3
 
     vis = create_visibility_from_ms(ms)[0]
 

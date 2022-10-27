@@ -21,6 +21,8 @@ import os
 import sys
 
 # Define build directories
+from unittest import mock
+
 sys.path.insert(0, os.path.abspath("../.."))
 sys.path.insert(0, os.path.abspath("../../src"))
 
@@ -59,8 +61,9 @@ autodoc_mock_imports = [
     "pandas",
     "xarray",
     "h5py",
-]
+    "astroplan"
 
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

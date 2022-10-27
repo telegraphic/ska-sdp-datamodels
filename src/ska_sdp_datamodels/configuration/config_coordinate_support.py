@@ -70,10 +70,10 @@ def hadec_to_azel(ha, dec, latitude):
     cosel cosaz = coslat sindec - sinlat cosdec cosha
     cosel sinaz = - cosdec sinha
 
-    :param ha:
-    :param dec:
-    :param latitude:
-    :return: az, el
+    :param ha: hour angle
+    :param dec: declination
+    :param latitude: latitude
+    :return: az, el (azimuth, elevation)
     """
     coslat = numpy.cos(latitude)
     sinlat = numpy.sin(latitude)
@@ -131,10 +131,10 @@ def ecef_to_enu(location, xyz):
 
 def lla_to_ecef(lat, lon, alt):
     """Convert WGS84 spherical coordinates to ECEF cartesian coordinates.
-    :param lat:
-    :param lon:
-    :param alt:
-    :result ecef:
+    :param lat: latitude
+    :param lon: longitude
+    :param alt: altitude
+    :result: ecef coordinates
     """
     WGS84_a = 6378137.00000000
     WGS84_b = 6356752.31424518
