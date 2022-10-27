@@ -18,7 +18,7 @@ see the source link in the top right corner.
 
 The data classes are built on the `xarray <https://docs.xarray.dev/en/stable/#>`_ library, offering a
 rich API for applications. For more details including how to update existing scripts, see
-:ref:`Use of xarray <xarray>`.
+:ref:`Use of xarray <xarray_doc>`.
 
 
 Installation Instructions

@@ -12,3 +12,4 @@ astropy
 pandas
 xarray
 h5py
+astroplan

@@ -1,3 +1,7 @@
+"""
+Polarisation-type data model unit tests.
+"""
+
 import pytest
 
 from ska_sdp_datamodels.science_data_model import (

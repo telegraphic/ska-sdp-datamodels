@@ -43,6 +43,9 @@ Configuration model
 
 * Telescope Configuration: :py:class:`ska_sdp_datamodels.configuration.Configuration`
 
+Note that the package contains a set of example configuration files, which can be used
+for testing purposes. These are in `ska_sdp_datamodels/configuration/example_antenna_files`.
+
 Science data models
 -------------------
 

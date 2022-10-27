@@ -3,6 +3,7 @@
 main
 ----
 
+* Added create_visibility and various create_configuration functions from RASCIL ([MR13](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/13))
 * Move class methods of classes inheriting from Dataset into the accessor classes ([MR11](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/11))
 * Restructured the repository ([MR10](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/10))
 * Moved Image() into its own file and added unit tests for it ([MR8](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/8))
