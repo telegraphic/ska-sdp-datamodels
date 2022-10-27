@@ -712,14 +712,15 @@ class GridData(xarray.Dataset):
 
         :return: QualityAssessment
         """
+        grid_data = self._obj.data
         data = {
-            "shape": str(self["pixels"].data.shape),
-            "max": numpy.max(self.data),
-            "min": numpy.min(self.data),
-            "rms": numpy.std(self.data),
-            "sum": numpy.sum(self.data),
-            "medianabs": numpy.median(numpy.abs(self.data)),
-            "median": numpy.median(self.data),
+            "shape": str(self._obj["pixels"].data.shape),
+            "max": numpy.max(grid_data),
+            "min": numpy.min(grid_data),
+            "rms": numpy.std(grid_data),
+            "sum": numpy.sum(grid_data),
+            "medianabs": numpy.median(numpy.abs(grid_data)),
+            "median": numpy.median(grid_data),
         }
 
         qa = QualityAssessment(origin="qa_image", data=data, context=context)
