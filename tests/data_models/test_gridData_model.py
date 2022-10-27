@@ -84,14 +84,11 @@ def test_GridData_constructor_attrs(result_gridData):
     assert result_attrs["data_model"] == "GridData"
     assert result_attrs["_polarisation_frame"] == "stokesIV"
 
+
 def test_qa_grid_data(result_gridData):
     """
     QualityAssessment of object data values
     are derived correctly.
-
-    Note: input "result_image" contains 1.0 for
-    every pixel value, which is used to determine most
-    of QA data values.
     """
     expected_data = {  # except "size"
         "shape": f"({N_CHAN}, {N_POL}, {NV}, {NU})",
@@ -108,6 +105,7 @@ def test_qa_grid_data(result_gridData):
     assert result_qa.context == "Test"
     for key, value in expected_data.items():
         assert result_qa.data[key] == value, f"{key} mismatch"
+
 
 def test_property_accessor(result_gridData):
     """

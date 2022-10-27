@@ -3,36 +3,21 @@
 
 import pytest
 import numpy
-import pandas
-from xarray import DataArray
-from astropy import constants as const
-from astropy import units as u
-from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
-from astropy.io import fits
-from astropy.time import Time
-from astropy.utils.exceptions import AstropyDeprecationWarning
-from astropy.wcs import FITSFixedWarning
 
-from src.ska_sdp_datamodels.polarisation_data_models import (
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
     ReceptorFrame,
 )
 
-from src.ska_sdp_datamodels.image_model import (
+from ska_sdp_datamodels.image.image_model import (
     Image
 )
 
-from src.ska_sdp_datamodels.memory_data_models import (
-    Configuration,
-    GainTable,
-    SkyModel
-)
-from src.ska_sdp_datamodels.xarray_coordinate_support import (
-    conv_func_wcs,
-    griddata_wcs,
-    image_wcs,
-)
+from ska_sdp_datamodels.configuration.config_model import Configuration
+from ska_sdp_datamodels.calibration.calibration_model import GainTable
+from ska_sdp_datamodels.sky_model.sky_model import SkyModel
+
 
 #Create an Image object for SkyModel
 
@@ -101,6 +86,7 @@ gaintable = GainTable.constructor(gain, time, interval,
 
 mask = "Test_mask"
 fixed = True
+
 
 @pytest.fixture(scope="module", name="result_skyModel")
 def fixture_skyModel():

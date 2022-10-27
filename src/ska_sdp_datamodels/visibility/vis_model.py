@@ -686,7 +686,7 @@ class FlagTableAccessor(XarrayAccessorMixin):
     @property
     def nbaselines(self):
         """Number of Baselines"""
-        return len(self["baselines"])
+        return len(self._obj.coords["baselines"])
 
     def qa_flag_table(self, context=None) -> QualityAssessment:
         """Assess the quality of FlagTable
