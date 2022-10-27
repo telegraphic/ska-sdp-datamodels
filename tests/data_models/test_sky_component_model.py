@@ -4,20 +4,16 @@
 import pytest
 import numpy
 
-from src.ska_sdp_datamodels.polarisation_data_models import (
-    PolarisationFrame
-)
-
-from src.ska_sdp_datamodels.memory_data_models import (
-    SkyComponent
-)
+from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
+from ska_sdp_datamodels.sky_model.sky_model import SkyComponent
 
 direction = (180., -35.)
-frequency = numpy.ones((1))
+frequency = numpy.ones(1)
 name = "test"
-flux = numpy.ones((1,1))
+flux = numpy.ones((1, 1))
 shape = "Point"
 polarisation_frame = PolarisationFrame("stokesI")
+
 
 @pytest.fixture(scope="module", name="result_skyComponent")
 def fixture_skyComponent():

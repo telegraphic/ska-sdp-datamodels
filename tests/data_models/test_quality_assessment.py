@@ -6,10 +6,8 @@ Unit tests for QualityAssessment
 
 import pytest
 
+from ska_sdp_datamodels.science_data_model.qa_model import QualityAssessment
 
-from src.ska_sdp_datamodels.memory_data_models import (
-    QualityAssessment
-)
 
 @pytest.fixture(scope="module", name="result_qualityAssessment")
 def fixture_qualityAssessment():
@@ -18,6 +16,7 @@ def fixture_qualityAssessment():
     """
     qualityAssessment = QualityAssessment("Test_origin", {"test_data_name": "test_data"}, "Test_context")
     return qualityAssessment
+
 
 def test_qualityAssessment_str(result_qualityAssessment):
     s = "Quality assessment:\n"

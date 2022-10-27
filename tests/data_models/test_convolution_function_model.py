@@ -1,32 +1,16 @@
-
 """ Unit tests for Memory Data Models
 """
 
 import pytest
 import numpy
-import pandas
-from xarray import DataArray
-from astropy import constants as const
-from astropy import units as u
-from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
-from astropy.io import fits
-from astropy.time import Time
-from astropy.utils.exceptions import AstropyDeprecationWarning
-from astropy.wcs import FITSFixedWarning
 
-from src.ska_sdp_datamodels.polarisation_data_models import (
-    PolarisationFrame,
-    ReceptorFrame,
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
+    PolarisationFrame
 )
 
-from src.ska_sdp_datamodels.memory_data_models import (
+from ska_sdp_datamodels.gridded_visibility.grid_vis_model import (
     ConvolutionFunction
-)
-from src.ska_sdp_datamodels.xarray_coordinate_support import (
-    conv_func_wcs,
-    griddata_wcs,
-    image_wcs,
 )
 
 N_CHAN = 100
@@ -54,61 +38,62 @@ WCS_HEADER = {
     "CDELT4": 1,  # delta between frequency values
 }
 
-@pytest.fixture(scope="module", name="result_convolutionFunction")
-def fixture_convolutionFunction():
+
+@pytest.fixture(scope="module", name="result_convolution_function")
+def fixture_convolution_function():
     """
     Generate a simple image using ConvolutionFunction.constructor.
     """
-    data = numpy.ones((N_CHAN, N_POL, NW, oversampling, oversampling , support, support))
+    data = numpy.ones((N_CHAN, N_POL, NW, oversampling, oversampling, support, support))
     polarisation_frame = PolarisationFrame("stokesIV")
     cf_wcs = WCS(header=WCS_HEADER, naxis=4)
-    convolutionFunction = ConvolutionFunction.constructor(data, cf_wcs,
-        polarisation_frame)
-    return convolutionFunction
+    convolution_function = ConvolutionFunction.constructor(data, cf_wcs, polarisation_frame)
+    return convolution_function
 
-def test_constructor_coords(result_convolutionFunction):
+
+def test_constructor_coords(result_convolution_function):
     """
     Constructor correctly generates coordinates
     """
 
     expected_coords_keys = ["frequency", "polarisation", "dv", "du", "w", "v", "u"]
-    result_coords = result_convolutionFunction.coords
+    result_coords = result_convolution_function.coords
 
     assert sorted(result_coords.keys()) == sorted(expected_coords_keys)
     # assert result_coords["frequency"].shape == (N_CHAN,)
     # assert (result_coords["polarisation"].data == ["I", "V"]).all()
     # assert result_coords["w"].shape == (NW,)
 
-# def test_constructor_data_vars(result_convolutionFunction):
+# def test_constructor_data_vars(result_convolution_function):
 #     """
 #     Constructor generates correctly generates data variables
 #     """
 
-#     result_data_vars = result_convolutionFunctionv.data_vars
+#     result_data_vars = result_convolution_function.data_vars
 
 #     assert len(result_data_vars) == 1  # only var is pixels
 #     assert "pixels" in result_data_vars.keys()
 #     assert isinstance(result_data_vars["pixels"], DataArray)
 #     assert (result_data_vars["pixels"].data == 1.0).all()
-    
 
-# def test_constructor_attrs(result_convolutionFunction):
+
+# def test_constructor_attrs(result_convolution_function):
 #     """
 #     Constructor correctly generates attributes
 #     """
 
-#     result_attrs = result_convolutionFunction.attrs
+#     result_attrs = result_convolution_function.attrs
 
 #     assert len(result_attrs) == 2
 #     assert result_attrs["data_model"] == "ConvolutionFunction"
 #     assert result_attrs["_polarisation_frame"] == "stokesIV"
 
-# def test_qa_grid_data(result_convolutionFunction):
+# def test_qa_grid_data(result_convolution_function):
 #     """
 #     QualityAssessment of object data values
 #     are derived correctly.
 
-#     Note: input "result_convolutionFunction" contains 1.0 for
+#     Note: input "result_convolution_function" contains 1.0 for
 #     every pixel value, which is used to determine most
 #     of QA data values.
 #     """
@@ -122,7 +107,7 @@ def test_constructor_coords(result_convolutionFunction):
 #         "median": 1.0,
 #     }
 
-#     result_qa = result_convolutionFunction.qa_grid_data(context="Test")
+#     result_qa = result_convolution_function.qa_grid_data(context="Test")
 
 #     assert result_qa.context == "Test"
 #     for key, value in expected_data.items():
