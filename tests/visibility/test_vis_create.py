@@ -1,3 +1,9 @@
+# pylint: disable=fixme
+
+"""
+Unit tests to creating Visibilities
+"""
+
 import numpy
 import pytest
 from astropy import units

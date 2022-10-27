@@ -1,3 +1,7 @@
+"""
+Functions to create Visibility
+"""
+
 import logging
 
 import numpy
@@ -11,7 +15,7 @@ from ska_sdp_datamodels.configuration.config_coordinate_support import (
     xyz_at_latitude,
     xyz_to_uvw,
 )
-from ska_sdp_datamodels.physical_constants import sidereal_day_seconds
+from ska_sdp_datamodels.physical_constants import SIDEREAL_DAY_SECONDS
 from ska_sdp_datamodels.science_data_model import (
     PolarisationFrame,
     correlate_polarisation,
@@ -25,6 +29,8 @@ from ska_sdp_datamodels.visibility.vis_utils import (
 log = logging.getLogger("data-models-logger")
 
 
+# pylint: disable=too-many-arguments,too-many-locals,invalid-name
+# pylint: disable=too-many-branches,too-many-statements
 def create_visibility(
     config: Configuration,
     times: numpy.array,
@@ -102,7 +108,7 @@ def create_visibility(
         if times_are_ha:
             ha = time
         else:
-            ha = time * (sidereal_day_seconds / 86400.0)
+            ha = time * (SIDEREAL_DAY_SECONDS / 86400.0)
 
         _, elevation = hadec_to_azel(ha, phasecentre.dec.rad, latitude)
         if elevation_limit is None or (elevation > elevation_limit):
@@ -120,11 +126,13 @@ def create_visibility(
     if elevation_limit is not None and n_flagged > 0:
         log.info(
             "create_visibility: flagged %d/%d times "
-            "below elevation limit %f (rad)"
-            % (n_flagged, ntimes, 180.0 * elevation_limit / numpy.pi)
+            "below elevation limit %f (rad)",
+            n_flagged,
+            ntimes,
+            180.0 * elevation_limit / numpy.pi,
         )
     else:
-        log.debug("create_visibility: created %d times" % (ntimes))
+        log.debug("create_visibility: created %d times", ntimes)
 
     npol = polarisation_frame.npol
     nchan = len(frequency)
@@ -150,7 +158,7 @@ def create_visibility(
         if times_are_ha:
             ha = time
         else:
-            ha = time * (sidereal_day_seconds / 86400.0)
+            ha = time * (SIDEREAL_DAY_SECONDS / 86400.0)
 
         # Calculate the positions of the antennas as seen for this hour angle
         # and declination
@@ -206,11 +214,9 @@ def create_visibility(
     )
 
     log.debug(
-        "create_visibility: %d rows, %.3f GB"
-        % (
-            vis.visibility_acc.nvis,
-            vis.visibility_acc.size(),
-        )
+        "create_visibility: %d rows, %.3f GB",
+        vis.visibility_acc.nvis,
+        vis.visibility_acc.size(),
     )
 
     return vis

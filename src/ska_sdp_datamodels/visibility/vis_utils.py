@@ -18,12 +18,11 @@ def generate_baselines(nant):
             yield ant1, ant2
 
 
-def calculate_transit_time(location, utc_time, direction, fraction_day=1e-7):
+def calculate_transit_time(location, utc_time, direction):
     """Find the UTC time of the nearest transit
 
-    :param fraction_day: Step in this fraction of day to find transit
-    :param utc_time: Time(Iterable)
     :param location: EarthLocation
+    :param utc_time: Time(Iterable)
     :param direction: SkyCoord source
     :return: astropy Time
     """
