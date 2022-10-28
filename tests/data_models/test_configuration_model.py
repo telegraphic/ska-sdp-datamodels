@@ -1,8 +1,9 @@
-""" Unit tests for Memory Data Models
+""" Unit tests for the Configuration model
 """
+# make python-format
+# make python lint
 
 import pytest
-import numpy
 from xarray import DataArray
 
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
@@ -12,6 +13,7 @@ from ska_sdp_datamodels.science_data_model.polarisation_model import (
 from ska_sdp_datamodels.configuration.config_model import (
     Configuration
 )
+
 
 @pytest.fixture(scope="module", name="result_configuration")
 def fixture_configuration():

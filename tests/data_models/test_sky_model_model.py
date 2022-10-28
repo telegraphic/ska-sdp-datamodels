@@ -1,6 +1,7 @@
 """ Unit tests for SkyModel class
 """
-
+# make python-format
+# make python lint
 import pytest
 import numpy
 from astropy.wcs import WCS
@@ -18,11 +19,8 @@ from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.calibration.calibration_model import GainTable
 from ska_sdp_datamodels.sky_model.sky_model import SkyModel
 
-
-#Create an Image object for SkyModel
-
 N_CHAN = 100
-N_POL = 2
+N_POL = 1
 Y = 512
 X = 256
 CLEAN_BEAM = {"bmaj": 0.1, "bmin": 0.1, "bpa": 0.1}
@@ -46,67 +44,55 @@ WCS_HEADER = {
     "CDELT3": 3,  # delta between polarisation values (I=0, V=4)
     "CDELT4": 10.0,  # delta between frequency values
 }
-data = numpy.ones((N_CHAN, N_POL, Y, X))
-pol_frame = PolarisationFrame("stokesIV")
-wcs = WCS(header=WCS_HEADER, naxis=4)
-image = Image.constructor(data, pol_frame, wcs, clean_beam=CLEAN_BEAM)
-components=None
+
+DATA = numpy.ones((N_CHAN, N_POL, Y, X))
+POL_FRAME = PolarisationFrame("stokesI")
+WCS = WCS(header=WCS_HEADER, naxis=4)
+IMAGE = Image.constructor(DATA, POL_FRAME, WCS, clean_beam=CLEAN_BEAM)
+COMPONENTS = None
 
 # Create a GainTable object for SkyModel
-name = "MID"
-location = (5109237.71471275, 2006795.66194638, -3239109.1838011)
-names = "M000"
-xyz = 222
-mount = "altaz"
-frame=None
-receptor_frame=ReceptorFrame("linear")
-diameter = 13.5
-offset = 0.0
-stations = 0
-vp_type = "MEERKAT" 
-
-# Create a Configuration object for GainTable
-
-configuration = Configuration.constructor(name, location, 
-    names, xyz, mount, frame, receptor_frame, diameter,
-    offset, stations, vp_type)
-
-gain = numpy.ones((1,1,1,1,1))
-time = numpy.ones((1))
-interval = numpy.ones((1))
-weight = numpy.ones((1,1,1,1,1))
-residual = numpy.ones((1,1,1,1))
-frequency = numpy.ones((1))
-receptor_frame = ReceptorFrame("linear")
-phasecentre = (180., -35.)
-jones_type = "T"
-gaintable = GainTable.constructor(gain, time, interval, 
-    weight, residual, frequency, receptor_frame, phasecentre, 
-    configuration, jones_type)
-
-mask = "Test_mask"
-fixed = True
+NAME = "MID"
+LOCATION = (5109237.71471275, 2006795.66194638, -3239109.1838011)
+NAMES = "M000"
+XYZ = 222
+MOUNT = "altaz"
+FRAME = None
+RECEPTOR_FRAME = ReceptorFrame("stokesI")
+DIAMETER = 13.5
+OFFSET = 0.0
+STATIONS = 0
+VP_TYPE = "MEERKAT"
+CONFIGUTRATION = Configuration.constructor(NAME, LOCATION, NAMES, XYZ, MOUNT, FRAME, RECEPTOR_FRAME, DIAMETER,
+                                           OFFSET, STATIONS, VP_TYPE)
+GAIN = numpy.ones((1, 1, 1, 1, 1))
+TIME = numpy.ones(1)
+INTERVAL = numpy.ones(1)
+WEIGHT = numpy.ones((1, 1, 1, 1, 1))
+RESIDUAL = numpy.ones((1, 1, 1, 1))
+FREQUENCY = numpy.ones(1)
+PHASECENTRE = (180., -35.)
+JONES_TYPE = "T"
+GAINTABLE = GainTable.constructor(GAIN, TIME, INTERVAL, WEIGHT, RESIDUAL, FREQUENCY, RECEPTOR_FRAME, PHASECENTRE,
+                                  CONFIGUTRATION, JONES_TYPE)
 
 
-@pytest.fixture(scope="module", name="result_skyModel")
-def fixture_skyModel():
+@pytest.fixture(scope="module", name="result_sky_model")
+def fixture_sky_model():
     """
     Generate a simple image using __init__.
     """
-    
-    skyModel = SkyModel(image, components, gaintable,
-        mask, fixed)
-    return skyModel
+    mask = "Test_mask"
+    fixed = True
+    sky_model = SkyModel(IMAGE, COMPONENTS, GAINTABLE, mask, fixed)
+    return sky_model
 
 
-def test__str__(result_skyModel):
-    s = f"SkyModel: fixed: {self.fixed}\n"
-    for _, sc in enumerate(self.components):
-        s += str(sc)
-    s += "\n"
-    s += str(self.image)
-    s += "\n"
-    s += str(self.mask)
-    s += "\n"
-    s += str(self.gaintable)
-    assert str(result_skyModel) == s
+def test__str__(result_sky_model):
+    components = ""
+    s = "SkyModel: fixed: True\n"
+    s += f"{str(components)}\n"
+    s += f"{str(IMAGE)}\n"
+    s += f"Test_mask\n"
+    s += f"{str(GAINTABLE)}"
+    assert str(result_sky_model) == s

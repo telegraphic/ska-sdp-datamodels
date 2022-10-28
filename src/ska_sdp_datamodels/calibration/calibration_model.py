@@ -289,7 +289,7 @@ class PointingTable(xarray.Dataset):
             "antenna": antennas,
             "frequency": frequency,
             "receptor": receptor_frame.names,
-            "angle": ["az", "el"],
+            "angle": [{"az", "el"}],  # {} are a hack to fix re-indexing issues
         }
 
         datavars = {}
@@ -374,8 +374,8 @@ class PointingTableAccessor(XarrayAccessorMixin):
 
         :return: QualityAssessment
         """
-        weight = self._obj.weight
-        pointing = self._obj.pointing
+        weight = self._obj.weight.data
+        pointing = self._obj.pointing.data
         apt = numpy.abs(pointing[weight > 0.0])
         ppt = numpy.angle(pointing[weight > 0.0])
         data = {

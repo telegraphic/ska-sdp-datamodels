@@ -1,5 +1,7 @@
 """ Unit tests for the FlagTable Model
 """
+# make python-format
+# make python lint
 
 import pytest
 import numpy
@@ -81,6 +83,7 @@ def test_constructor_attrs(result_flag_table):
         """
     result_attrs = result_flag_table.attrs
 
+    assert len(result_attrs) == 3
     assert result_attrs["data_model"] == "FlagTable"
     assert result_attrs["_polarisation_frame"] == "stokesI"
     assert result_attrs["configuration"] == CONFIGURATION
@@ -118,7 +121,6 @@ def test_qa_flag_table(result_flag_table):
     QualityAssessment of object data values
     are derived correctly.
     """
-    accessor_object = result_flag_table.flagtable_acc
     expected_data = {
         "maxabs": 1,
         "minabs": 1,
@@ -127,7 +129,7 @@ def test_qa_flag_table(result_flag_table):
         "medianabs": 1,
     }
 
-    result_qa = accessor_object.qa_flag_table(context="Test")
+    result_qa = result_flag_table.flagtable_acc.qa_flag_table(context="Test")
 
     assert result_qa.context == "Test"
     for key, value in expected_data.items():
