@@ -7,6 +7,7 @@ from .image_functions import (
     import_image_from_hdf5,
 )
 from .image_model import Image
+from .image_create import create_image
 
 __all__ = [
     "Image",
@@ -14,4 +15,5 @@ __all__ = [
     "export_image_to_hdf5",
     "convert_image_to_hdf",
     "convert_hdf_to_image",
+    "create_image",
 ]
