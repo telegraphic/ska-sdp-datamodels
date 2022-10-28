@@ -8,4 +8,4 @@ PROJECT_NAME = ska-sdp-datamodels
 PYTHON_SWITCHES_FOR_FLAKE8 = --ignore=W503
 
 # tmp, until we get all tests working
-PYTHON_TEST_FILE = tests/data_models/test_image_model.py
+PYTHON_TEST_FILE = tests/configuration tests/image tests/visibility tests/science_data_model

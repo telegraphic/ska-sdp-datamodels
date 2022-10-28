@@ -34,7 +34,8 @@ log = logging.getLogger("data-models-logger")
 
 
 def polarisation_frame_from_names(names):
-    """Derive polarisation_frame from names
+    """
+    Derive polarisation_frame from names
 
     :param names: str, e.g. "linear"
     :return: PolarisationFrame
@@ -320,7 +321,8 @@ def convert_pol_frame(
 
 
 def correlate_polarisation(rec_frame: ReceptorFrame):
-    """Gives the polarisation frame corresponding to a receptor frame
+    """
+    Gives the polarisation frame corresponding to a receptor frame
 
     :param rec_frame: Receptor frame
     :return: PolarisationFrame

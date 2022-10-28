@@ -1,7 +1,7 @@
 # pylint: disable=invalid-name
 
 """
-Functions working with Configuration model.
+Functions converting from and to Configuration data model.
 """
 
 import numpy
@@ -42,7 +42,9 @@ def convert_configuration_to_hdf(config: Configuration, f):
 
     cf["configuration/xyz"] = config.xyz
     cf["configuration/diameter"] = config.diameter
-    cf["configuration/names"] = [numpy.string_(name) for name in config.names]
+    cf["configuration/names"] = [
+        numpy.string_(name, encoding="utf-8") for name in config.names.data
+    ]
     cf["configuration/mount"] = [
         numpy.string_(mount) for mount in config.mount
     ]
@@ -86,10 +88,10 @@ def convert_configuration_from_hdf(f):
 
     xyz = cf["configuration/xyz"]
     diameter = cf["configuration/diameter"]
-    names = [str(n) for n in cf["configuration/names"]]
-    mount = [str(m) for m in cf["configuration/mount"]]
-    stations = [str(p) for p in cf["configuration/stations"]]
-    vp_type = [str(p) for p in cf["configuration/vp_type"]]
+    names = [str(n, encoding="utf-8") for n in cf["configuration/names"]]
+    mount = [str(m, encoding="utf-8") for m in cf["configuration/mount"]]
+    stations = [str(p, encoding="utf-8") for p in cf["configuration/stations"]]
+    vp_type = [str(p, encoding="utf-8") for p in cf["configuration/vp_type"]]
     offset = cf["configuration/offset"]
 
     return Configuration.constructor(

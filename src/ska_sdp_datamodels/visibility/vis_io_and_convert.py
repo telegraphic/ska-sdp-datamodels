@@ -20,19 +20,7 @@ from ska_sdp_datamodels.configuration import (
 )
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
 from ska_sdp_datamodels.visibility.vis_model import FlagTable, Visibility
-
-
-def _generate_baselines(nant):
-    """Generate mapping from antennas to baselines
-    Note that we need to include auto-correlations
-    since some input measurement sets
-    may contain auto-correlations
-
-    :param nant: Number of antennas
-    """
-    for ant1 in range(0, nant):
-        for ant2 in range(ant1, nant):
-            yield ant1, ant2
+from ska_sdp_datamodels.visibility.vis_utils import generate_baselines
 
 
 def convert_visibility_to_hdf(vis: Visibility, f):
@@ -102,7 +90,7 @@ def convert_hdf_to_visibility(f):
     flags = f["data_flags"][()]
 
     baselines = pandas.MultiIndex.from_tuples(
-        _generate_baselines(nants),
+        generate_baselines(nants),
         names=("antenna1", "antenna2"),
     )
 
@@ -163,7 +151,7 @@ def convert_hdf_to_flagtable(f):
     nants = f.attrs["nants"]
 
     baselines = pandas.MultiIndex.from_tuples(
-        _generate_baselines(nants), names=("antenna1", "antenna2")
+        generate_baselines(nants), names=("antenna1", "antenna2")
     )
     polarisation_frame = PolarisationFrame(f.attrs["polarisation_frame"])
     frequency = f["data_frequency"][()]
