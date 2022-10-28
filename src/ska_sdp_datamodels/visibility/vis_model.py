@@ -126,7 +126,7 @@ class Visibility(xarray.Dataset):
             "baselines": baselines,
             "frequency": frequency,
             "polarisation": polarisation_frame.names,
-            "spatial": ["u", "v", "w"],
+            "spatial": [{"u", "v", "w"}], # the {} are a hack to fix indexing issues
         }
 
         datavars = {}

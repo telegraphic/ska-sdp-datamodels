@@ -1,5 +1,7 @@
 """ Unit tests for GainTable Models
 """
+# make python-format
+# make python lint
 
 import pytest
 import numpy
@@ -8,25 +10,26 @@ from ska_sdp_datamodels.science_data_model.polarisation_model import ReceptorFra
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.calibration.calibration_model import GainTable
 
+NAME = "MID"
+LOCATION = (5109237.71471275, 2006795.66194638, -3239109.1838011)
+NAMES = "M000"
+XYZ = 222
+MOUNT = "altaz"
+FRAME = None
+RECEPTOR_FRAME = ReceptorFrame("stokesI")
+DIAMETER = 13.5
+OFFSET = 0.0
+STATIONS = 0
+VP_TYPE = "MEERKAT"
+CONFIGURATION = Configuration.constructor(NAME, LOCATION, NAMES, XYZ, MOUNT, FRAME, RECEPTOR_FRAME, DIAMETER,
+                                          OFFSET, STATIONS, VP_TYPE)
 
 @pytest.fixture(scope="module", name="result_gain_table")
 def fixture_gain_table():
     """
     Generate a simple gain table using GainTable.constructor
     """
-    name = "MID"
-    location = (5109237.71471275, 2006795.66194638, -3239109.1838011)
-    names = "M000"
-    xyz = 222
-    mount = "altaz"
-    frame = None
-    receptor_frame = ReceptorFrame("stokesI")
-    diameter = 13.5
-    offset = 0.0
-    stations = 0
-    vp_type = "MEERKAT"
-    configuration = Configuration.constructor(name, location, names, xyz, mount, frame, receptor_frame, diameter,
-                                              offset, stations, vp_type)
+
     gain = numpy.ones((1, 1, 1, 1, 1))
     time = numpy.ones(1)
     interval = numpy.ones(1)
@@ -35,8 +38,8 @@ def fixture_gain_table():
     frequency = numpy.ones(1)
     phasecentre = (180., -35.)
     jones_type = "T"
-    gain_table = GainTable.constructor(gain, time, interval, weight, residual, frequency, receptor_frame, phasecentre,
-                                       configuration, jones_type)
+    gain_table = GainTable.constructor(gain, time, interval, weight, residual, frequency, RECEPTOR_FRAME, phasecentre,
+                                       CONFIGURATION, jones_type)
     return gain_table
 
 
@@ -54,6 +57,35 @@ def test_constructor_coords(result_gain_table):
     assert result_coords["frequency"] == 1
     assert result_coords["receptor1"] == "I"
     assert result_coords["receptor2"] == "I"
+
+
+def test_constructor_datavars(result_gain_table):
+    """
+    Constructor correctly generates data variables
+    """
+
+    result_datavars = result_gain_table.data_vars
+    assert len(result_datavars) == 5
+    assert (result_datavars["gain"] == 1).all()
+    assert (result_datavars["weight"] == 1).all()
+    assert (result_datavars["residual"] == 1).all()
+    assert result_datavars["interval"] == 1
+    # TODO: figure out the time format used for datetime
+    # assert result_datavars["datetime"] == 1
+
+
+def test_constructor_attrs(result_gain_table):
+    """
+        Constructor correctly generates attributes.
+        """
+    result_attrs = result_gain_table.attrs
+
+    assert len(result_attrs) == 5
+    assert result_attrs["data_model"] == "GainTable"
+    assert result_attrs["receptor_frame"] == RECEPTOR_FRAME
+    assert result_attrs["phasecentre"] == (180.0, -35.0)
+    assert result_attrs["configuration"] == CONFIGURATION
+    assert result_attrs["jones_type"] == "T"
 
 
 def test_copy(result_gain_table):
