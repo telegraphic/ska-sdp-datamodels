@@ -8,7 +8,7 @@ import numpy
 
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
-    ReceptorFrame
+    ReceptorFrame,
 )
 
 from ska_sdp_datamodels.configuration import Configuration
@@ -26,8 +26,19 @@ DIAMETER = 13.5
 OFFSET = 0.0
 STATIONS = 0
 VP_TYPE = "MEERKAT"
-CONFIGURATION = Configuration.constructor(NAME, LOCATION, NAMES, XYZ, MOUNT, FRAME, RECEPTOR_FRAME, DIAMETER, OFFSET,
-                                          STATIONS, VP_TYPE)
+CONFIGURATION = Configuration.constructor(
+    NAME,
+    LOCATION,
+    NAMES,
+    XYZ,
+    MOUNT,
+    FRAME,
+    RECEPTOR_FRAME,
+    DIAMETER,
+    OFFSET,
+    STATIONS,
+    VP_TYPE,
+)
 
 
 @pytest.fixture(scope="module", name="result_flag_table")
@@ -44,8 +55,16 @@ def fixture_flag_table():
     integration_time = numpy.ones(1)
     polarisation_frame = PolarisationFrame("stokesI")
 
-    flag_table = FlagTable.constructor(baselines, flags, frequency, channel_bandwidth, CONFIGURATION, time,
-                                       integration_time, polarisation_frame)
+    flag_table = FlagTable.constructor(
+        baselines,
+        flags,
+        frequency,
+        channel_bandwidth,
+        CONFIGURATION,
+        time,
+        integration_time,
+        polarisation_frame,
+    )
     return flag_table
 
 
@@ -79,8 +98,8 @@ def test_constructor_datavars(result_flag_table):
 
 def test_constructor_attrs(result_flag_table):
     """
-        Constructor correctly generates attributes.
-        """
+    Constructor correctly generates attributes.
+    """
     result_attrs = result_flag_table.attrs
 
     assert len(result_attrs) == 3
@@ -91,8 +110,8 @@ def test_constructor_attrs(result_flag_table):
 
 def test_copy(result_flag_table):
     """
-        Copy accurately copies a flag table
-        """
+    Copy accurately copies a flag table
+    """
     copied_ft_deep = result_flag_table.copy(True, None, False)
     copied_ft_no_deep = result_flag_table.copy(False, None, False)
     # copied_ft_zero = result_flag_table.copy(True, None, True)

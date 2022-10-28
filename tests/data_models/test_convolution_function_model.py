@@ -8,9 +8,7 @@ import numpy
 from astropy.wcs import WCS
 from xarray import DataArray
 
-from ska_sdp_datamodels.science_data_model.polarisation_model import (
-    PolarisationFrame
-)
+from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
 
 from ska_sdp_datamodels.gridded_visibility.grid_vis_model import (
     ConvolutionFunction,
@@ -58,7 +56,9 @@ def fixture_convolution_function():
     data = numpy.ones((N_CHAN, N_POL, NW, OVERSAMPLING, OVERSAMPLING, SUPPORT, SUPPORT))
     polarisation_frame = PolarisationFrame("stokesIV")
     cf_wcs = WCS(header=WCS_HEADER, naxis=7)
-    convolution_function = ConvolutionFunction.constructor(data, cf_wcs, polarisation_frame)
+    convolution_function = ConvolutionFunction.constructor(
+        data, cf_wcs, polarisation_frame
+    )
     return convolution_function
 
 
@@ -115,7 +115,11 @@ def test_qa_convolution_function(result_convolution_function):
         "medianabs": 1.0,
         "median": 1.0,
     }
-    result_qa = result_convolution_function.convolutionfunction_acc.qa_convolution_function(context="Test")
+    result_qa = (
+        result_convolution_function.convolutionfunction_acc.qa_convolution_function(
+            context="Test"
+        )
+    )
     assert result_qa.context == "Test"
     for key, value in expected_data.items():
         assert result_qa.data[key] == value, f"{key} mismatch"
@@ -131,6 +135,14 @@ def test_property_accessor(result_convolution_function):
     assert accessor_object.nchan == N_CHAN
     assert accessor_object.npol == N_POL
     assert accessor_object.polarisation_frame == PolarisationFrame("stokesIV")
-    assert accessor_object.shape == (N_CHAN, N_POL, NW, OVERSAMPLING, OVERSAMPLING, SUPPORT, SUPPORT)
+    assert accessor_object.shape == (
+        N_CHAN,
+        N_POL,
+        NW,
+        OVERSAMPLING,
+        OVERSAMPLING,
+        SUPPORT,
+        SUPPORT,
+    )
     for key, value in WCS_HEADER.items():
         assert accessor_object.cf_wcs.to_header()[key] == value, f"{key} mismatch"

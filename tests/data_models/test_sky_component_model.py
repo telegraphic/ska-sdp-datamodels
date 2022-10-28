@@ -14,14 +14,15 @@ def fixture_sky_component():
     """
     Generate a simple image using __init__.
     """
-    direction = (180., -35.)
+    direction = (180.0, -35.0)
     frequency = numpy.ones(1)
     name = "test"
     flux = numpy.ones((1, 1))
     shape = "Point"
     polarisation_frame = PolarisationFrame("stokesI")
-    sky_component = SkyComponent(direction, frequency, name,
-                                 flux, shape, polarisation_frame, params=None)
+    sky_component = SkyComponent(
+        direction, frequency, name, flux, shape, polarisation_frame, params=None
+    )
     return sky_component
 
 

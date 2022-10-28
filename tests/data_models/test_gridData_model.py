@@ -8,13 +8,9 @@ import numpy
 from xarray import DataArray
 from astropy.wcs import WCS
 
-from ska_sdp_datamodels.science_data_model.polarisation_model import (
-    PolarisationFrame
-)
+from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
 
-from ska_sdp_datamodels.gridded_visibility.grid_vis_model import (
-    GridData
-)
+from ska_sdp_datamodels.gridded_visibility.grid_vis_model import GridData
 
 N_CHAN = 100
 N_POL = 2

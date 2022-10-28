@@ -11,9 +11,7 @@ from ska_sdp_datamodels.science_data_model.polarisation_model import (
     ReceptorFrame,
 )
 
-from ska_sdp_datamodels.image.image_model import (
-    Image
-)
+from ska_sdp_datamodels.image.image_model import Image
 
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.calibration.calibration_model import GainTable
@@ -63,18 +61,39 @@ DIAMETER = 13.5
 OFFSET = 0.0
 STATIONS = 0
 VP_TYPE = "MEERKAT"
-CONFIGUTRATION = Configuration.constructor(NAME, LOCATION, NAMES, XYZ, MOUNT, FRAME, RECEPTOR_FRAME, DIAMETER,
-                                           OFFSET, STATIONS, VP_TYPE)
+CONFIGUTRATION = Configuration.constructor(
+    NAME,
+    LOCATION,
+    NAMES,
+    XYZ,
+    MOUNT,
+    FRAME,
+    RECEPTOR_FRAME,
+    DIAMETER,
+    OFFSET,
+    STATIONS,
+    VP_TYPE,
+)
 GAIN = numpy.ones((1, 1, 1, 1, 1))
 TIME = numpy.ones(1)
 INTERVAL = numpy.ones(1)
 WEIGHT = numpy.ones((1, 1, 1, 1, 1))
 RESIDUAL = numpy.ones((1, 1, 1, 1))
 FREQUENCY = numpy.ones(1)
-PHASECENTRE = (180., -35.)
+PHASECENTRE = (180.0, -35.0)
 JONES_TYPE = "T"
-GAINTABLE = GainTable.constructor(GAIN, TIME, INTERVAL, WEIGHT, RESIDUAL, FREQUENCY, RECEPTOR_FRAME, PHASECENTRE,
-                                  CONFIGUTRATION, JONES_TYPE)
+GAINTABLE = GainTable.constructor(
+    GAIN,
+    TIME,
+    INTERVAL,
+    WEIGHT,
+    RESIDUAL,
+    FREQUENCY,
+    RECEPTOR_FRAME,
+    PHASECENTRE,
+    CONFIGUTRATION,
+    JONES_TYPE,
+)
 
 
 @pytest.fixture(scope="module", name="result_sky_model")

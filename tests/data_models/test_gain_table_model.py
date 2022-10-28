@@ -21,8 +21,20 @@ DIAMETER = 13.5
 OFFSET = 0.0
 STATIONS = 0
 VP_TYPE = "MEERKAT"
-CONFIGURATION = Configuration.constructor(NAME, LOCATION, NAMES, XYZ, MOUNT, FRAME, RECEPTOR_FRAME, DIAMETER,
-                                          OFFSET, STATIONS, VP_TYPE)
+CONFIGURATION = Configuration.constructor(
+    NAME,
+    LOCATION,
+    NAMES,
+    XYZ,
+    MOUNT,
+    FRAME,
+    RECEPTOR_FRAME,
+    DIAMETER,
+    OFFSET,
+    STATIONS,
+    VP_TYPE,
+)
+
 
 @pytest.fixture(scope="module", name="result_gain_table")
 def fixture_gain_table():
@@ -36,10 +48,20 @@ def fixture_gain_table():
     weight = numpy.ones((1, 1, 1, 1, 1))
     residual = numpy.ones((1, 1, 1, 1))
     frequency = numpy.ones(1)
-    phasecentre = (180., -35.)
+    phasecentre = (180.0, -35.0)
     jones_type = "T"
-    gain_table = GainTable.constructor(gain, time, interval, weight, residual, frequency, RECEPTOR_FRAME, phasecentre,
-                                       CONFIGURATION, jones_type)
+    gain_table = GainTable.constructor(
+        gain,
+        time,
+        interval,
+        weight,
+        residual,
+        frequency,
+        RECEPTOR_FRAME,
+        phasecentre,
+        CONFIGURATION,
+        jones_type,
+    )
     return gain_table
 
 
@@ -76,8 +98,8 @@ def test_constructor_datavars(result_gain_table):
 
 def test_constructor_attrs(result_gain_table):
     """
-        Constructor correctly generates attributes.
-        """
+    Constructor correctly generates attributes.
+    """
     result_attrs = result_gain_table.attrs
 
     assert len(result_attrs) == 5
@@ -90,8 +112,8 @@ def test_constructor_attrs(result_gain_table):
 
 def test_copy(result_gain_table):
     """
-        Copy accurately copies a flag table
-        """
+    Copy accurately copies a flag table
+    """
     copied_gt_deep = result_gain_table.copy(True, None, False)
     copied_gt_no_deep = result_gain_table.copy(False, None, False)
     # copied_gt_zero = result_gain_table.copy(True, None, True)
@@ -139,4 +161,3 @@ def test_qa_gain_table(result_gain_table):
     assert result_qa.context == "Test"
     for key, value in expected_data.items():
         assert result_qa.data[key] == value, f"{key} mismatch"
-

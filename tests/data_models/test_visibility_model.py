@@ -10,7 +10,7 @@ import pytest
 
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
-    ReceptorFrame
+    ReceptorFrame,
 )
 
 from ska_sdp_datamodels.configuration.config_model import Configuration
@@ -27,8 +27,19 @@ DIAMETER = 13.5
 OFFSET = 0.0
 STATIONS = 0
 VP_TYPE = "MEERKAT"
-CONFIGURATION = Configuration.constructor(NAME, LOCATION, NAMES, XYZ, MOUNT, FRAME, RECEPTOR_FRAME, DIAMETER, OFFSET,
-                                          STATIONS, VP_TYPE)
+CONFIGURATION = Configuration.constructor(
+    NAME,
+    LOCATION,
+    NAMES,
+    XYZ,
+    MOUNT,
+    FRAME,
+    RECEPTOR_FRAME,
+    DIAMETER,
+    OFFSET,
+    STATIONS,
+    VP_TYPE,
+)
 
 
 @pytest.fixture(scope="module", name="result_visibility")
@@ -39,7 +50,7 @@ def fixture_visibility():
 
     frequency = numpy.ones(1)
     channel_bandwidth = numpy.ones(1)
-    phasecentre = (180., -35.)
+    phasecentre = (180.0, -35.0)
     uvw = numpy.ones((1, 1, 1))
     time = numpy.ones(1)
     vis = numpy.ones((1, 1, 1, 1))
@@ -51,10 +62,23 @@ def fixture_visibility():
     polarisation_frame = PolarisationFrame("stokesI")
     source = "anonymous"
     low_precision = "float64"
-    visibility = Visibility.constructor(frequency, channel_bandwidth, phasecentre, CONFIGURATION, uvw, time, vis, weight,
-                                        integration_time, flags, baselines, polarisation_frame, source, meta,
-                                        low_precision
-                                        )
+    visibility = Visibility.constructor(
+        frequency,
+        channel_bandwidth,
+        phasecentre,
+        CONFIGURATION,
+        uvw,
+        time,
+        vis,
+        weight,
+        integration_time,
+        flags,
+        baselines,
+        polarisation_frame,
+        source,
+        meta,
+        low_precision,
+    )
     return visibility
 
 
@@ -76,8 +100,8 @@ def test_constructor_coords(result_visibility):
 
 def test_constructor_data_vars(result_visibility):
     """
-        Constructor generates correctly generates data variables
-        """
+    Constructor generates correctly generates data variables
+    """
 
     result_data_vars = result_visibility.data_vars
 
@@ -93,8 +117,8 @@ def test_constructor_data_vars(result_visibility):
 
 def test_constructor_attrs(result_visibility):
     """
-        Constructor correctly generates attributes
-        """
+    Constructor correctly generates attributes
+    """
 
     result_attrs = result_visibility.attrs
 
@@ -109,8 +133,8 @@ def test_constructor_attrs(result_visibility):
 
 def test_copy(result_visibility):
     """
-        Copy accurately copies a visibility
-        """
+    Copy accurately copies a visibility
+    """
     copied_vis_deep = result_visibility.copy(True, None, False)
     copied_vis_no_deep = result_visibility.copy(False, None, False)
     # copied_ft_zero = result_flag_table.copy(True, None, True)

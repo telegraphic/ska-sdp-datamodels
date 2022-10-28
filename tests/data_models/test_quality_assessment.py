@@ -15,7 +15,9 @@ def fixture_quality_assessment():
     """
     Generate a Quality Assessment object using __init__
     """
-    quality_assessment = QualityAssessment("Test_origin", {"test_data_name": "test_data"}, "Test_context")
+    quality_assessment = QualityAssessment(
+        "Test_origin", {"test_data_name": "test_data"}, "Test_context"
+    )
     return quality_assessment
 
 

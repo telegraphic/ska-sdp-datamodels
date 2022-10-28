@@ -10,9 +10,7 @@ from ska_sdp_datamodels.science_data_model.polarisation_model import (
     ReceptorFrame,
 )
 
-from ska_sdp_datamodels.configuration.config_model import (
-    Configuration
-)
+from ska_sdp_datamodels.configuration.config_model import Configuration
 
 
 @pytest.fixture(scope="module", name="result_configuration")
@@ -31,9 +29,19 @@ def fixture_configuration():
     offset = 0.0
     stations = 0
     vp_type = "MEERKAT"
-    configuration = Configuration.constructor(name, location,
-                                              names, xyz, mount, frame, receptor_frame, diameter,
-                                              offset, stations, vp_type)
+    configuration = Configuration.constructor(
+        name,
+        location,
+        names,
+        xyz,
+        mount,
+        frame,
+        receptor_frame,
+        diameter,
+        offset,
+        stations,
+        vp_type,
+    )
     return configuration
 
 
@@ -92,7 +100,11 @@ def test_constructor_attrs(result_configuration):
     assert len(result_attrs) == 5
     assert result_attrs["data_model"] == "Configuration"
     assert result_attrs["name"] == "MID"
-    assert result_attrs["location"] == (5109237.71471275, 2006795.66194638, -3239109.1838011)
+    assert result_attrs["location"] == (
+        5109237.71471275,
+        2006795.66194638,
+        -3239109.1838011,
+    )
     assert result_attrs["receptor_frame"] == ReceptorFrame("linear")
     assert result_attrs["frame"] is None
 
