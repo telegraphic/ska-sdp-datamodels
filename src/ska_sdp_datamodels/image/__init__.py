@@ -1,5 +1,6 @@
 # pylint: disable=missing-module-docstring
 
+from .image_create import create_image
 from .image_io_and_convert import (
     convert_hdf_to_image,
     convert_image_to_hdf,
@@ -7,7 +8,6 @@ from .image_io_and_convert import (
     import_image_from_hdf5,
 )
 from .image_model import Image
-from .image_create import create_image
 
 __all__ = [
     "Image",
