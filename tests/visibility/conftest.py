@@ -9,7 +9,7 @@ from astropy.coordinates import SkyCoord
 
 from ska_sdp_datamodels.configuration import create_named_configuration
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
-from ska_sdp_datamodels.visibility import create_visibility
+from ska_sdp_datamodels.visibility import FlagTable, create_visibility
 
 
 @pytest.fixture(scope="package", name="visibility")
@@ -43,3 +43,19 @@ def visibility_fixture():
         weight=1.0,
     )
     return vis
+
+
+@pytest.fixture(scope="package", name="flag_table")
+def flag_table_fixture(visibility):
+    """
+    FlagTable fixture
+    """
+    return FlagTable.constructor(
+        flags=visibility.flags,
+        frequency=visibility.frequency,
+        channel_bandwidth=visibility.channel_bandwidth,
+        configuration=visibility.configuration,
+        time=visibility.time,
+        integration_time=visibility.integration_time,
+        polarisation_frame=visibility.visibility_acc.polarisation_frame,
+    )

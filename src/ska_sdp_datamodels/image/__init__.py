@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring
 
-from .image_functions import (
+from .image_io_and_convert import (
     convert_hdf_to_image,
     convert_image_to_hdf,
     export_image_to_hdf5,
