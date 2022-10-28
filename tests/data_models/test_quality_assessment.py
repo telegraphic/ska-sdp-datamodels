@@ -6,7 +6,6 @@ Unit tests for QualityAssessment
 """
 
 import pytest
-
 from ska_sdp_datamodels.science_data_model.qa_model import QualityAssessment
 
 

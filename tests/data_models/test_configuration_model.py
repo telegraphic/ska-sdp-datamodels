@@ -4,13 +4,9 @@
 # make python lint
 
 import pytest
-from xarray import DataArray
-
-from ska_sdp_datamodels.science_data_model.polarisation_model import (
-    ReceptorFrame,
-)
-
 from ska_sdp_datamodels.configuration.config_model import Configuration
+from ska_sdp_datamodels.science_data_model.polarisation_model import ReceptorFrame
+from xarray import DataArray
 
 
 @pytest.fixture(scope="module", name="result_configuration")

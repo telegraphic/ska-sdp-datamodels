@@ -2,19 +2,16 @@
 """
 # make python-format
 # make python lint
-import pytest
 import numpy
+import pytest
 from astropy.wcs import WCS
-
+from ska_sdp_datamodels.calibration.calibration_model import GainTable
+from ska_sdp_datamodels.configuration.config_model import Configuration
+from ska_sdp_datamodels.image.image_model import Image
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
     ReceptorFrame,
 )
-
-from ska_sdp_datamodels.image.image_model import Image
-
-from ska_sdp_datamodels.configuration.config_model import Configuration
-from ska_sdp_datamodels.calibration.calibration_model import GainTable
 from ska_sdp_datamodels.sky_model.sky_model import SkyModel
 
 N_CHAN = 100

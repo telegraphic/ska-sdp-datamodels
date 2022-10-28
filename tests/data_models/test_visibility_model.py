@@ -7,13 +7,11 @@ Unit tests for Visibility model
 
 import numpy
 import pytest
-
+from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
     ReceptorFrame,
 )
-
-from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.visibility.vis_model import Visibility
 
 NAME = "MID"

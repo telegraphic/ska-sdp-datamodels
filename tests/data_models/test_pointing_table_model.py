@@ -3,16 +3,11 @@
 # make python-format
 # make python lint
 
-import pytest
 import numpy
-
-
-from ska_sdp_datamodels.science_data_model.polarisation_model import (
-    ReceptorFrame,
-)
-
-from ska_sdp_datamodels.configuration.config_model import Configuration
+import pytest
 from ska_sdp_datamodels.calibration.calibration_model import PointingTable
+from ska_sdp_datamodels.configuration.config_model import Configuration
+from ska_sdp_datamodels.science_data_model.polarisation_model import ReceptorFrame
 
 NAME = "MID"
 LOCATION = (5109237.71471275, 2006795.66194638, -3239109.1838011)

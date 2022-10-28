@@ -3,14 +3,12 @@
 # make python-format
 # make python lint
 
-import pytest
 import numpy
-from xarray import DataArray
+import pytest
 from astropy.wcs import WCS
-
-from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
-
 from ska_sdp_datamodels.gridded_visibility.grid_vis_model import GridData
+from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
+from xarray import DataArray
 
 N_CHAN = 100
 N_POL = 2

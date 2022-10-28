@@ -2,9 +2,8 @@
 """
 # make python-format
 # make python lint
-import pytest
 import numpy
-
+import pytest
 from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
 from ska_sdp_datamodels.sky_model.sky_model import SkyComponent
 
