@@ -35,7 +35,7 @@ WCS_HEADER = {
     "CRPIX5": 3,
     "CRPIX6": 1,
     "CRPIX7": 1,
-    # TODO: find why these values seem to differ by 0.05 with every test (i.e. never match)
+    # TODO: find why CRVAL change by 0.05 with every test
     # "CRVAL1": 40.1,  # UU in deg
     # "CRVAL2": 1.0,  # VV in deg
     # "CRVAL5": 0.0,  # WW in deg
@@ -52,7 +52,7 @@ WCS_HEADER = {
 @pytest.fixture(scope="module", name="result_convolution_function")
 def fixture_convolution_function():
     """
-    Generate a  convolution function object using ConvolutionFunction.constructor.
+    Generate convolution function object with ConvolutionFunction.constructor
     """
     data = numpy.ones(
         (N_CHAN, N_POL, NW, OVERSAMPLING, OVERSAMPLING, SUPPORT, SUPPORT)
@@ -118,7 +118,8 @@ def test_qa_convolution_function(result_convolution_function):
     are derived correctly.
     """
     expected_data = {
-        "shape": f"({N_CHAN}, {N_POL}, {NW}, {OVERSAMPLING}, {OVERSAMPLING}, {SUPPORT}, {SUPPORT})",
+        "shape": f"({N_CHAN}, {N_POL}, {NW}, {OVERSAMPLING}, {OVERSAMPLING}, "
+        f"{SUPPORT}, {SUPPORT})",
         "max": 1.0,
         "min": 1.0,
         "rms": 0.0,
@@ -126,9 +127,8 @@ def test_qa_convolution_function(result_convolution_function):
         "medianabs": 1.0,
         "median": 1.0,
     }
-    result_qa = result_convolution_function.convolutionfunction_acc.qa_convolution_function(
-        context="Test"
-    )
+    accessor_object = result_convolution_function.convolutionfunction_acc
+    result_qa = accessor_object.qa_convolution_function(context="Test")
     assert result_qa.context == "Test"
     for key, value in expected_data.items():
         assert result_qa.data[key] == value, f"{key} mismatch"

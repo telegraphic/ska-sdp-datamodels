@@ -113,6 +113,6 @@ def test__str__(result_sky_model):
     s = "SkyModel: fixed: True\n"
     s += f"{str(components)}\n"
     s += f"{str(IMAGE)}\n"
-    s += f"Test_mask\n"
+    s += "Test_mask\n"
     s += f"{str(GAINTABLE)}"
     assert str(result_sky_model) == s

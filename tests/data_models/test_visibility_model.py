@@ -9,7 +9,6 @@ import numpy
 import pytest
 from astropy import constants as const
 from astropy.time import Time
-from numpy.random import default_rng
 
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
@@ -192,7 +191,7 @@ def test_select_uv_range(result_visibility):
 
 def test_select_r_range_none(result_visibility):
     """
-    Check there are no changes to set parameters if rmin and rmax are set to None
+    Check no changes to set parameters if rmin and rmax are set to None
     """
     result_range = result_visibility.visibility_acc.select_r_range(None, None)
     expected_sub_bvis = {

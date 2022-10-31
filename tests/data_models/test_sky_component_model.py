@@ -47,11 +47,11 @@ def test_npol(result_sky_component):
 def test__str__(result_sky_component):
     params = {}
     s = "SkyComponent:\n"
-    s += f"\tName: test\n"
-    s += f"\tFlux: [[1.]]\n"
-    s += f"\tFrequency: [1.]\n"
-    s += f"\tDirection: (180.0, -35.0)\n"
-    s += f"\tShape: Point\n"
+    s += "\tName: test\n"
+    s += "\tFlux: [[1.]]\n"
+    s += "\tFrequency: [1.]\n"
+    s += "\tDirection: (180.0, -35.0)\n"
+    s += "\tShape: Point\n"
     s += f"\tParams: {params}\n"
-    s += f"\tPolarisation frame: stokesI\n"
+    s += "\tPolarisation frame: stokesI\n"
     assert str(result_sky_component) == s

@@ -23,8 +23,8 @@ def fixture_quality_assessment():
 
 def test_quality_assessment_str(result_quality_assessment):
     s = "Quality assessment:\n"
-    s += f"\tOrigin: Test_origin\n"
-    s += f"\tContext: Test_context\n"
+    s += "\tOrigin: Test_origin\n"
+    s += "\tContext: Test_context\n"
     s += "\tData:\n"
-    s += f"\t\ttest_data_name: test_data\n"
+    s += "\t\ttest_data_name: test_data\n"
     assert str(result_quality_assessment) == s

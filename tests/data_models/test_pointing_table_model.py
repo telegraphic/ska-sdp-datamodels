@@ -148,7 +148,7 @@ def test_property_accessor(result_pointing_table):
     accessor_object = result_pointing_table.pointingtable_acc
     assert accessor_object.nants == 1
     assert accessor_object.nchan == 1
-    # TODO: current setup of nrec in calibration_model.py does give access to relevant info
+    # TODO: nrec does not give access to relevant info
     # assert accessor_object.nrec == 1
 
 
