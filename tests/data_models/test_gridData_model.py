@@ -119,4 +119,6 @@ def test_property_accessor(result_grid_data):
     assert accessor_object.polarisation_frame == PolarisationFrame("stokesIV")
     assert accessor_object.shape == (N_CHAN, N_POL, NV, NU)
     for key, value in WCS_HEADER.items():
-        assert accessor_object.griddata_wcs.to_header()[key] == value, f"{key} mismatch"
+        assert (
+            accessor_object.griddata_wcs.to_header()[key] == value
+        ), f"{key} mismatch"

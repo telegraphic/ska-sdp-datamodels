@@ -91,7 +91,13 @@ def test_constructor_coords(result_visibility):
     Constructor correctly generates coordinates
     """
 
-    expected_coords_keys = ["time", "baselines", "frequency", "polarisation", "spatial"]
+    expected_coords_keys = [
+        "time",
+        "baselines",
+        "frequency",
+        "polarisation",
+        "spatial",
+    ]
     result_coords = result_visibility.coords
 
     assert sorted(result_coords.keys()) == sorted(expected_coords_keys)
@@ -111,7 +117,10 @@ def test_constructor_data_vars(result_visibility):
 
     assert len(result_data_vars) == 7  # 7 vars in data_vars
     assert result_data_vars["integration_time"] == 1
-    assert result_data_vars["datetime"] == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
+    assert (
+        result_data_vars["datetime"]
+        == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
+    )
     assert (result_data_vars["vis"] == 1).all()
     assert (result_data_vars["weight"] == 1).all()
     assert (result_data_vars["flags"] == 0).all()
@@ -159,7 +168,7 @@ def test_property_accessor(result_visibility):
     assert accessor_object.npol == 1
     assert accessor_object.polarisation_frame == PolarisationFrame("stokesI")
     assert accessor_object.nbaselines == 1
-    assert (accessor_object.uvw_lambda == 1/const.c.value).all()
+    assert (accessor_object.uvw_lambda == 1 / const.c.value).all()
     assert accessor_object.u == 1
     assert accessor_object.v == 1
     assert accessor_object.w == 1
@@ -171,7 +180,7 @@ def test_property_accessor(result_visibility):
 def test_select_uv_range(result_visibility):
     """
     Check that flags are set to 1 if out of the given range
-        """
+    """
 
     result_flags = result_visibility.data_vars["flags"]
     uvmin = 2
@@ -194,6 +203,7 @@ def test_select_r_range_none(result_visibility):
     for key, value in expected_sub_bvis.items():
         assert result_range[key] == value, f"{key} mismatch"
 
+
 # TODO: add tests for select_r_range "with" a range
 
 
@@ -201,16 +211,20 @@ def test_group_by_time(result_visibility):
     """
     Check that group_by("time") retunrs the correct array
     """
-    times = numpy.array([result[0] for result in result_visibility.groupby("time")])
+    times = numpy.array(
+        [result[0] for result in result_visibility.groupby("time")]
+    )
     assert times.all() == result_visibility.time.all()
+
+
 # TODO: add more tests for groupby() and groupbybins() functions
 
 
 def test_performance_visibility(result_visibility):
     """
-        Check info about visibility object is correct
+    Check info about visibility object is correct
 
-        """
+    """
     expected_bv_info = {  # except "size"
         "number_times": 1,
         "number_baselines": 1,
@@ -229,9 +243,9 @@ def test_performance_visibility(result_visibility):
 
 def test_qa_visibility(result_visibility):
     """
-        QualityAssessment of object data values
-        are derived correctly.
-        """
+    QualityAssessment of object data values
+    are derived correctly.
+    """
     expected_data = {
         "maxabs": 1,
         "minabs": 1,

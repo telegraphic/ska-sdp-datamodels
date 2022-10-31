@@ -75,7 +75,13 @@ def test_constructor_coords(result_gain_table):
     Constructor correctly generates coordinates
     """
 
-    expected_coords_keys = ["time", "antenna", "frequency", "receptor1", "receptor2"]
+    expected_coords_keys = [
+        "time",
+        "antenna",
+        "frequency",
+        "receptor1",
+        "receptor2",
+    ]
     result_coords = result_gain_table.coords
 
     assert sorted(result_coords.keys()) == sorted(expected_coords_keys)
@@ -97,7 +103,10 @@ def test_constructor_datavars(result_gain_table):
     assert (result_data_vars["weight"] == 1).all()
     assert (result_data_vars["residual"] == 1).all()
     assert result_data_vars["interval"] == 1
-    assert result_data_vars["datetime"] == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
+    assert (
+        result_data_vars["datetime"]
+        == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
+    )
 
 
 def test_constructor_attrs(result_gain_table):

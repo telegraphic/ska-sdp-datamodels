@@ -167,7 +167,9 @@ class GridDataAccessor(XarrayAccessorMixin):
             "median": numpy.median(grid_data),
         }
 
-        qa = QualityAssessment(origin="qa_grid_data", data=data, context=context)
+        qa = QualityAssessment(
+            origin="qa_grid_data", data=data, context=context
+        )
         return qa
 
 
@@ -385,5 +387,7 @@ class ConvolutionFunctionAccessor(XarrayAccessorMixin):
             "median": numpy.median(conv_func_data),
         }
 
-        qa = QualityAssessment(origin="qa_convolution_function", data=data, context=context)
+        qa = QualityAssessment(
+            origin="qa_convolution_function", data=data, context=context
+        )
         return qa

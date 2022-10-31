@@ -23,7 +23,13 @@ def fixture_sky_component():
     shape = "Point"
     polarisation_frame = PolarisationFrame("stokesI")
     sky_component = SkyComponent(
-        direction, frequency, name, flux, shape, polarisation_frame, params=None
+        direction,
+        frequency,
+        name,
+        flux,
+        shape,
+        polarisation_frame,
+        params=None,
     )
     return sky_component
 

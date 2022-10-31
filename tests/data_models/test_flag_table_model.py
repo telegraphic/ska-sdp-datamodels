@@ -92,7 +92,10 @@ def test_constructor_data_vars(result_flag_table):
     assert (result_data_vars["flags"] == 1).all()
     assert result_data_vars["integration_time"] == 1
     assert result_data_vars["channel_bandwidth"] == 1
-    assert result_data_vars["datetime"] == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
+    assert (
+        result_data_vars["datetime"]
+        == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
+    )
 
 
 def test_constructor_attrs(result_flag_table):

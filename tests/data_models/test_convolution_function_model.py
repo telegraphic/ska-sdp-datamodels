@@ -54,7 +54,9 @@ def fixture_convolution_function():
     """
     Generate a  convolution function object using ConvolutionFunction.constructor.
     """
-    data = numpy.ones((N_CHAN, N_POL, NW, OVERSAMPLING, OVERSAMPLING, SUPPORT, SUPPORT))
+    data = numpy.ones(
+        (N_CHAN, N_POL, NW, OVERSAMPLING, OVERSAMPLING, SUPPORT, SUPPORT)
+    )
     polarisation_frame = PolarisationFrame("stokesIV")
     cf_wcs = WCS(header=WCS_HEADER, naxis=7)
     convolution_function = ConvolutionFunction.constructor(
@@ -68,7 +70,15 @@ def test_constructor_coords(result_convolution_function):
     Constructor correctly generates coordinates
     """
 
-    expected_coords_keys = ["frequency", "polarisation", "dv", "du", "w", "v", "u"]
+    expected_coords_keys = [
+        "frequency",
+        "polarisation",
+        "dv",
+        "du",
+        "w",
+        "v",
+        "u",
+    ]
     result_coords = result_convolution_function.coords
 
     assert sorted(result_coords.keys()) == sorted(expected_coords_keys)
@@ -116,10 +126,8 @@ def test_qa_convolution_function(result_convolution_function):
         "medianabs": 1.0,
         "median": 1.0,
     }
-    result_qa = (
-        result_convolution_function.convolutionfunction_acc.qa_convolution_function(
-            context="Test"
-        )
+    result_qa = result_convolution_function.convolutionfunction_acc.qa_convolution_function(
+        context="Test"
     )
     assert result_qa.context == "Test"
     for key, value in expected_data.items():
@@ -146,4 +154,6 @@ def test_property_accessor(result_convolution_function):
         SUPPORT,
     )
     for key, value in WCS_HEADER.items():
-        assert accessor_object.cf_wcs.to_header()[key] == value, f"{key} mismatch"
+        assert (
+            accessor_object.cf_wcs.to_header()[key] == value
+        ), f"{key} mismatch"
