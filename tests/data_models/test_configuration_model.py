@@ -4,15 +4,18 @@
 # make python lint
 
 import pytest
-from ska_sdp_datamodels.configuration.config_model import Configuration
-from ska_sdp_datamodels.science_data_model.polarisation_model import ReceptorFrame
 from xarray import DataArray
+
+from ska_sdp_datamodels.configuration.config_model import Configuration
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
+    ReceptorFrame,
+)
 
 
 @pytest.fixture(scope="module", name="result_configuration")
 def fixture_configuration():
     """
-    Generate a simple configuration using Configuration.constructor
+    Generate a configuration object using Configuration.constructor
     """
     name = "MID"
     location = (5109237.71471275, 2006795.66194638, -3239109.1838011)

@@ -5,9 +5,15 @@
 
 import numpy
 import pytest
+from astropy.time import Time
+
 from ska_sdp_datamodels.calibration.calibration_model import GainTable
 from ska_sdp_datamodels.configuration.config_model import Configuration
-from ska_sdp_datamodels.science_data_model.polarisation_model import ReceptorFrame
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
+    ReceptorFrame,
+)
+
+#  Create a configuration object
 
 NAME = "MID"
 LOCATION = (5109237.71471275, 2006795.66194638, -3239109.1838011)
@@ -85,14 +91,13 @@ def test_constructor_datavars(result_gain_table):
     Constructor correctly generates data variables
     """
 
-    result_datavars = result_gain_table.data_vars
-    assert len(result_datavars) == 5
-    assert (result_datavars["gain"] == 1).all()
-    assert (result_datavars["weight"] == 1).all()
-    assert (result_datavars["residual"] == 1).all()
-    assert result_datavars["interval"] == 1
-    # TODO: figure out the time format used for datetime
-    # assert result_datavars["datetime"] == 1
+    result_data_vars = result_gain_table.data_vars
+    assert len(result_data_vars) == 5
+    assert (result_data_vars["gain"] == 1).all()
+    assert (result_data_vars["weight"] == 1).all()
+    assert (result_data_vars["residual"] == 1).all()
+    assert result_data_vars["interval"] == 1
+    assert result_data_vars["datetime"] == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
 
 
 def test_constructor_attrs(result_gain_table):
@@ -111,16 +116,14 @@ def test_constructor_attrs(result_gain_table):
 
 def test_copy(result_gain_table):
     """
-    Copy accurately copies a flag table
+    Test deep-copying Visibility
     """
-    copied_gt_deep = result_gain_table.copy(True, None, False)
-    copied_gt_no_deep = result_gain_table.copy(False, None, False)
-    # copied_gt_zero = result_gain_table.copy(True, None, True)
-
-    assert copied_gt_deep == result_gain_table
-    assert copied_gt_no_deep == result_gain_table
-    # TODO: test when Zero is True (needed data != None)
-    # assert copied_gt_zero == result_gain_table
+    new_flag = result_gain_table.copy(deep=True)
+    result_gain_table["gain"].data[...] = 0
+    new_flag["gain"].data[...] = 1
+    assert result_gain_table["gain"].data[0, 0].real.all() == 0
+    result_gain_table["gain"].data[...] = 1  # reset for following tests
+    assert new_flag["gain"].data[0, 0].real.all() == 1
 
 
 def test_property_accessor(result_gain_table):

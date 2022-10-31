@@ -6,9 +6,12 @@
 import numpy
 import pytest
 from astropy.wcs import WCS
-from ska_sdp_datamodels.gridded_visibility.grid_vis_model import GridData
-from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
 from xarray import DataArray
+
+from ska_sdp_datamodels.gridded_visibility.grid_vis_model import GridData
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
+    PolarisationFrame,
+)
 
 N_CHAN = 100
 N_POL = 2
@@ -31,7 +34,7 @@ WCS_HEADER = {
 @pytest.fixture(scope="module", name="result_grid_data")
 def fixture_griddata():
     """
-    Generate a simple image using GridData.constructor.
+    Generate a simple grid date object using GridData.constructor.
     """
     data = numpy.ones((N_CHAN, N_POL, NV, NU))
     pol_frame = PolarisationFrame("stokesIV")

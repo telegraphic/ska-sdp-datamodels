@@ -5,6 +5,7 @@
 import numpy
 import pytest
 from astropy.wcs import WCS
+
 from ska_sdp_datamodels.calibration.calibration_model import GainTable
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.image.image_model import Image
@@ -40,13 +41,16 @@ WCS_HEADER = {
     "CDELT4": 10.0,  # delta between frequency values
 }
 
+#  Create an Image object
+
 DATA = numpy.ones((N_CHAN, N_POL, Y, X))
 POL_FRAME = PolarisationFrame("stokesI")
 WCS = WCS(header=WCS_HEADER, naxis=4)
 IMAGE = Image.constructor(DATA, POL_FRAME, WCS, clean_beam=CLEAN_BEAM)
 COMPONENTS = None
 
-# Create a GainTable object for SkyModel
+# Create a Configuration and a GainTable object
+
 NAME = "MID"
 LOCATION = (5109237.71471275, 2006795.66194638, -3239109.1838011)
 NAMES = "M000"
@@ -96,7 +100,7 @@ GAINTABLE = GainTable.constructor(
 @pytest.fixture(scope="module", name="result_sky_model")
 def fixture_sky_model():
     """
-    Generate a simple image using __init__.
+    Generate a sky model object using __init__.
     """
     mask = "Test_mask"
     fixed = True

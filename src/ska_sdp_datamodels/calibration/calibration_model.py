@@ -289,7 +289,7 @@ class PointingTable(xarray.Dataset):
             "antenna": antennas,
             "frequency": frequency,
             "receptor": receptor_frame.names,
-            "angle": [{"az", "el"}],  # {} are a hack to fix re-indexing issues
+            "angle": ["az", "el"],
         }
 
         datavars = {}

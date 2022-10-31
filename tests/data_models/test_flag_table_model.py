@@ -5,6 +5,8 @@
 
 import numpy
 import pytest
+from astropy.time import Time
+
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
@@ -42,7 +44,7 @@ CONFIGURATION = Configuration.constructor(
 @pytest.fixture(scope="module", name="result_flag_table")
 def fixture_flag_table():
     """
-    Generate a simple image using FlagTable.constructor.
+    Generate a simple flag table using FlagTable.constructor.
     """
 
     baselines = numpy.ones(1)
@@ -80,18 +82,17 @@ def test_constructor_coords(result_flag_table):
     assert result_coords["polarisation"] == "I"
 
 
-def test_constructor_datavars(result_flag_table):
+def test_constructor_data_vars(result_flag_table):
     """
     Constructor correctly generates data variables
     """
 
-    result_datavars = result_flag_table.data_vars
-    assert len(result_datavars) == 4
-    assert (result_datavars["flags"] == 1).all()
-    assert result_datavars["integration_time"] == 1
-    assert result_datavars["channel_bandwidth"] == 1
-    # TODO: figure out the time format used for datetime
-    # assert result_datavars["datetime"] == 1
+    result_data_vars = result_flag_table.data_vars
+    assert len(result_data_vars) == 4
+    assert (result_data_vars["flags"] == 1).all()
+    assert result_data_vars["integration_time"] == 1
+    assert result_data_vars["channel_bandwidth"] == 1
+    assert result_data_vars["datetime"] == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
 
 
 def test_constructor_attrs(result_flag_table):
@@ -108,16 +109,14 @@ def test_constructor_attrs(result_flag_table):
 
 def test_copy(result_flag_table):
     """
-    Copy accurately copies a flag table
+    Test deep-copying Visibility
     """
-    copied_ft_deep = result_flag_table.copy(True, None, False)
-    copied_ft_no_deep = result_flag_table.copy(False, None, False)
-    # copied_ft_zero = result_flag_table.copy(True, None, True)
-
-    assert copied_ft_deep == result_flag_table
-    assert copied_ft_no_deep == result_flag_table
-    # TODO: test when Zero is True (needed data != None)
-    # assert copied_ft_zero == result_flag_table
+    new_flag = result_flag_table.copy(deep=True)
+    result_flag_table["flags"].data[...] = 0
+    new_flag["flags"].data[...] = 1
+    assert result_flag_table["flags"].data[0, 0].real.all() == 0
+    result_flag_table["flags"].data[...] = 1  # reset for following tests
+    assert new_flag["flags"].data[0, 0].real.all() == 1
 
 
 def test_property_accessor(result_flag_table):

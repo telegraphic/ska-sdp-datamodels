@@ -4,14 +4,17 @@
 # make python lint
 import numpy
 import pytest
-from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
+
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
+    PolarisationFrame,
+)
 from ska_sdp_datamodels.sky_model.sky_model import SkyComponent
 
 
 @pytest.fixture(scope="module", name="result_sky_component")
 def fixture_sky_component():
     """
-    Generate a simple image using __init__.
+    Generate a simple sky component object using __init__.
     """
     direction = (180.0, -35.0)
     frequency = numpy.ones(1)
