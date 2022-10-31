@@ -60,7 +60,7 @@ def fixture_visibility():
     vis = numpy.array([[[[1]]]])
     weight = None
     integration_time = numpy.array([1])
-    flags = numpy.array([[[[1]]]])
+    flags = numpy.array([[[[0]]]])
     baselines = numpy.array([1])
     meta = None
     polarisation_frame = PolarisationFrame("stokesI")
@@ -114,7 +114,7 @@ def test_constructor_data_vars(result_visibility):
     assert result_data_vars["datetime"] == Time(1 / 86400.0, format="mjd", scale="utc").datetime64
     assert (result_data_vars["vis"] == 1).all()
     assert (result_data_vars["weight"] == 1).all()
-    assert (result_data_vars["flags"] == 1).all()
+    assert (result_data_vars["flags"] == 0).all()
     assert (result_data_vars["uvw"] == 1).all()
     assert result_data_vars["channel_bandwidth"] == 1
 
@@ -163,22 +163,22 @@ def test_property_accessor(result_visibility):
     assert accessor_object.u == 1
     assert accessor_object.v == 1
     assert accessor_object.w == 1
-    assert accessor_object.flagged_vis == 0
-    assert accessor_object.flagged_weight == 0
+    assert accessor_object.flagged_vis == 1
+    assert accessor_object.flagged_weight == 1
     assert accessor_object.nvis == 1
 
 
-#  TODO: fix indexing issue for self.uvw_lambda in vis_model.VisibilityAccessor.select_uv_range():
-#  "IndexError: index 1 is out of bounds for axis 3 with size 1"
-# def test_select_uv_range(result_visibility):
-#     """
-#     Check that flags are set to 1 if out of the given range
-#         """
-#     result_visibility.visibility_acc.select_uv_range(0, 100)
-#     result_flags = result_visibility.data_vars["flags"]
-#
-#     assert (result_flags <= 2).all()
-#     assert (result_flags >= 0).all()
+def test_select_uv_range(result_visibility):
+    """
+    Check that flags are set to 1 if out of the given range
+        """
+
+    result_flags = result_visibility.data_vars["flags"]
+    uvmin = 2
+    uvmax = 100
+    assert result_flags.sum() == 0
+    result_visibility.visibility_acc.select_uv_range(uvmin, uvmax)
+    assert result_flags.sum() == 1
 
 
 def test_select_r_range_none(result_visibility):
@@ -188,21 +188,22 @@ def test_select_r_range_none(result_visibility):
     result_range = result_visibility.visibility_acc.select_r_range(None, None)
     expected_sub_bvis = {
         "baselines": 1,
+        "frequency": 1,
+        "integration_time": 1,
     }
     for key, value in expected_sub_bvis.items():
         assert result_range[key] == value, f"{key} mismatch"
 
+# TODO: add tests for select_r_range "with" a range
 
-# def test_select_r_range_with_range(result_visibility):
-#     """
-#         Check changes are correct with given rmin and rmax
-#         """
-#     result_range = result_visibility.visibility_acc.select_r_range(0, 3)
-#     expected_sub_bvis = {
-#         "baselines": 2,
-#     }
-#     for key, value in expected_sub_bvis.items():
-#         assert result_range[key] == value, f"{key} mismatch"
+
+def test_group_by_time(result_visibility):
+    """
+    Check that group_by("time") retunrs the correct array
+    """
+    times = numpy.array([result[0] for result in result_visibility.groupby("time")])
+    assert times.all() == result_visibility.time.all()
+# TODO: add more tests for groupby() and groupbybins() functions
 
 
 def test_performance_visibility(result_visibility):

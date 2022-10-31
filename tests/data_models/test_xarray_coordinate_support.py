@@ -11,9 +11,11 @@ from astropy.coordinates import SkyCoord
 
 from src.data_models.polarisation_data_models import PolarisationFrame
 from src.data_models.xarray_coordinate_support import image_wcs
-from src.processing_components import create_image, create_griddata_from_image
+from src.processing_components import create_griddata_from_image, create_image
 from src.processing_components.simulation import create_named_configuration
-from src.processing_components.skycomponent.operations import create_skycomponent
+from src.processing_components.skycomponent.operations import (
+    create_skycomponent,
+)
 from src.processing_components.visibility.base import create_visibility
 
 log = logging.getLogger("rascil-logger")
