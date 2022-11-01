@@ -132,12 +132,9 @@ def test_copy(result_pointing_table):
     """
     copied_pt_deep = result_pointing_table.copy(True, None, False)
     copied_pt_no_deep = result_pointing_table.copy(False, None, False)
-    # copied_pt_zero = result_gain_table.copy(True, None, True)
 
     assert copied_pt_deep == result_pointing_table
     assert copied_pt_no_deep == result_pointing_table
-    # TODO: test when Zero is True (needed data != None)
-    # assert copied_gt_zero == result_pointing_table
 
 
 def test_property_accessor(result_pointing_table):
@@ -148,8 +145,7 @@ def test_property_accessor(result_pointing_table):
     accessor_object = result_pointing_table.pointingtable_acc
     assert accessor_object.nants == 1
     assert accessor_object.nchan == 1
-    # TODO: nrec does not give access to relevant info
-    # assert accessor_object.nrec == 1
+    # assert accessor_object.nrec == 1  # get KeyError for receptor_frame
 
 
 def test_qa_pointing_table(result_pointing_table):

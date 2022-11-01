@@ -34,24 +34,33 @@ def fixture_sky_component():
     return sky_component
 
 
-def test_chan(result_sky_component):
+def test_nchan(result_sky_component):
+    """
+    Check nchans retunrs correct data
+    """
     nchans = result_sky_component.nchan
     assert nchans == 1
 
 
 def test_npol(result_sky_component):
+    """
+    Check npols retunrs correct data
+    """
     npols = result_sky_component.npol
     assert npols == 1
 
 
 def test__str__(result_sky_component):
+    """
+    Check __str__() returns the correct string
+    """
     params = {}
-    s = "SkyComponent:\n"
-    s += "\tName: test\n"
-    s += "\tFlux: [[1.]]\n"
-    s += "\tFrequency: [1.]\n"
-    s += "\tDirection: (180.0, -35.0)\n"
-    s += "\tShape: Point\n"
-    s += f"\tParams: {params}\n"
-    s += "\tPolarisation frame: stokesI\n"
-    assert str(result_sky_component) == s
+    expected_text = "SkyComponent:\n"
+    expected_text += "\tName: test\n"
+    expected_text += "\tFlux: [[1.]]\n"
+    expected_text += "\tFrequency: [1.]\n"
+    expected_text += "\tDirection: (180.0, -35.0)\n"
+    expected_text += "\tShape: Point\n"
+    expected_text += f"\tParams: {params}\n"
+    expected_text += "\tPolarisation frame: stokesI\n"
+    assert str(result_sky_component) == expected_text

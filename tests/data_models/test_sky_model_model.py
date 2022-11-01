@@ -109,10 +109,13 @@ def fixture_sky_model():
 
 
 def test__str__(result_sky_model):
+    """
+    Check __str__() returns the correct string
+    """
     components = ""
-    s = "SkyModel: fixed: True\n"
-    s += f"{str(components)}\n"
-    s += f"{str(IMAGE)}\n"
-    s += "Test_mask\n"
-    s += f"{str(GAINTABLE)}"
-    assert str(result_sky_model) == s
+    expected_text = "SkyModel: fixed: True\n"
+    expected_text += f"{str(components)}\n"
+    expected_text += f"{str(IMAGE)}\n"
+    expected_text += "Test_mask\n"
+    expected_text += f"{str(GAINTABLE)}"
+    assert str(result_sky_model) == expected_text

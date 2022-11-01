@@ -22,9 +22,12 @@ def fixture_quality_assessment():
 
 
 def test_quality_assessment_str(result_quality_assessment):
-    s = "Quality assessment:\n"
-    s += "\tOrigin: Test_origin\n"
-    s += "\tContext: Test_context\n"
-    s += "\tData:\n"
-    s += "\t\ttest_data_name: test_data\n"
-    assert str(result_quality_assessment) == s
+    """
+    Check __str__() returns the correct string
+    """
+    expected_text = "Quality assessment:\n"
+    expected_text += "\tOrigin: Test_origin\n"
+    expected_text += "\tContext: Test_context\n"
+    expected_text += "\tData:\n"
+    expected_text += "\t\ttest_data_name: test_data\n"
+    assert str(result_quality_assessment) == expected_text

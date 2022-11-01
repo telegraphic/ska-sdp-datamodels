@@ -1,3 +1,4 @@
+# pylint: skip-file
 """ Unit tests for skycomponents
 
 """

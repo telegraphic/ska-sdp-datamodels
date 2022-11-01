@@ -203,9 +203,6 @@ def test_select_r_range_none(result_visibility):
         assert result_range[key] == value, f"{key} mismatch"
 
 
-# TODO: add tests for select_r_range "with" a range
-
-
 def test_group_by_time(result_visibility):
     """
     Check that group_by("time") retunrs the correct array
@@ -214,9 +211,6 @@ def test_group_by_time(result_visibility):
         [result[0] for result in result_visibility.groupby("time")]
     )
     assert times.all() == result_visibility.time.all()
-
-
-# TODO: add more tests for groupby() and groupbybins() functions
 
 
 def test_performance_visibility(result_visibility):

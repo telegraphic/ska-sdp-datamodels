@@ -108,14 +108,13 @@ def test_qa_grid_data(result_grid_data):
 
 def test_property_accessor(result_grid_data):
     """
-    GridData.image_acc (xarray accessor) returns
+    GridData.griddata_acc (xarray accessor) returns
     properties correctly.
     """
     accessor_object = result_grid_data.griddata_acc
 
-    assert accessor_object.nchan == 100
-    # TODO: Check why the npol test is failing
-    # assert accessor_object.npol == 2
+    assert accessor_object.nchan == N_CHAN
+    # assert accessor_object.npol == N_POL  # Test failing, can't tell why
     assert accessor_object.polarisation_frame == PolarisationFrame("stokesIV")
     assert accessor_object.shape == (N_CHAN, N_POL, NV, NU)
     for key, value in WCS_HEADER.items():

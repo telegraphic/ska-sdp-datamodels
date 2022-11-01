@@ -35,10 +35,6 @@ WCS_HEADER = {
     "CRPIX5": 3,
     "CRPIX6": 1,
     "CRPIX7": 1,
-    # TODO: find why CRVAL change by 0.05 with every test
-    # "CRVAL1": 40.1,  # UU in deg
-    # "CRVAL2": 1.0,  # VV in deg
-    # "CRVAL5": 0.0,  # WW in deg
     "CDELT1": -0.1,
     "CDELT2": 0.1,  # abs(CDELT2) = cellsize in deg
     "CDELT3": 1.0,
