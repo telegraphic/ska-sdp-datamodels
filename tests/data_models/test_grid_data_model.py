@@ -1,5 +1,6 @@
 """ Unit tests for GridData models
 """
+# pylint: disable=duplicate-code
 # make python-format
 # make python lint
 

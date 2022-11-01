@@ -1,5 +1,6 @@
 """ Unit tests for GainTable Models
 """
+# pylint: disable=duplicate-code
 # make python-format
 # make python lint
 

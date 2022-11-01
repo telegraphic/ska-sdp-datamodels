@@ -1,5 +1,6 @@
 """ Unit tests for PointingTable Models
 """
+# pylint: disable=duplicate-code
 # make python-format
 # make python lint
 

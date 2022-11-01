@@ -1,5 +1,6 @@
 """ Unit tests for the FlagTable Model
 """
+# pylint: disable=duplicate-code
 # make python-format
 # make python lint
 

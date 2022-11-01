@@ -1,5 +1,6 @@
 """ Unit tests for SkyModel class
 """
+# pylint: disable=duplicate-code
 # make python-format
 # make python lint
 import numpy
