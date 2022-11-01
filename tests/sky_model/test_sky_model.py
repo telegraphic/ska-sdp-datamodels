@@ -1,4 +1,4 @@
-""" Unit tests for SkyModel class
+""" Unit tests for the Sky Model
 """
 # pylint: disable=duplicate-code
 # make python-format
@@ -14,7 +14,7 @@ from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
     ReceptorFrame,
 )
-from ska_sdp_datamodels.sky_model.sky_model import SkyModel
+from ska_sdp_datamodels.sky_model.sky_model import SkyComponent, SkyModel
 
 N_CHAN = 100
 N_POL = 1
@@ -98,6 +98,9 @@ GAINTABLE = GainTable.constructor(
 )
 
 
+# SkyModel Class tests
+
+
 @pytest.fixture(scope="module", name="result_sky_model")
 def fixture_sky_model():
     """
@@ -109,14 +112,72 @@ def fixture_sky_model():
     return sky_model
 
 
-def test__str__(result_sky_model):
+def test_sky_model__str__(result_sky_model):
     """
     Check __str__() returns the correct string
     """
     components = ""
-    expected_text = "SkyModel: fixed: True\n"
-    expected_text += f"{str(components)}\n"
-    expected_text += f"{str(IMAGE)}\n"
-    expected_text += "Test_mask\n"
-    expected_text += f"{str(GAINTABLE)}"
-    assert str(result_sky_model) == expected_text
+    sky_model_text = "SkyModel: fixed: True\n"
+    sky_model_text += f"{str(components)}\n"
+    sky_model_text += f"{str(IMAGE)}\n"
+    sky_model_text += "Test_mask\n"
+    sky_model_text += f"{str(GAINTABLE)}"
+    assert str(result_sky_model) == sky_model_text
+
+
+# SkyComponent Class tests
+
+
+@pytest.fixture(scope="module", name="result_sky_component")
+def fixture_sky_component():
+    """
+    Generate a simple sky component object using __init__.
+    """
+    direction = (180.0, -35.0)
+    frequency = numpy.ones(1)
+    name = "test"
+    flux = numpy.ones((1, 1))
+    shape = "Point"
+    polarisation_frame = PolarisationFrame("stokesI")
+    sky_component = SkyComponent(
+        direction,
+        frequency,
+        name,
+        flux,
+        shape,
+        polarisation_frame,
+        params=None,
+    )
+    return sky_component
+
+
+def test_sky_component_nchan(result_sky_component):
+    """
+    Check nchans returns correct data
+    """
+    nchans = result_sky_component.nchan
+    assert nchans == 1
+
+
+def test_sky_component_npol(result_sky_component):
+    """
+    Check npols returns correct data
+    """
+    npols = result_sky_component.npol
+    assert npols == 1
+
+
+def test_sky_component__str__(result_sky_component):
+    """
+    Check __str__() returns the correct string
+    """
+    params = {}
+    sky_comp_text = "SkyComponent:\n"
+    sky_comp_text += "\tName: test\n"
+    sky_comp_text += "\tFlux: [[1.]]\n"
+    sky_comp_text += "\tFrequency: [1.]\n"
+    sky_comp_text += "\tDirection: (180.0, -35.0)\n"
+    sky_comp_text += "\tShape: Point\n"
+    sky_comp_text += f"\tParams: {params}\n"
+    sky_comp_text += "\tPolarisation frame: stokesI\n"
+    assert str(result_sky_component) == sky_comp_text

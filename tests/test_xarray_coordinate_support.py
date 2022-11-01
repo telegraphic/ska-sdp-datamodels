@@ -1,5 +1,5 @@
 # pylint: skip-file
-""" Unit tests for skycomponents
+""" Unit tests for xarray coordinate support functions
 
 """
 import logging
@@ -10,8 +10,10 @@ import astropy.units as u
 import numpy
 from astropy.coordinates import SkyCoord
 
-from src.data_models.polarisation_data_models import PolarisationFrame
-from src.data_models.xarray_coordinate_support import image_wcs
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
+    PolarisationFrame,
+)
+from ska_sdp_datamodels.xarray_coordinate_support import image_wcs
 from src.processing_components import create_griddata_from_image, create_image
 from src.processing_components.simulation import create_named_configuration
 from src.processing_components.skycomponent.operations import (

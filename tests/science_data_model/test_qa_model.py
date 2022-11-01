@@ -2,7 +2,7 @@
 # make python-format
 # make python lint
 """
-Unit tests for QualityAssessment
+Unit tests for the QualityAssessment Class
 """
 
 import pytest

@@ -127,6 +127,7 @@ class GridDataAccessor(XarrayAccessorMixin):
         """Number of channels"""
         return len(self._obj.frequency)
 
+    @property
     def npol(self):
         """Number of polarisations"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"]).npol

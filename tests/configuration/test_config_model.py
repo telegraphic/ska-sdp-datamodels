@@ -1,4 +1,4 @@
-""" Unit tests for the Configuration model
+""" Unit tests for the Configuration Class
 """
 # make python-format
 # make python lint
