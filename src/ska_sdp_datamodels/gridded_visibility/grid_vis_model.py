@@ -127,6 +127,7 @@ class GridDataAccessor(XarrayAccessorMixin):
         """Number of channels"""
         return len(self._obj.frequency)
 
+    @property
     def npol(self):
         """Number of polarisations"""
         return PolarisationFrame(self._obj.attrs["_polarisation_frame"]).npol
@@ -156,7 +157,7 @@ class GridDataAccessor(XarrayAccessorMixin):
 
         :return: QualityAssessment
         """
-        grid_data = self._obj.data
+        grid_data = self._obj["pixels"].data
         data = {
             "shape": str(self._obj["pixels"].data.shape),
             "max": numpy.max(grid_data),
@@ -167,7 +168,9 @@ class GridDataAccessor(XarrayAccessorMixin):
             "median": numpy.median(grid_data),
         }
 
-        qa = QualityAssessment(origin="qa_image", data=data, context=context)
+        qa = QualityAssessment(
+            origin="qa_grid_data", data=data, context=context
+        )
         return qa
 
 
@@ -374,7 +377,7 @@ class ConvolutionFunctionAccessor(XarrayAccessorMixin):
 
         :return: QualityAssessment
         """
-        conv_func_data = self._obj.data
+        conv_func_data = self._obj["pixels"].data
         data = {
             "shape": str(self._obj["pixels"].data.shape),
             "max": numpy.max(conv_func_data),
@@ -385,5 +388,7 @@ class ConvolutionFunctionAccessor(XarrayAccessorMixin):
             "median": numpy.median(conv_func_data),
         }
 
-        qa = QualityAssessment(origin="qa_image", data=data, context=context)
+        qa = QualityAssessment(
+            origin="qa_convolution_function", data=data, context=context
+        )
         return qa
