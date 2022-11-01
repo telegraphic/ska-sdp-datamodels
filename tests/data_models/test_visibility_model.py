@@ -1,4 +1,4 @@
-# pylint: disable=no-name-in-module,import-error,duplicate-code
+# pylint: disable=duplicate-code
 # make python-format
 # make python lint
 """
@@ -160,6 +160,7 @@ def test_property_accessor(result_visibility):
     Visibility.visibility_acc (xarray accessor) returns
     properties correctly.
     """
+    # pylint: disable=no-member
     accessor_object = result_visibility.visibility_acc
     assert accessor_object.rows == range(0, 1)
     assert accessor_object.ntimes == 1
@@ -167,7 +168,7 @@ def test_property_accessor(result_visibility):
     assert accessor_object.npol == 1
     assert accessor_object.polarisation_frame == PolarisationFrame("stokesI")
     assert accessor_object.nbaselines == 1
-    assert (accessor_object.uvw_lambda == 1 / const.c.value).all()  # pylint: disable=no-member
+    assert (accessor_object.uvw_lambda == 1 / const.c.value).all()
     assert accessor_object.u == 1
     assert accessor_object.v == 1
     assert accessor_object.w == 1
