@@ -1,5 +1,5 @@
 """
-Unite tests for creating Configuration and related functions
+Unit tests for creating Configuration and related functions
 """
 
 import numpy
