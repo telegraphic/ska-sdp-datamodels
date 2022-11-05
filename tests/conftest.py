@@ -98,7 +98,7 @@ def flag_table_fixture(visibility):
 
 
 @pytest.fixture(scope="package", name="low_aa05_config")
-def config_fixture():
+def config_fixture_low():
     """
     Configuration object fixture
     """
