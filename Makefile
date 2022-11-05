@@ -7,5 +7,5 @@ PROJECT_NAME = ska-sdp-datamodels
 # W503: line break before binary operator
 PYTHON_SWITCHES_FOR_FLAKE8 = --ignore=W503
 
-# tmp, until we get all tests working
-PYTHON_TEST_FILE = tests/configuration tests/image tests/visibility tests/science_data_model
+# tmp, skip these files until fixed
+PYTHON_VARS_AFTER_PYTEST = --ignore=tests/test_import_export.py --ignore=tests/test_xarray_coordinate_support.py
