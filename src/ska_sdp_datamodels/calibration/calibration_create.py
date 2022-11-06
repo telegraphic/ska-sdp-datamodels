@@ -7,7 +7,10 @@ from Visibility
 
 import numpy
 
-from ska_sdp_datamodels.calibration import GainTable, PointingTable
+from ska_sdp_datamodels.calibration.calibration_model import (
+    GainTable,
+    PointingTable,
+)
 from ska_sdp_datamodels.configuration.config_coordinate_support import (
     hadec_to_azel,
 )
