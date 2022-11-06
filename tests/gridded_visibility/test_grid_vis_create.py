@@ -56,6 +56,7 @@ def test_create_griddata_from_image_pol_frame_wrong(image):
     )
 
 
+# pylint: disable=invalid-name
 @pytest.mark.parametrize(
     "nw, oversampling, support, wstep",
     [(1, 8, 16, 1e15), (2, 4, 32, 1.0e13)],  # function defaults
