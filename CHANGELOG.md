@@ -1,7 +1,7 @@
 # Changelog
 
-main
-----
+0.1.1
+-----
 
 * From RASCIL, added, create_gaintable_from_visibility, create_pointingtable_from_visibility,
   create_griddata_from_image, create_convolutionfunction_from_image, create_flagtable_from_visibility
