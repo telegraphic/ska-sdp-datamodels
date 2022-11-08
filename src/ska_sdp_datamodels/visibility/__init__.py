@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring
 
-from .vis_create import create_visibility
+from .vis_create import create_flagtable_from_visibility, create_visibility
 from .vis_io_and_convert import (
     convert_flagtable_to_hdf,
     convert_hdf_to_flagtable,
@@ -25,4 +25,5 @@ __all__ = [
     "convert_flagtable_to_hdf",
     "convert_hdf_to_flagtable",
     "create_visibility",
+    "create_flagtable_from_visibility",
 ]

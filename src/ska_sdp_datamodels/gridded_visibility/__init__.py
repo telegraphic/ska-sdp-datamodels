@@ -1,5 +1,9 @@
 # pylint: disable=missing-module-docstring
 
+from .grid_vis_create import (
+    create_convolutionfunction_from_image,
+    create_griddata_from_image,
+)
 from .grid_vis_functions import (
     convert_convolutionfunction_to_hdf,
     convert_griddata_to_hdf,
@@ -23,4 +27,6 @@ __all__ = [
     "convert_hdf_to_griddata",
     "convert_convolutionfunction_to_hdf",
     "convert_hdf_to_convolutionfunction",
+    "create_griddata_from_image",
+    "create_convolutionfunction_from_image",
 ]

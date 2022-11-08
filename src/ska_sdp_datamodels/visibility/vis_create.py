@@ -20,7 +20,7 @@ from ska_sdp_datamodels.science_data_model import (
     PolarisationFrame,
     correlate_polarisation,
 )
-from ska_sdp_datamodels.visibility.vis_model import Visibility
+from ska_sdp_datamodels.visibility.vis_model import FlagTable, Visibility
 from ska_sdp_datamodels.visibility.vis_utils import (
     calculate_transit_time,
     generate_baselines,
@@ -220,3 +220,21 @@ def create_visibility(
     )
 
     return vis
+
+
+def create_flagtable_from_visibility(vis: Visibility) -> FlagTable:
+    """
+    Create FlagTable matching Visibility
+
+    :param vis: Visibility object
+    :return: FlagTable object
+    """
+    return FlagTable.constructor(
+        flags=vis.flags,
+        frequency=vis.frequency,
+        channel_bandwidth=vis.channel_bandwidth,
+        configuration=vis.configuration,
+        time=vis.time,
+        integration_time=vis.integration_time,
+        polarisation_frame=vis.visibility_acc.polarisation_frame,
+    )

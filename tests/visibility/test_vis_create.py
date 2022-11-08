@@ -11,7 +11,10 @@ from astropy.coordinates import SkyCoord
 
 from ska_sdp_datamodels.configuration import create_named_configuration
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
-from ska_sdp_datamodels.visibility import create_visibility
+from ska_sdp_datamodels.visibility import (
+    create_flagtable_from_visibility,
+    create_visibility,
+)
 
 LOW_CORE = create_named_configuration("LOW-AA0.5")
 TIMES = (numpy.pi / 43200.0) * numpy.arange(0.0, 300.0, 30.0)
@@ -80,3 +83,23 @@ def test_create_visibility_polarisation():
     )
     assert vis.vis.shape[-1] == 1  # polarisation dimension is 1
     assert (vis.polarisation.data == ["I"]).all()
+
+
+def test_create_flagtable_from_visibility(visibility):
+    """
+    FlagTable is correctly created from input Visibility.
+    """
+    new_vis = visibility.copy(deep=True)
+    new_vis["flags"].data = new_vis["flags"].data + 1
+    result = create_flagtable_from_visibility(new_vis)
+
+    assert (result.flags.data == 1).all()
+    assert (result.coords["frequency"] == new_vis.frequency).all()
+    assert (result.channel_bandwidth == new_vis.channel_bandwidth).all()
+    assert result.configuration == new_vis.configuration
+    assert (result.coords["time"] == new_vis.time).all()
+    assert (result.integration_time == new_vis.integration_time).all()
+    assert (
+        result.coords["polarisation"]
+        == new_vis.visibility_acc.polarisation_frame.names
+    ).all()

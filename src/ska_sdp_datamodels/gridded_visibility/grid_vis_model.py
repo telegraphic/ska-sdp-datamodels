@@ -64,16 +64,26 @@ class GridData(xarray.Dataset):
 
     @classmethod
     def constructor(cls, data, polarisation_frame=None, grid_wcs=None):
-        """Create a GridData
+        """
+        Create a GridData
 
-        :param polarisation_frame:
+        :param data: pixel data array;
+                     dims: ["frequency", "polarisation", "u", "v"]
+        :param polarisation_frame: PolarisationFrame object
+        :param grid_wcs: astropy WCS object
         :return: GridData
         """
         nchan, npol, nv, nu = data.shape
 
         frequency = grid_wcs.sub([4]).wcs_pix2world(range(nchan), 0)[0]
 
-        assert npol == polarisation_frame.npol
+        if not npol == polarisation_frame.npol:
+            raise ValueError(
+                "Polarisation dimensions of input PolarisationFrame "
+                "does not mach that of data polarisation dimensions: "
+                f"{polarisation_frame.npol} != {npol}"
+            )
+
         cu = grid_wcs.wcs.crval[0]
         cv = grid_wcs.wcs.crval[1]
         du = grid_wcs.wcs.cdelt[0]
