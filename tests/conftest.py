@@ -1,16 +1,35 @@
+# pylint: disable=too-many-locals
+
 """
 Pytest Fixtures
 """
-
 import numpy
 import pytest
 from astropy import units
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import EarthLocation, SkyCoord
 
-from ska_sdp_datamodels.configuration import create_named_configuration
+from ska_sdp_datamodels.calibration import (
+    create_gaintable_from_visibility,
+    create_pointingtable_from_visibility,
+)
+from ska_sdp_datamodels.configuration import (
+    Configuration,
+    create_named_configuration,
+)
+from ska_sdp_datamodels.configuration.config_coordinate_support import (
+    lla_to_ecef,
+)
+from ska_sdp_datamodels.gridded_visibility import (
+    create_convolutionfunction_from_image,
+    create_griddata_from_image,
+)
 from ska_sdp_datamodels.image import create_image
 from ska_sdp_datamodels.science_data_model import PolarisationFrame
-from ska_sdp_datamodels.visibility import create_visibility
+from ska_sdp_datamodels.sky_model import SkyComponent, SkyModel
+from ska_sdp_datamodels.visibility import (
+    create_flagtable_from_visibility,
+    create_visibility,
+)
 
 
 @pytest.fixture(scope="package", name="phase_centre")
@@ -62,3 +81,133 @@ def image_fixture(phase_centre):
         polarisation_frame=PolarisationFrame("stokesIQUV"),
     )
     return image
+
+
+@pytest.fixture(scope="package", name="flag_table")
+def flag_table_fixture(visibility):
+    """
+    FlagTable fixture
+    """
+    return create_flagtable_from_visibility(visibility)
+
+
+@pytest.fixture(scope="package", name="low_aa05_config")
+def config_fixture_low():
+    """
+    Configuration object fixture
+    """
+    location = EarthLocation(
+        lon=116.69345390 * units.deg,
+        lat=-26.86371635 * units.deg,
+        height=300.0,
+    )
+
+    nants = 6
+    aa05_low_coords = numpy.array(
+        [
+            [116.69345390, -26.86371635],
+            [116.69365770, -26.86334071],
+            [116.72963910, -26.85615287],
+            [116.73007800, -26.85612864],
+            [116.74788540, -26.88080530],
+            [116.74733280, -26.88062234],
+        ]
+    )
+    lon, lat = aa05_low_coords[:, 0], aa05_low_coords[:, 1]
+
+    altitude = 300.0
+    diameter = 38.0
+
+    # pylint: disable=duplicate-code
+    names = [
+        "S008‐1",
+        "S008‐2",
+        "S009‐1",
+        "S009‐2",
+        "S010‐1",
+        "S010‐2",
+    ]
+    mount = "XY"
+    x_coord, y_coord, z_coord = lla_to_ecef(
+        lat * units.deg, lon * units.deg, altitude
+    )
+    ant_xyz = numpy.stack((x_coord, y_coord, z_coord), axis=1)
+
+    config = Configuration.constructor(
+        name="LOW-AA0.5",
+        location=location,
+        names=names,
+        mount=numpy.repeat(mount, nants),
+        xyz=ant_xyz,
+        vp_type=numpy.repeat("LOW", nants),
+        diameter=diameter * numpy.ones(nants),
+    )
+    return config
+
+
+@pytest.fixture(scope="package", name="gain_table")
+def gain_table_fixture(visibility):
+    """
+    GainTable fixture.
+    """
+    gain_table = create_gaintable_from_visibility(visibility, jones_type="B")
+    return gain_table
+
+
+@pytest.fixture(scope="package", name="pointing_table")
+def pointing_table_fixture(visibility):
+    """
+    PointingTable fixture.
+    """
+    pointing_table = create_pointingtable_from_visibility(visibility)
+    return pointing_table
+
+
+@pytest.fixture(scope="package", name="sky_component")
+def sky_comp_fixture(phase_centre):
+    """
+    SkyComponent fixture
+    """
+    frequency = numpy.linspace(1.0e8, 1.1e8, 3)
+    flux_elem = numpy.array([100.0, 20.0, -10.0, 1.0])
+    flux = numpy.array([flux_elem, 0.8 * flux_elem, 0.6 * flux_elem])
+
+    comp = SkyComponent(
+        direction=phase_centre,
+        frequency=frequency,
+        flux=flux,
+    )
+    return comp
+
+
+@pytest.fixture(scope="package", name="sky_model")
+def sky_model_fixture(image, sky_component, gain_table):
+    """
+    SkyModel fixture
+    """
+    mask = image.copy(deep=True)
+    mask["pixels"].data[...] = image["pixels"].data[...] * 0
+    return SkyModel(
+        components=[sky_component],
+        image=image,
+        gaintable=gain_table,
+        mask=mask,
+    )
+
+
+@pytest.fixture(scope="package", name="grid_data")
+def grid_data_fixture(image):
+    """
+    GridData fixture
+    """
+    grid_data = create_griddata_from_image(image)
+    return grid_data
+
+
+@pytest.fixture(scope="package", name="conv_func")
+def convolution_function_fixture(image):
+    """
+    ConvolutionFunction fixture
+    """
+    conv_func = create_convolutionfunction_from_image(image)
+    return conv_func

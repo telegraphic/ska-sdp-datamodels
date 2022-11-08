@@ -372,3 +372,20 @@ def test_qa_flag_table(result_flag_table):
     assert result_qa.context == "Test"
     for key, value in expected_data.items():
         assert result_qa.data[key] == value, f"{key} mismatch"
+
+
+def test_flagtable_groupby_time(flag_table, visibility):
+    """
+    Test FlagTable groupby.
+    """
+    times = numpy.array([result[0] for result in flag_table.groupby("time")])
+    assert times.all() == visibility.time.all()
+
+
+def test_flagtable_select_time(flag_table):
+    """
+    Test FalgTable select by.
+    """
+    times = flag_table.time
+    selected_ft = flag_table.sel({"time": slice(times[1], times[2])})
+    assert len(selected_ft.time) == 2

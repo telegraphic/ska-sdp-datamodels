@@ -1,8 +1,8 @@
-""" Unit tests for the Sky Model
+"""
+Unit tests for the Sky Model
 """
 # pylint: disable=duplicate-code
-# make python-format
-# make python lint
+
 import numpy
 import pytest
 from astropy.wcs import WCS
