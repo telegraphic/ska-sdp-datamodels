@@ -28,5 +28,3 @@ def data_model_equals(ds_new, ds_ref):
         assert attr in ds_new.attrs.keys()
     for attr in ds_new.attrs.keys():
         assert attr in ds_ref.attrs.keys()
-
-    return True

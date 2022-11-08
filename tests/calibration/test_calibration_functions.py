@@ -56,14 +56,11 @@ def test_import_gaintable_from_hdf5(gain_table):
     works correctly, which is tested above.
     """
     with tempfile.TemporaryDirectory() as temp_dir:
-        # GIVEN
         test_hdf = f"{temp_dir}/test_export_gain_table_to_hdf5.hdf5"
         export_gaintable_to_hdf5(gain_table, test_hdf)
 
-        # WHEN
         result = import_gaintable_from_hdf5(test_hdf)
 
-        # THEN
         data_model_equals(result, gain_table)
 
 
@@ -113,12 +110,9 @@ def test_import_pointingtable_from_hdf5(pointing_table):
     works correctly, which is tested above.
     """
     with tempfile.TemporaryDirectory() as temp_dir:
-        # GIVEN
         test_hdf = f"{temp_dir}/test_export_pointing_to_hdf5.hdf5"
         export_pointingtable_to_hdf5(pointing_table, test_hdf)
 
-        # WHEN
         result = import_pointingtable_from_hdf5(test_hdf)
 
-        # THEN
         data_model_equals(result, pointing_table)
