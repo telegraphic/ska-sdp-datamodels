@@ -76,6 +76,20 @@ class SkyComponent:
             f"flux shape {self.flux.shape}"
         )
 
+    def copy(self):
+        """
+        Copy a single SkyComponent
+        """
+        return SkyComponent(
+            direction=self.direction,
+            frequency=self.frequency,
+            name=self.name,
+            flux=self.flux,
+            shape=self.shape,
+            params=self.params,
+            polarisation_frame=self.polarisation_frame,
+        )
+
     @property
     def nchan(self):
         """Number of channels"""
@@ -181,3 +195,33 @@ class SkyModel:
         s += str(self.gaintable)
 
         return s
+
+    def copy(self):
+        """Copy a SkyModel"""
+        if self.components is not None:
+            newcomps = [comp.copy() for comp in self.components]
+        else:
+            newcomps = None
+
+        if self.image is not None:
+            newimage = self.image.copy(deep=True)
+        else:
+            newimage = None
+
+        if self.mask is not None:
+            newmask = self.mask
+        else:
+            newmask = None
+
+        if self.gaintable is not None:
+            newgt = self.gaintable.copy(deep=True)
+        else:
+            newgt = None
+
+        return SkyModel(
+            components=newcomps,
+            image=newimage,
+            gaintable=newgt,
+            mask=newmask,
+            fixed=self.fixed,
+        )
