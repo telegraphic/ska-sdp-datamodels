@@ -181,7 +181,7 @@ def sky_comp_fixture(phase_centre):
 
 
 @pytest.fixture(scope="package", name="sky_model")
-def sky_model_fixture(image, sky_component, gain_table):
+def sky_model_fixture(image, gain_table):
     """
     SkyModel fixture
     """
