@@ -125,6 +125,24 @@ def test_sky_model__str__(result_sky_model):
     assert str(result_sky_model) == sky_model_text
 
 
+def test_skymodel_copy(result_sky_model):
+    """
+    Test copy SkyModel
+    """
+    new_model = result_sky_model.copy(deep=True)
+    assert new_model.components == []
+    assert new_model.mask == "Test_mask"
+
+    # check Gaintable
+    result_sky_model.gaintable["gain"].data[...] = 0
+    new_model.gaintable["gain"].data[...] = 1
+    assert result_sky_model.gaintable["gain"].data[0, 0].real.all() == 0
+    result_sky_model.gaintable["gain"].data[
+        ...
+    ] = 1  # reset for following tests
+    assert new_model.gaintable["gain"].data[0, 0].real.all() == 1
+
+
 # SkyComponent Class tests
 
 
@@ -181,3 +199,15 @@ def test_sky_component__str__(result_sky_component):
     sky_comp_text += f"\tParams: {params}\n"
     sky_comp_text += "\tPolarisation frame: stokesI\n"
     assert str(result_sky_component) == sky_comp_text
+
+
+def test_sky_component_copy(result_sky_component):
+    """
+    Test copying SkyComponent
+    """
+    new_sc = result_sky_component.copy()
+    assert new_sc.direction == result_sky_component.direction
+    assert new_sc.frequency == result_sky_component.frequency
+    assert new_sc.flux == result_sky_component.flux
+    assert new_sc.params == result_sky_component.params
+    assert new_sc.polarisation_frame == result_sky_component.polarisation_frame

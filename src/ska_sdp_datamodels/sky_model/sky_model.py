@@ -76,6 +76,20 @@ class SkyComponent:
             f"flux shape {self.flux.shape}"
         )
 
+    def copy(self):
+        """
+        Copy a single SkyComponent
+        """
+        return SkyComponent(
+            direction=self.direction,
+            frequency=self.frequency,
+            name=self.name,
+            flux=self.flux,
+            shape=self.shape,
+            params=self.params,
+            polarisation_frame=self.polarisation_frame,
+        )
+
     @property
     def nchan(self):
         """Number of channels"""
@@ -181,3 +195,40 @@ class SkyModel:
         s += str(self.gaintable)
 
         return s
+
+    def copy(self, deep=False, data=None, zero=False):
+        """Copy a SkyModel
+
+        :param deep: perform deep-copy
+        :param data: data to use in new object; see docstring of
+                     xarray.core.dataset.Dataset.copy
+        :param zero: if True, set gain data to zero in copied object
+
+        """
+        if self.components is not None:
+            newcomps = [comp.copy() for comp in self.components]
+        else:
+            newcomps = None
+
+        if self.image is not None:
+            newimage = self.image.copy(deep=deep, data=data)
+        else:
+            newimage = None
+
+        if self.mask is not None:
+            newmask = self.mask
+        else:
+            newmask = None
+
+        if self.gaintable is not None:
+            newgt = self.gaintable.copy(deep=deep, data=data, zero=zero)
+        else:
+            newgt = None
+
+        return SkyModel(
+            components=newcomps,
+            image=newimage,
+            gaintable=newgt,
+            mask=newmask,
+            fixed=self.fixed,
+        )
