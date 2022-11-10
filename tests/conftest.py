@@ -181,14 +181,14 @@ def sky_comp_fixture(phase_centre):
 
 
 @pytest.fixture(scope="package", name="sky_model")
-def sky_model_fixture(image, gain_table):
+def sky_model_fixture(image, sky_component, gain_table):
     """
     SkyModel fixture
     """
     mask = image.copy(deep=True)
     mask["pixels"].data[...] = image["pixels"].data[...] * 0
     return SkyModel(
-        components=None,
+        components=[sky_component],
         image=image,
         gaintable=gain_table,
         mask=mask,

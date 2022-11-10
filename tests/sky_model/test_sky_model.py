@@ -6,26 +6,16 @@ Unit tests for the Sky Model
 # SkyModel Class tests
 
 
-def test_sky_model__str__(sky_model):
-    """
-    Check __str__() returns the correct string
-    """
-
-    sky_model_text = "SkyModel: fixed: False\n"
-    sky_model_text += "\n"  # SkyComponent is None
-    sky_model_text += f"{sky_model.image}\n"
-    sky_model_text += f"{sky_model.mask}\n"
-    sky_model_text += f"{sky_model.gaintable}"
-    assert str(sky_model) == sky_model_text
-
-
 def test_skymodel_copy(sky_model):
     """
     Test copy SkyModel
     """
     new_model = sky_model.copy()
-    assert new_model.components == []
     assert new_model.mask == sky_model.mask
+    assert (
+        new_model.components[0].frequency.all()
+        == sky_model.components[0].frequency.all()
+    )
     assert (
         new_model.gaintable["gain"].data.all()
         == sky_model.gaintable["gain"].data.all()
@@ -34,6 +24,22 @@ def test_skymodel_copy(sky_model):
         new_model.image["pixels"].data.all()
         == sky_model.image["pixels"].data.all()
     )
+
+
+def test_sky_model__str__(sky_model):
+    """
+    Check __str__() returns the correct string
+    """
+    # Assume copy works
+    sky_copy = sky_model.copy()
+    sky_copy.components = ""
+
+    sky_model_text = "SkyModel: fixed: False\n"
+    sky_model_text += "\n"  # SkyComponent is None
+    sky_model_text += f"{sky_copy.image}\n"
+    sky_model_text += f"{sky_copy.mask}\n"
+    sky_model_text += f"{sky_copy.gaintable}"
+    assert str(sky_copy) == sky_model_text
 
 
 # SkyComponent Class tests
