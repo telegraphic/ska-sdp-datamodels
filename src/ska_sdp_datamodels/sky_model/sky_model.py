@@ -196,22 +196,15 @@ class SkyModel:
 
         return s
 
-    def copy(self, deep=False, data=None, zero=False):
-        """Copy a SkyModel
-
-        :param deep: perform deep-copy
-        :param data: data to use in new object; see docstring of
-                     xarray.core.dataset.Dataset.copy
-        :param zero: if True, set gain data to zero in copied object
-
-        """
+    def copy(self):
+        """Copy a SkyModel"""
         if self.components is not None:
             newcomps = [comp.copy() for comp in self.components]
         else:
             newcomps = None
 
         if self.image is not None:
-            newimage = self.image.copy(deep=deep, data=data)
+            newimage = self.image.copy(deep=True)
         else:
             newimage = None
 
@@ -221,7 +214,7 @@ class SkyModel:
             newmask = None
 
         if self.gaintable is not None:
-            newgt = self.gaintable.copy(deep=deep, data=data, zero=zero)
+            newgt = self.gaintable.copy(deep=True)
         else:
             newgt = None
 

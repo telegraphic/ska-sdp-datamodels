@@ -188,7 +188,7 @@ def sky_model_fixture(image, sky_component, gain_table):
     mask = image.copy(deep=True)
     mask["pixels"].data[...] = image["pixels"].data[...] * 0
     return SkyModel(
-        components=[sky_component],
+        components=None,
         image=image,
         gaintable=gain_table,
         mask=mask,
