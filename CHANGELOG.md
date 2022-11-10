@@ -1,5 +1,7 @@
 # Changelog
-
+0.1.2
+-----
+* Add copy functions for SkyComponent and SkyModel (([MR18](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/18)))
 0.1.1
 -----
 
