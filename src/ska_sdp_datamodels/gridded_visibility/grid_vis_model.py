@@ -24,6 +24,7 @@ class GridData(xarray.Dataset):
 
     - Has four or more coordinates: [chan, pol, z, y, x]
     where x can be u, l; y can be v, m; z can be w, n.
+    Note: current implementation only uses 4 coordinates: [nchan, npol, v, u]
 
     The conventions for indexing in WCS and numpy are opposite.
     - In astropy.wcs, the order is (longitude, latitude, polarisation, frequency);
@@ -36,20 +37,19 @@ class GridData(xarray.Dataset):
 
     Here is an example::
 
-        <xarray.Image>
-        Dimensions:       (chan: 3, l: 256, m: 256, pol: 4)
+        <xarray.GridData>
+        Dimensions:       (frequency: 3, polarisation: 4, v: 256, u: 256)
         Coordinates:
-            frequency     (chan) float64 1e+08 1.01e+08 1.02e+08
-            polarisation  (pol) <U1 'I' 'Q' 'U' 'V'
-          * m             (m) float64 -35.11 -35.11 -35.11 ... -34.89 -34.89 -34.89
-          * l             (l) float64 179.9 179.9 179.9 179.9 ... 180.1 180.1 180.1
-            ra            (l, m) float64 180.1 180.1 180.1 180.1 ... 179.9 179.9 179.9
-            dec           (l, m) float64 -35.11 -35.11 -35.11 ... -34.89 -34.89 -34.89
-        Dimensions without coordinates: chan, pol
+          * frequency     (frequency) float64 1e+08 1.01e+08 1.02e+08
+          * polarisation  (polarisation) <U1 'I' 'Q' 'U' 'V'
+          * v             (v) float64 -3.333e+04 -3.307e+04 ... 3.281e+04 3.307e+04
+          * u             (u) float64 3.333e+04 3.307e+04 ... -3.281e+04 -3.307e+04
         Data variables:
-            pixels        (chan, pol, m, l) float64 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0
+            pixels        (frequency, polarisation, v, u) complex128 0j 0j 0j ... 0j 0j
         Attributes:
-            data_model:  Image
+            data_model:           GridData
+            _polarisation_frame:  stokesIQUV
+
     """  # noqa: E501
 
     __slots__ = ()
@@ -68,7 +68,7 @@ class GridData(xarray.Dataset):
         Create a GridData
 
         :param data: pixel data array;
-                     dims: ["frequency", "polarisation", "u", "v"]
+                     dims: ["frequency", "polarisation", "v", "u"]
         :param polarisation_frame: PolarisationFrame object
         :param grid_wcs: astropy WCS object
         :return: GridData
@@ -89,7 +89,7 @@ class GridData(xarray.Dataset):
         du = grid_wcs.wcs.cdelt[0]
         dv = grid_wcs.wcs.cdelt[1]
 
-        dims = ["frequency", "polarisation", "u", "v"]
+        dims = ["frequency", "polarisation", "v", "u"]
 
         # Define the coordinates on these dimensions
         coords = {
