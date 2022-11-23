@@ -42,6 +42,11 @@ def convert_skycomponent_to_hdf(sc: SkyComponent, f):
 
     f.attrs["data_model"] = "SkyComponent"
     f.attrs["direction"] = _convert_direction_to_string(sc.direction)
+
+    # HDF5 accepts attribute sizes up to 64KB. Creating frequency and
+    # flux attributes from more than 2045 frequency channels exceeds this
+    # attribute size threshold, so we call them directing returning an
+    # xarray datasets instead.
     f["frequency"] = sc.frequency
     f.attrs["polarisation_frame"] = sc.polarisation_frame.type
     f["flux"] = sc.flux
@@ -117,8 +122,7 @@ def import_skycomponent_from_hdf5(filename):
     with h5py.File(filename, "r") as f:
         nsclist = f.attrs["number_data_models"]
         sclist = [
-            convert_hdf_to_skycomponent(f[f"SkyComponent{i}"])
-            for i in range(nsclist)
+            convert_hdf_to_skycomponent(f[f"SkyComponent{i}"]) for i in range(nsclist)
         ]
         if nsclist == 1:
             return sclist[0]
@@ -183,9 +187,7 @@ def import_skymodel_from_hdf5(filename):
 
     with h5py.File(filename, "r") as f:
         nsmlist = f.attrs["number_data_models"]
-        smlist = [
-            convert_hdf_to_skymodel(f[f"SkyModel{i}"]) for i in range(nsmlist)
-        ]
+        smlist = [convert_hdf_to_skymodel(f[f"SkyModel{i}"]) for i in range(nsmlist)]
         if nsmlist == 1:
             return smlist[0]
 
