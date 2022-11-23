@@ -101,10 +101,15 @@ def test_import_skymodel_from_hdf5(sky_model):
         result = import_skymodel_from_hdf5(test_hdf)
 
         # THEN
-        assert result.components[0].flux.shape == sky_model.components[0].flux.shape
+        assert (
+            result.components[0].flux.shape
+            == sky_model.components[0].flux.shape
+        )
         assert (
             numpy.max(
-                numpy.abs(result.components[0].flux - sky_model.components[0].flux)
+                numpy.abs(
+                    result.components[0].flux - sky_model.components[0].flux
+                )
             )
             < 1e-15
         ).all()
