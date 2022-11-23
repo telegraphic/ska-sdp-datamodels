@@ -30,11 +30,11 @@ def test_export_skycomponent_to_hdf5(sky_component):
             assert result_file.attrs["number_data_models"] == 1
 
             result_sc = result_file["SkyComponent0"]
-            assert (result_sc.attrs["flux"] == sky_component.flux).all()
+
+            assert (result_sc["flux"] == sky_component.flux).all()
             assert result_sc.attrs["data_model"] == "SkyComponent"
-            assert (
-                result_sc.attrs["frequency"] == sky_component.frequency
-            ).all()
+            assert (result_sc["frequency"] == sky_component.frequency).all()
+
             assert (
                 result_sc.attrs["polarisation_frame"]
                 == sky_component.polarisation_frame.type
@@ -101,15 +101,10 @@ def test_import_skymodel_from_hdf5(sky_model):
         result = import_skymodel_from_hdf5(test_hdf)
 
         # THEN
-        assert (
-            result.components[0].flux.shape
-            == sky_model.components[0].flux.shape
-        )
+        assert result.components[0].flux.shape == sky_model.components[0].flux.shape
         assert (
             numpy.max(
-                numpy.abs(
-                    result.components[0].flux - sky_model.components[0].flux
-                )
+                numpy.abs(result.components[0].flux - sky_model.components[0].flux)
             )
             < 1e-15
         ).all()
