@@ -1,6 +1,7 @@
 # Changelog
 0.1.2
 -----
+* Bug fix for simulating with frequency channels larger than 2045 (([MR12](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/12)))
 * Add copy functions for SkyComponent and SkyModel (([MR18](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/18)))
 0.1.1
 -----
