@@ -42,9 +42,14 @@ def convert_skycomponent_to_hdf(sc: SkyComponent, f):
 
     f.attrs["data_model"] = "SkyComponent"
     f.attrs["direction"] = _convert_direction_to_string(sc.direction)
-    f.attrs["frequency"] = sc.frequency
+
+    # HDF5 accepts attribute sizes up to 64KB. Creating frequency and
+    # flux attributes from more than 2045 frequency channels exceeds this
+    # attribute size threshold, so we call them directing returning an
+    # xarray datasets instead.
+    f["frequency"] = sc.frequency
     f.attrs["polarisation_frame"] = sc.polarisation_frame.type
-    f.attrs["flux"] = sc.flux
+    f["flux"] = sc.flux
     f.attrs["shape"] = sc.shape
     f.attrs["params"] = str(sc.params)
     f.attrs["name"] = numpy.string_(sc.name)
@@ -71,10 +76,10 @@ def convert_hdf_to_skycomponent(f):
 
     assert f.attrs["data_model"] == "SkyComponent", "Not a SkyComponent"
     direction = _convert_direction_from_string(f.attrs["direction"])
-    frequency = numpy.array(f.attrs["frequency"])
+    frequency = f["frequency"][:]
     name = f.attrs["name"]
     polarisation_frame = PolarisationFrame(f.attrs["polarisation_frame"])
-    flux = f.attrs["flux"]
+    flux = f["flux"][:]
     shape = f.attrs["shape"]
     params = ast.literal_eval(f.attrs["params"])
     sc = SkyComponent(
