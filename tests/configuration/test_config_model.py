@@ -1,118 +1,85 @@
-""" Unit tests for the Configuration Class
 """
-# make python-format
-# make python lint
-
-import pytest
+Unit tests for the Configuration Class
+"""
+import numpy
+from astropy import units
+from astropy.coordinates import EarthLocation
 from xarray import DataArray
 
-from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     ReceptorFrame,
 )
 
 
-@pytest.fixture(scope="module", name="result_configuration")
-def fixture_configuration():
+def test_constructor_coords(low_aa05_config):
     """
-    Generate a configuration object using Configuration.constructor
+    Constructor correctly generates coordinates
     """
-    name = "MID"
-    location = (5109237.71471275, 2006795.66194638, -3239109.1838011)
-    names = "M000"
-    xyz = 222
-    mount = "altaz"
-    frame = None
-    receptor_frame = ReceptorFrame("linear")
-    diameter = 13.5
-    offset = 0.0
-    stations = 0
-    vp_type = "MEERKAT"
-    configuration = Configuration.constructor(
-        name,
-        location,
-        names,
-        xyz,
-        mount,
-        frame,
-        receptor_frame,
-        diameter,
-        offset,
-        stations,
-        vp_type,
-    )
-    return configuration
-
-
-def test_constructor_coords(result_configuration):
-    """
-    Constructor generates correctly generates coordinates
-    """
-    # Fails when "stations" is a string:
-    # TypeError: not all arguments converted during string formatting
-
     expected_coords_keys = ["id", "spatial"]
-    result_coords = result_configuration.coords
+    result_coords = low_aa05_config.coords
     assert sorted(result_coords.keys()) == sorted(expected_coords_keys)
-    assert len(result_coords["id"]) == 4
+    assert len(result_coords["id"]) == 6
     assert (result_coords["spatial"] == ["X", "Y", "Z"]).all()
 
 
-def test_constructor_data_vars(result_configuration):
+def test_constructor_data_vars(low_aa05_config):
     """
-    Constructor generates correctly generates data variables
+    Constructor correctly generates data variables
     """
 
-    result_data_vars = result_configuration.data_vars
+    result_data_vars = low_aa05_config.data_vars
 
-    assert len(result_data_vars) == 7  # 7 vars in data_vars
-    assert "names" in result_data_vars.keys()
-    assert isinstance(result_data_vars["names"], DataArray)
-    assert (result_data_vars["names"].data == "M000").all()
-    assert "xyz" in result_data_vars.keys()
-    assert isinstance(result_data_vars["xyz"], DataArray)
-    assert (result_data_vars["xyz"].data == 222).all()
-    assert "diameter" in result_data_vars.keys()
-    assert isinstance(result_data_vars["diameter"], DataArray)
-    assert (result_data_vars["diameter"].data == 13.5).all()
-    assert "mount" in result_data_vars.keys()
-    assert isinstance(result_data_vars["mount"], DataArray)
-    assert (result_data_vars["mount"].data == "altaz").all()
-    assert "vp_type" in result_data_vars.keys()
-    assert isinstance(result_data_vars["vp_type"], DataArray)
-    assert (result_data_vars["vp_type"].data == "MEERKAT").all()
-    assert "offset" in result_data_vars.keys()
-    assert isinstance(result_data_vars["offset"], DataArray)
+    assert len(result_data_vars) == 7
+
+    for _, value in result_data_vars.items():
+        assert isinstance(value, DataArray)
+
+    assert (
+        result_data_vars["names"].data
+        == [
+            "S008‐1",
+            "S008‐2",
+            "S009‐1",
+            "S009‐2",
+            "S010‐1",
+            "S010‐2",
+        ]
+    ).all()
+    assert result_data_vars["xyz"].data.shape == (6, 3)
+    assert (result_data_vars["diameter"].data == 38.0).all()
+    assert (result_data_vars["mount"].data == "XY").all()
+    assert (result_data_vars["vp_type"].data == "LOW").all()
     assert (result_data_vars["offset"].data == 0.0).all()
-    assert "stations" in result_data_vars.keys()
-    assert isinstance(result_data_vars["stations"], DataArray)
-    assert (result_data_vars["stations"].data == 0).all()
+    assert (
+        result_data_vars["stations"].data
+        == numpy.array(["0", "1", "2", "3", "4", "5"])
+    ).all()
 
 
-def test_constructor_attrs(result_configuration):
+def test_constructor_attrs(low_aa05_config):
     """
     Constructor correctly generates attributes
     """
 
-    result_attrs = result_configuration.attrs
+    result_attrs = low_aa05_config.attrs
 
     assert len(result_attrs) == 5
     assert result_attrs["data_model"] == "Configuration"
-    assert result_attrs["name"] == "MID"
-    assert result_attrs["location"] == (
-        5109237.71471275,
-        2006795.66194638,
-        -3239109.1838011,
+    assert result_attrs["name"] == "LOW-AA0.5"
+    assert result_attrs["location"] == EarthLocation(
+        lon=116.69345390 * units.deg,
+        lat=-26.86371635 * units.deg,
+        height=300.0,
     )
     assert result_attrs["receptor_frame"] == ReceptorFrame("linear")
-    assert result_attrs["frame"] is None
+    assert result_attrs["frame"] == ""
 
 
-def test_property_accessor(result_configuration):
+def test_property_accessor(low_aa05_config):
     """
     Configuration.configuration_acc (xarray accessor) returns
     properties correctly.
     """
-    accessor_object = result_configuration.configuration_acc
+    accessor_object = low_aa05_config.configuration_acc
 
-    assert accessor_object.nants == 4
+    assert accessor_object.nants == 6

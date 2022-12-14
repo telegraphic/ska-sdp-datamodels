@@ -1,8 +1,6 @@
-""" Unit tests for GridData models
 """
-# pylint: disable=duplicate-code
-# make python-format
-# make python lint
+Unit tests for GridData models
+"""
 
 import numpy
 import pytest
@@ -21,10 +19,11 @@ N_CHAN = 100
 N_POL = 2
 NV = 256
 NU = 256
+# pylint: disable=duplicate-code
 GD_WCS_HEADER = {
     "CTYPE1": "UU",
     "CTYPE2": "VV",
-    "CTYPE3": "STOKES",  # no units, so no CUNIT3
+    "CTYPE3": "STOKES",
     "CTYPE4": "FREQ",
     "CRVAL1": 40.0,  # RA in deg
     "CRVAL2": 0.0,  # DEC in deg
@@ -34,7 +33,26 @@ GD_WCS_HEADER = {
     "CDELT4": 10.0,  # delta between channel_bandwidth values
 }
 
-# Unit tests for the GridData Class
+
+NW = 4
+OVERSAMPLING = 1
+SUPPORT = 3
+CF_WCS_HEADER = {
+    "CTYPE1": "UU",
+    "CTYPE2": "VV",
+    "CTYPE3": "DUU",
+    "CTYPE4": "DVV",
+    "CTYPE5": "WW",
+    "CTYPE6": "STOKES",
+    "CTYPE7": "FREQ",
+    "CDELT1": -0.1,
+    "CDELT2": 0.1,
+    "CDELT3": 1.0,
+    "CDELT4": 1.0,
+    "CDELT5": 1.0,
+    "CDELT6": 3,  # delta between polarisation values (I=0, V=4)
+    "CDELT7": 1,  # delta between frequency values
+}
 
 
 @pytest.fixture(scope="module", name="result_grid_data")
@@ -47,6 +65,22 @@ def fixture_griddata():
     grid_wcs = WCS(header=GD_WCS_HEADER, naxis=4)
     grid_data = GridData.constructor(data, pol_frame, grid_wcs)
     return grid_data
+
+
+@pytest.fixture(scope="module", name="result_convolution_function")
+def fixture_convolution_function():
+    """
+    Generate convolution function object with ConvolutionFunction.constructor
+    """
+    data = numpy.ones(
+        (N_CHAN, N_POL, NW, OVERSAMPLING, OVERSAMPLING, SUPPORT, SUPPORT)
+    )
+    polarisation_frame = PolarisationFrame("stokesIV")
+    cf_wcs = WCS(header=CF_WCS_HEADER, naxis=7)
+    convolution_function = ConvolutionFunction.constructor(
+        data, cf_wcs, polarisation_frame
+    )
+    return convolution_function
 
 
 def test_grid_data_constructor_coords(result_grid_data):
@@ -68,9 +102,8 @@ def test_grid_data_constructor_coords(result_grid_data):
 
 def test_grid_data_constructor_data_vars(result_grid_data):
     """
-    Constructor generates correctly generates data variables
+    Constructor correctly generates data variables
     """
-
     result_data_vars = result_grid_data.data_vars
 
     assert len(result_data_vars) == 1  # only var is pixels
@@ -83,7 +116,6 @@ def test_grid_data_constructor_attrs(result_grid_data):
     """
     Constructor correctly generates attributes
     """
-
     result_attrs = result_grid_data.attrs
 
     assert len(result_attrs) == 2
@@ -129,57 +161,10 @@ def test_property_accessor(result_grid_data):
         ), f"{key} mismatch"
 
 
-NW = 4
-OVERSAMPLING = 1
-SUPPORT = 3
-CF_WCS_HEADER = {
-    "CTYPE1": "UU",
-    "CTYPE2": "VV",
-    "CTYPE3": "DUU",
-    "CTYPE4": "DVV",
-    "CTYPE5": "WW",
-    "CTYPE6": "STOKES",  # no units, so no CUNIT6
-    "CTYPE7": "FREQ",
-    "CRPIX1": 2,  # CRPIX1-7 are reference pixels
-    "CRPIX2": 2,
-    "CRPIX3": 1,
-    "CRPIX4": 1,
-    "CRPIX5": 3,
-    "CRPIX6": 1,
-    "CRPIX7": 1,
-    "CDELT1": -0.1,
-    "CDELT2": 0.1,  # abs(CDELT2) = cellsize in deg
-    "CDELT3": 1.0,
-    "CDELT4": 1.0,
-    "CDELT5": 1.0,
-    "CDELT6": 3,  # delta between polarisation values (I=0, V=4)
-    "CDELT7": 1,  # delta between frequency values
-}
-
-# Unit tests for the ConvolutionFunction Class
-
-
-@pytest.fixture(scope="module", name="result_convolution_function")
-def fixture_convolution_function():
-    """
-    Generate convolution function object with ConvolutionFunction.constructor
-    """
-    data = numpy.ones(
-        (N_CHAN, N_POL, NW, OVERSAMPLING, OVERSAMPLING, SUPPORT, SUPPORT)
-    )
-    polarisation_frame = PolarisationFrame("stokesIV")
-    cf_wcs = WCS(header=CF_WCS_HEADER, naxis=7)
-    convolution_function = ConvolutionFunction.constructor(
-        data, cf_wcs, polarisation_frame
-    )
-    return convolution_function
-
-
 def test_convolution_function_constructor_coords(result_convolution_function):
     """
     Constructor correctly generates coordinates
     """
-
     expected_coords_keys = [
         "frequency",
         "polarisation",
@@ -201,7 +186,7 @@ def test_convolution_function_constructor_data_vars(
     result_convolution_function,
 ):
     """
-    Constructor generates correctly generates data variables
+    Constructor correctly generates data variables
     """
 
     result_data_vars = result_convolution_function.data_vars
@@ -216,7 +201,6 @@ def test_convolution_function_constructor_attrs(result_convolution_function):
     """
     Constructor correctly generates attributes
     """
-
     result_attrs = result_convolution_function.attrs
 
     assert len(result_attrs) == 2

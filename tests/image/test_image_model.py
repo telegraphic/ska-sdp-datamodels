@@ -17,7 +17,7 @@ N_POL = 2
 Y = 512
 X = 256
 CLEAN_BEAM = {"bmaj": 0.1, "bmin": 0.1, "bpa": 0.1}
-
+# pylint: disable=duplicate-code
 WCS_HEADER = {
     "CTYPE1": "RA---SIN",
     "CTYPE2": "DEC--SIN",

@@ -35,12 +35,14 @@ def calculate_transit_time(location, utc_time, direction):
     )
 
 
-def get_direction_time_location(vis):
+def get_direction_time_location(vis, time=None):
     """
     Obtain PhaseCentre direction, time,
     and location from Visibility object
 
     :param vis: Visibility object
+    :param time: user-defined time samples;
+                 if None, use times from vis
     :return: location, time, direction
             [EarthLocation, UTC Time, PhaseCentre]
     """
@@ -51,20 +53,23 @@ def get_direction_time_location(vis):
             y=Quantity(vis.configuration.antxyz[1]),
             z=Quantity(vis.configuration.antxyz[2]),
         )
-
-    utc_time = Time(vis.time / 86400.0, format="mjd", scale="utc")
+    if time is None:
+        time = vis.time
+    utc_time = Time(time / 86400.0, format="mjd", scale="utc")
     direction = vis.phasecentre
     return location, utc_time, direction
 
 
-def calculate_visibility_hourangles(vis):
+def calculate_visibility_hourangles(vis, time=None):
     """
     Return hour angles for location, utc_time, and direction
 
     :param vis: Visibility object
+    :param time: user-defined time samples;
+                 if None, use times from vis
     :return: hour angles
     """
-    location, utc_time, direction = get_direction_time_location(vis)
+    location, utc_time, direction = get_direction_time_location(vis, time=time)
     site = Observer(location=location)
     hour_angles = site.target_hour_angle(utc_time, direction).wrap_at("180d")
     return hour_angles

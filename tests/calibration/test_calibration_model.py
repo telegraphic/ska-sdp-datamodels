@@ -1,8 +1,6 @@
-""" Unit tests for the Calibration Models
 """
-# pylint: disable=duplicate-code
-# make python-format
-# make python lint
+Unit tests for the Calibration Models
+"""
 
 import numpy
 import pytest
@@ -12,54 +10,24 @@ from ska_sdp_datamodels.calibration.calibration_model import (
     GainTable,
     PointingTable,
 )
-from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     ReceptorFrame,
 )
 
-#  Create a configuration object
-
-NAME = "MID"
-LOCATION = (5109237.71471275, 2006795.66194638, -3239109.1838011)
-NAMES = "M000"
-XYZ = 222
-MOUNT = "altaz"
-FRAME = None
 RECEPTOR_FRAME = ReceptorFrame("stokesI")
-DIAMETER = 13.5
-OFFSET = 0.0
-STATIONS = 0
-VP_TYPE = "MEERKAT"
-CONFIGURATION = Configuration.constructor(
-    NAME,
-    LOCATION,
-    NAMES,
-    XYZ,
-    MOUNT,
-    FRAME,
-    RECEPTOR_FRAME,
-    DIAMETER,
-    OFFSET,
-    STATIONS,
-    VP_TYPE,
-)
-
-# Unit tests for the GainTable Class
 
 
 @pytest.fixture(scope="module", name="result_gain_table")
-def fixture_gain_table():
+def fixture_gain_table(low_aa05_config, phase_centre):
     """
     Generate a simple gain table using GainTable.constructor
     """
-
     gain = numpy.ones((1, 1, 1, 1, 1))
     time = numpy.ones(1)
     interval = numpy.ones(1)
     weight = numpy.ones((1, 1, 1, 1, 1))
     residual = numpy.ones((1, 1, 1, 1))
     frequency = numpy.ones(1)
-    phasecentre = (180.0, -35.0)
     jones_type = "T"
     gain_table = GainTable.constructor(
         gain,
@@ -69,18 +37,47 @@ def fixture_gain_table():
         residual,
         frequency,
         RECEPTOR_FRAME,
-        phasecentre,
-        CONFIGURATION,
+        phase_centre,
+        low_aa05_config,
         jones_type,
     )
     return gain_table
+
+
+@pytest.fixture(scope="module", name="result_pointing_table")
+def fixture_pointing_table(low_aa05_config, phase_centre):
+    """
+    Generate a simple pointing table using PointingTable.constructor
+    """
+
+    pointing = numpy.array([[[[[1, 1]]]]])
+    nominal = numpy.array([[[[[1, 1]]]]])
+    time = numpy.ones(1)
+    interval = numpy.ones(1)
+    weight = numpy.array([[[[[1, 1]]]]])
+    residual = numpy.array([[[[1, 1]]]])
+    frequency = numpy.ones(1)
+    pointing_frame = "local"
+    pointing_table = PointingTable.constructor(
+        pointing,
+        nominal,
+        time,
+        interval,
+        weight,
+        residual,
+        frequency,
+        RECEPTOR_FRAME,
+        pointing_frame,
+        phase_centre,
+        low_aa05_config,
+    )
+    return pointing_table
 
 
 def test_gain_table_constructor_coords(result_gain_table):
     """
     Constructor correctly generates coordinates
     """
-
     expected_coords_keys = [
         "time",
         "antenna",
@@ -102,7 +99,6 @@ def test_gain_table_constructor_datavars(result_gain_table):
     """
     Constructor correctly generates data variables
     """
-
     result_data_vars = result_gain_table.data_vars
     assert len(result_data_vars) == 5
     assert (result_data_vars["gain"] == 1).all()
@@ -115,7 +111,9 @@ def test_gain_table_constructor_datavars(result_gain_table):
     )
 
 
-def test_gain_table_constructor_attrs(result_gain_table):
+def test_gain_table_constructor_attrs(
+    result_gain_table, low_aa05_config, phase_centre
+):
     """
     Constructor correctly generates attributes.
     """
@@ -124,21 +122,21 @@ def test_gain_table_constructor_attrs(result_gain_table):
     assert len(result_attrs) == 5
     assert result_attrs["data_model"] == "GainTable"
     assert result_attrs["receptor_frame"] == RECEPTOR_FRAME
-    assert result_attrs["phasecentre"] == (180.0, -35.0)
-    assert result_attrs["configuration"] == CONFIGURATION
+    assert result_attrs["phasecentre"] == phase_centre
+    assert result_attrs["configuration"] == low_aa05_config
     assert result_attrs["jones_type"] == "T"
 
 
 def test_gain_table_copy(result_gain_table):
     """
-    Test deep-copying Visibility
+    Test deep-copying GainTable
     """
-    new_flag = result_gain_table.copy(deep=True)
-    result_gain_table["gain"].data[...] = 0
-    new_flag["gain"].data[...] = 1
-    assert result_gain_table["gain"].data[0, 0].real.all() == 0
-    result_gain_table["gain"].data[...] = 1  # reset for following tests
-    assert new_flag["gain"].data[0, 0].real.all() == 1
+    original_gain = result_gain_table.gain.data
+    new_gain_data = result_gain_table.copy(deep=True)
+    new_gain_data["gain"].data[...] = 100.0
+
+    assert (result_gain_table["gain"].data == original_gain).all()
+    assert (new_gain_data["gain"].data == 100.0).all()
 
 
 def test_gain_table_property_accessor(result_gain_table):
@@ -180,45 +178,10 @@ def test_qa_gain_table(result_gain_table):
         assert result_qa.data[key] == value, f"{key} mismatch"
 
 
-# Unit tests for the PointingTable Class
-
-
-@pytest.fixture(scope="module", name="result_pointing_table")
-def fixture_pointing_table():
-    """
-    Generate a simple pointing table using PointingTable.constructor
-    """
-
-    pointing = numpy.array([[[[[1, 1]]]]])
-    nominal = numpy.array([[[[[1, 1]]]]])
-    time = numpy.ones(1)
-    interval = numpy.ones(1)
-    weight = numpy.array([[[[[1, 1]]]]])
-    residual = numpy.array([[[[1, 1]]]])
-    frequency = numpy.ones(1)
-    pointing_frame = "local"
-    pointingcentre = (180.0, -35.0)
-    pointing_table = PointingTable.constructor(
-        pointing,
-        nominal,
-        time,
-        interval,
-        weight,
-        residual,
-        frequency,
-        RECEPTOR_FRAME,
-        pointing_frame,
-        pointingcentre,
-        CONFIGURATION,
-    )
-    return pointing_table
-
-
 def test_pointing_table_constructor_coords(result_pointing_table):
     """
     Constructor correctly generates coordinates
     """
-
     expected_coords_keys = [
         "time",
         "antenna",
@@ -254,7 +217,9 @@ def test_pointing_table_constructor_datavars(result_pointing_table):
     )
 
 
-def test_pointing_table_constructor_attrs(result_pointing_table):
+def test_pointing_table_constructor_attrs(
+    result_pointing_table, low_aa05_config, phase_centre
+):
     """
     Constructor correctly generates attributes.
     """
@@ -264,19 +229,20 @@ def test_pointing_table_constructor_attrs(result_pointing_table):
     assert result_attrs["data_model"] == "PointingTable"
     assert result_attrs["receptor_frame"] == RECEPTOR_FRAME
     assert result_attrs["pointing_frame"] == "local"
-    assert result_attrs["pointingcentre"] == (180.0, -35.0)
-    assert result_attrs["configuration"] == CONFIGURATION
+    assert result_attrs["pointingcentre"] == phase_centre
+    assert result_attrs["configuration"] == low_aa05_config
 
 
 def test_pointing_table_copy(result_pointing_table):
     """
-    Copy accurately copies a pointing table
+    Test deep copy of PointingTable
     """
-    copied_pt_deep = result_pointing_table.copy(True, None, False)
-    copied_pt_no_deep = result_pointing_table.copy(False, None, False)
+    original_pointing = result_pointing_table.pointing.data
+    new_pointing_data = result_pointing_table.copy(deep=True)
+    new_pointing_data["pointing"].data[...] = 100.0
 
-    assert copied_pt_deep == result_pointing_table
-    assert copied_pt_no_deep == result_pointing_table
+    assert (result_pointing_table["pointing"].data == original_pointing).all()
+    assert (new_pointing_data["pointing"].data == 100.0).all()
 
 
 def test_pointing_table_property_accessor(result_pointing_table):
@@ -287,7 +253,7 @@ def test_pointing_table_property_accessor(result_pointing_table):
     accessor_object = result_pointing_table.pointingtable_acc
     assert accessor_object.nants == 1
     assert accessor_object.nchan == 1
-    # assert accessor_object.nrec == 1  # get KeyError for receptor_frame
+    assert accessor_object.nrec == 1
 
 
 def test_qa_pointing_table(result_pointing_table):

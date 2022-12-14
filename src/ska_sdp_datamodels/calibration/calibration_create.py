@@ -150,7 +150,11 @@ def create_pointingtable_from_visibility(
         pointing[..., 0, 1] = 0.0
         pointing[..., 1, 1] = 0.0
 
-    hour_angle = calculate_visibility_hourangles(vis).to("rad").value
+    hour_angle = (
+        calculate_visibility_hourangles(vis, time=pointing_time)
+        .to("rad")
+        .value
+    )
     dec = vis.phasecentre.dec.rad
     latitude = vis.configuration.location.lat.rad
     azimuth, elevation = hadec_to_azel(hour_angle, dec, latitude)

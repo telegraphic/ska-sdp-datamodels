@@ -78,7 +78,11 @@ def test_create_pointingtable_from_visibility_timeslice(visibility):
     input timeslice.
     """
     time_slice = 100  # seconds
-    expected_times = numpy.array([4.45347902, 4.45347913, 4.45347922])
-    result = create_gaintable_from_visibility(visibility, timeslice=time_slice)
+    expected_times = numpy.array(
+        [4.45347902, 4.45347913, 4.45347922, 4.4534793]
+    )
+    result = create_pointingtable_from_visibility(
+        visibility, timeslice=time_slice
+    )
 
     assert_almost_equal(result.coords["time"].data / 1.0e9, expected_times)

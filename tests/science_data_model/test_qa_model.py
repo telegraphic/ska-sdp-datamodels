@@ -1,6 +1,3 @@
-# pylint: disable=no-name-in-module,import-error
-# make python-format
-# make python lint
 """
 Unit tests for the QualityAssessment Class
 """
