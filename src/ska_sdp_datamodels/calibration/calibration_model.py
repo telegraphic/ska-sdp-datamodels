@@ -367,7 +367,7 @@ class PointingTableAccessor(XarrayAccessorMixin):
     @property
     def nrec(self):
         """Number of receptors"""
-        return self._obj["receptor_frame"].nrec
+        return self._obj.attrs["receptor_frame"].nrec
 
     def qa_pointing_table(self, context=None) -> QualityAssessment:
         """Assess the quality of a PointingTable
