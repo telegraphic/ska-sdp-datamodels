@@ -1,121 +1,54 @@
-# pylint: skip-file
-""" Unit tests for xarray coordinate support functions
-
 """
-import logging
-import os
-import unittest
+Unit tests for xarray coordinate support functions
+"""
 
-import astropy.units as u
-import numpy
-from astropy.coordinates import SkyCoord
-
-from ska_sdp_datamodels.science_data_model.polarisation_model import (
-    PolarisationFrame,
+from ska_sdp_datamodels.xarray_coordinate_support import (
+    conv_func_wcs,
+    griddata_wcs,
+    image_wcs,
 )
-from ska_sdp_datamodels.xarray_coordinate_support import image_wcs
-from src.processing_components import create_griddata_from_image, create_image
-from src.processing_components.simulation import create_named_configuration
-from src.processing_components.skycomponent.operations import (
-    create_skycomponent,
-)
-from src.processing_components.visibility.base import create_visibility
-
-log = logging.getLogger("rascil-logger")
-
-log.setLevel(logging.WARNING)
 
 
-class TestXarrayCoordinateSupport(unittest.TestCase):
-    def setUp(self):
-
-        self.persist = os.getenv("RASCIL_PERSIST", False)
-
-        from rascil.processing_components.parameters import rascil_path
-
-        self.lowcore = create_named_configuration("LOWBD2-CORE")
-        self.results_dir = rascil_path("test_results")
-
-    def actualSetup(self, dopol=False):
-
-        if dopol:
-            self.vis_pol = PolarisationFrame("linear")
-            self.image_pol = PolarisationFrame("stokesIQUV")
-            self.pol_flux = numpy.array([1.0, -0.8, 0.2, 0.01])
-        else:
-            self.vis_pol = PolarisationFrame("stokesI")
-            self.image_pol = PolarisationFrame("stokesI")
-            self.pol_flux = numpy.array([1.0])
-
-        self.times = (numpy.pi / 12.0) * numpy.linspace(-3.0, 3.0, 6)
-        self.image_frequency = numpy.linspace(0.9e8, 1.1e8, 5)
-        self.image_channel_bandwidth = numpy.array(5 * [5e6])
-        self.component_frequency = numpy.linspace(0.8e8, 1.2e8, 7)
-        self.phasecentre = SkyCoord(
-            ra=+180.0 * u.deg, dec=-60.0 * u.deg, frame="icrs", equinox="J2000"
-        )
-        self.vis = create_visibility(
-            self.lowcore,
-            self.times,
-            self.image_frequency,
-            channel_bandwidth=self.image_channel_bandwidth,
-            phasecentre=self.phasecentre,
-            weight=1.0,
-            polarisation_frame=self.vis_pol,
-            zerow=True,
-        )
-        self.vis["vis"].data *= 0.0
-
-        # Create model
-        self.model = create_image(
-            npixel=256,
-            cellsize=0.0015,
-            phasecentre=self.vis.phasecentre,
-            frequency=self.image_frequency,
-            channel_bandwidth=self.image_channel_bandwidth,
-            polarisation_frame=self.image_pol,
-        )
-
-        dphasecentre = SkyCoord(
-            ra=+181.0 * u.deg, dec=-58.0 * u.deg, frame="icrs", equinox="J2000"
-        )
-        flux_scale = numpy.power(self.component_frequency / 1e8, -0.7)
-        self.flux = numpy.outer(flux_scale, self.pol_flux)
-        self.sc = create_skycomponent(
-            direction=dphasecentre,
-            flux=self.flux,
-            frequency=self.component_frequency,
-            polarisation_frame=self.image_pol,
-        )
-
-    def test_image_conversion(self):
-        self.actualSetup()
-        print(self.model.image_acc.wcs)
-        print(image_wcs(self.model))
-
-    def test_image_conversion_pol(self):
-        self.actualSetup(dopol=True)
-        print(self.model.image_acc.wcs)
-        print(image_wcs(self.model))
-
-    def test_griddata_conversion(self):
-        self.actualSetup()
-        gd = create_griddata_from_image(self.model)
-        assert gd.griddata_acc.shape == self.model.image_acc.shape
-        assert (
-            gd.griddata_acc.polarisation_frame.type
-            == self.model.image_acc.polarisation_frame.type
-        )
-
-    def test_griddata_conversion_pol(self):
-        self.actualSetup(dopol=True)
-        gd = create_griddata_from_image(self.model)
-        assert gd.griddata_acc.shape == self.model.image_acc.shape
-        assert (
-            gd.griddata_acc.polarisation_frame.type
-            == self.model.image_acc.polarisation_frame.type
-        )
+def test_image_wcs(image):
+    """
+    Function creates image WCS from Image object correctly
+    """
+    result = image_wcs(image)
+    assert sorted(result.wcs.ctype) == sorted(
+        ["RA---SIN", "DEC--SIN", "STOKES", "FREQ"]
+    )
+    assert (result.wcs.crval == [180.0, -35.0, 1.0, 100000000.0]).all()
+    assert (result.wcs.crpix == [129.0, 129.0, 1.0, 1.0]).all()
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_griddata_wcs(grid_data):
+    """
+    Function creates grid data WCS from GridData object correctly
+    """
+    result = griddata_wcs(grid_data)
+    assert sorted(result.wcs.ctype) == sorted(["UU", "VV", "STOKES", "FREQ"])
+    assert (result.wcs.crval == [0.0, 0.0, 1.0, 100000000.0]).all()
+    assert (result.wcs.crpix == [129.0, 129.0, 1.0, 1.0]).all()
+
+
+def test_conv_func_wcs(conv_func):
+    """
+    Function creates convolution function WCS from
+    ConvolutionFunction object correctly
+    """
+    result = conv_func_wcs(conv_func)
+    assert sorted(result.wcs.ctype) == sorted(
+        ["UU", "VV", "DUU", "DVV", "WW", "STOKES", "FREQ"]
+    )
+    assert (
+        result.wcs.cdelt
+        == [
+            -260.41666666663866,
+            260.41666666666134,
+            -32.55208333332983,
+            32.55208333333267,
+            1000000000000000.0,
+            1.0,
+            1000000.0,
+        ]
+    ).all()

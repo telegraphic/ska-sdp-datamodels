@@ -1,9 +1,6 @@
 """
 Unit tests for the Sky Model
 """
-# pylint: disable=duplicate-code
-
-# SkyModel Class tests
 
 
 def test_skymodel_copy(sky_model):
@@ -42,7 +39,6 @@ def test_sky_model__str__(sky_model):
     assert str(sky_copy) == sky_model_text
 
 
-# SkyComponent Class tests
 def test_sky_component_nchan(sky_component):
     """
     Check nchans returns correct data

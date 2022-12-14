@@ -1,14 +1,7 @@
 """
 Unit tests for visibility selectors
 """
-
-import logging
-
 import numpy
-
-log = logging.getLogger("data-models-logger")
-
-log.setLevel(logging.WARNING)
 
 
 def test_visibility_groupby_time(visibility):

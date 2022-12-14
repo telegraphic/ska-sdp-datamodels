@@ -1,5 +1,5 @@
 """
-Unit tests for gridding visibility data model functions
+Unit tests for gridded visibility data model functions
 """
 
 import tempfile
