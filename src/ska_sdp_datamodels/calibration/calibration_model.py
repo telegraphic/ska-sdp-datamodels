@@ -25,17 +25,17 @@ class GainTable(xarray.Dataset):
     Here is an example::
 
         <xarray.GainTable>
-        Dimensions:    (antenna: 115, frequency: 3, receptor1: 2, receptor2: 2, time: 3)
+        Dimensions:    (antenna: 115, frequency: 3, receptor_in: 2, receptor_out: 2, time: 3)
         Coordinates:
           * time       (time) float64 5.085e+09 5.085e+09 5.085e+09
           * antenna    (antenna) int64 0 1 2 3 4 5 6 7 ... 108 109 110 111 112 113 114
           * frequency  (frequency) float64 1e+08 1.05e+08 1.1e+08
-          * receptor1  (receptor1) <U1 'X' 'Y'
-          * receptor2  (receptor2) <U1 'X' 'Y'
+          * receptor_in  (receptor_in) <U1 'X' 'Y'
+          * receptor_out  (receptor_out) <U1 'X' 'Y'
         Data variables:
-            gain       (time, antenna, frequency, receptor1, receptor2) complex128 (0...
-            weight     (time, antenna, frequency, receptor1, receptor2) float64 1.0 ....
-            residual   (time, frequency, receptor1, receptor2) float64 0.0 0.0 ... 0.0
+            gain       (time, antenna, frequency, receptor_in, receptor_out) complex128 (0...
+            weight     (time, antenna, frequency, receptor_in, receptor_out) float64 1.0 ....
+            residual   (time, frequency, receptor_in, receptor_out) float64 0.0 0.0 ... 0.0
             interval   (time) float32 99.72697 99.72697 99.72697
             datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
@@ -103,21 +103,33 @@ class GainTable(xarray.Dataset):
             "time": time,
             "antenna": antennas,
             "frequency": frequency,
-            "receptor1": receptor_in.names,
-            "receptor2": receptor_out.names,
+            "receptor_in": receptor_in.names,
+            "receptor_out": receptor_out.names,
         }
 
         datavars = {}
         datavars["gain"] = xarray.DataArray(
             gain,
-            dims=["time", "antenna", "frequency", "receptor1", "receptor2"],
+            dims=[
+                "time",
+                "antenna",
+                "frequency",
+                "receptor_in",
+                "receptor_out",
+            ],
         )
         datavars["weight"] = xarray.DataArray(
             weight,
-            dims=["time", "antenna", "frequency", "receptor1", "receptor2"],
+            dims=[
+                "time",
+                "antenna",
+                "frequency",
+                "receptor_in",
+                "receptor_out",
+            ],
         )
         datavars["residual"] = xarray.DataArray(
-            residual, dims=["time", "frequency", "receptor1", "receptor2"]
+            residual, dims=["time", "frequency", "receptor_in", "receptor_out"]
         )
         datavars["interval"] = xarray.DataArray(interval, dims=["time"])
         datavars["datetime"] = xarray.DataArray(
@@ -185,17 +197,17 @@ class GainTableAccessor(XarrayAccessorMixin):
     @property
     def nrec(self):
         """Number of receivers"""
-        return len(self._obj["receptor1"])
+        return len(self._obj["receptor_in"])
 
     @property
     def receptor_in(self):
         """Receptor Input"""
-        return self._obj["receptor1"]
+        return self._obj["receptor_in"]
 
     @property
     def receptor_out(self):
         """Receptor Output"""
-        return self._obj["receptor2"]
+        return self._obj["receptor_out"]
 
     def qa_gain_table(self, context=None) -> QualityAssessment:
         """Assess the quality of a gaintable

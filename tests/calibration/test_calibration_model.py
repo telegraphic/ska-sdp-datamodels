@@ -82,8 +82,8 @@ def test_gain_table_constructor_coords(result_gain_table):
         "time",
         "antenna",
         "frequency",
-        "receptor1",
-        "receptor2",
+        "receptor_in",
+        "receptor_out",
     ]
     result_coords = result_gain_table.coords
 
@@ -91,8 +91,8 @@ def test_gain_table_constructor_coords(result_gain_table):
     assert result_coords["time"] == 1
     assert result_coords["antenna"] == 0
     assert result_coords["frequency"] == 1
-    assert result_coords["receptor1"] == "I"
-    assert result_coords["receptor2"] == "I"
+    assert result_coords["receptor_in"] == "I"
+    assert result_coords["receptor_out"] == "I"
 
 
 def test_gain_table_constructor_datavars(result_gain_table):
