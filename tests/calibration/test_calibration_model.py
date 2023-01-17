@@ -36,7 +36,7 @@ def fixture_gain_table(low_aa05_config, phase_centre):
         weight,
         residual,
         frequency,
-        RECEPTOR_FRAME,
+        (RECEPTOR_FRAME, RECEPTOR_FRAME),
         phase_centre,
         low_aa05_config,
         jones_type,
@@ -119,9 +119,10 @@ def test_gain_table_constructor_attrs(
     """
     result_attrs = result_gain_table.attrs
 
-    assert len(result_attrs) == 5
+    assert len(result_attrs) == 6
     assert result_attrs["data_model"] == "GainTable"
-    assert result_attrs["receptor_frame"] == RECEPTOR_FRAME
+    assert result_attrs["receptor_frame_in"] == RECEPTOR_FRAME
+    assert result_attrs["receptor_frame_out"] == RECEPTOR_FRAME
     assert result_attrs["phasecentre"] == phase_centre
     assert result_attrs["configuration"] == low_aa05_config
     assert result_attrs["jones_type"] == "T"
@@ -149,7 +150,8 @@ def test_gain_table_property_accessor(result_gain_table):
     assert accessor_object.nants == 1
     assert accessor_object.nchan == 1
     assert accessor_object.nrec == 1
-    assert accessor_object.receptors == "I"
+    assert accessor_object.receptor_in == "I"
+    assert accessor_object.receptor_out == "I"
 
 
 def test_qa_gain_table(result_gain_table):

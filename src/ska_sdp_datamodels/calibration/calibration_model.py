@@ -40,7 +40,8 @@ class GainTable(xarray.Dataset):
             datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
             data_model:  GainTable
-            receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
+            receptor_frame_in:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
+            receptor_frame_out:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
             phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
             configuration:      <xarray.Configuration> Dimensions:   (id: 115, spati...
     """  # noqa: E501
@@ -82,19 +83,28 @@ class GainTable(xarray.Dataset):
         :param weight: Weight of gain [nrows, nchan, nrec, nrec]
         :param residual: Residual of fit [nchan, nrec, nrec]
         :param frequency: Frequency [nchan]
-        :param receptor_frame: Receptor frame
         :param phasecentre: Phasecentre (SkyCoord)
         :param configuration: Configuration
         :param jones_type: Type of gain: T, G, B, etc
+        :param receptor_frame: Input and output receptor frames
+                If a single frame, use it for both receptor_in and receptor_out
+                If a tuple, it stands for [receptor_in, receptor_out]
         """
         nants = gain.shape[1]
         antennas = range(nants)
+        # If this doesn't work it will automatically raise a ValueError
+        if isinstance(receptor_frame, (list, tuple)):
+            receptor_in, receptor_out = receptor_frame
+        if isinstance(receptor_frame, ReceptorFrame):
+            receptor_in = receptor_frame
+            receptor_out = receptor_frame
+
         coords = {
             "time": time,
             "antenna": antennas,
             "frequency": frequency,
-            "receptor1": receptor_frame.names,
-            "receptor2": receptor_frame.names,
+            "receptor1": receptor_in.names,
+            "receptor2": receptor_out.names,
         }
 
         datavars = {}
@@ -116,7 +126,8 @@ class GainTable(xarray.Dataset):
         )
         attrs = {}
         attrs["data_model"] = "GainTable"
-        attrs["receptor_frame"] = receptor_frame
+        attrs["receptor_frame_in"] = receptor_in
+        attrs["receptor_frame_out"] = receptor_out
         attrs["phasecentre"] = phasecentre
         attrs["configuration"] = configuration
         attrs["jones_type"] = jones_type
@@ -177,9 +188,14 @@ class GainTableAccessor(XarrayAccessorMixin):
         return len(self._obj["receptor1"])
 
     @property
-    def receptors(self):
-        """Receptors"""
+    def receptor_in(self):
+        """Receptor Input"""
         return self._obj["receptor1"]
+
+    @property
+    def receptor_out(self):
+        """Receptor Output"""
+        return self._obj["receptor2"]
 
     def qa_gain_table(self, context=None) -> QualityAssessment:
         """Assess the quality of a gaintable
