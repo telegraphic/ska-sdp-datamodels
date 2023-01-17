@@ -211,12 +211,12 @@ def create_gaintable_from_casa_cal_table(
     # Get times, interval, bandpass solutions
     gain_time = numpy.unique(bt.getcol(columnname="TIME"))
     gain_interval = numpy.unique(bt.getcol(columnname="INTERVAL"))
-    field_id = numpy.unique(bt.getcol(columnname="FIELD_ID"))
-    gain_residual = bt.getcol(columnname="PARAMERR")
+    # field_id = numpy.unique(bt.getcol(columnname="FIELD_ID"))
+    # gain_residual = bt.getcol(columnname="PARAMERR")
     gains = bt.getcol(columnname="CPARAM")
     antenna = bt.getcol(columnname="ANTENNA1")
     spec_wind_id = bt.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
-    gain_weight = numpy.ones(gains.shape)
+    # gain_weight = numpy.ones(gains.shape)
 
     nants = len(numpy.unique(antenna))
     ntimes = len(gain_time)
@@ -288,7 +288,7 @@ def create_gaintable_from_casa_cal_table(
         stations=stations,
     )
 
-    time_range = obs.getcol(columnname="TIME_RANGE")
+    # time_range = obs.getcol(columnname="TIME_RANGE")
 
     # Get phasecentres
     fieldtab = table("%s/FIELD" % msname, ack=False)
