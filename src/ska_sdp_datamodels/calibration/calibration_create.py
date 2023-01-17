@@ -206,27 +206,27 @@ def create_gaintable_from_casa_cal_table(
 
     """
 
-    bt = table(tablename=msname)
+    base_table = table(tablename=msname)
 
     # Get times, interval, bandpass solutions
-    gain_time = numpy.unique(bt.getcol(columnname="TIME"))
-    gain_interval = numpy.unique(bt.getcol(columnname="INTERVAL"))
+    gain_time = numpy.unique(base_table.getcol(columnname="TIME"))
+    gain_interval = numpy.unique(base_table.getcol(columnname="INTERVAL"))
     # field_id = numpy.unique(bt.getcol(columnname="FIELD_ID"))
     # gain_residual = bt.getcol(columnname="PARAMERR")
-    gains = bt.getcol(columnname="CPARAM")
-    antenna = bt.getcol(columnname="ANTENNA1")
-    spec_wind_id = bt.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
+    gains = base_table.getcol(columnname="CPARAM")
+    antenna = base_table.getcol(columnname="ANTENNA1")
+    spec_wind_id = base_table.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
     # gain_weight = numpy.ones(gains.shape)
 
     nants = len(numpy.unique(antenna))
     ntimes = len(gain_time)
 
     # Set the frequency sampling
-    spw = table(tablename=msname + "/SPECTRAL_WINDOW")
+    spw = table(tablename=f"{msname}/SPECTRAL_WINDOW")
     gain_frequency = spw.getcol(columnname="CHAN_FREQ")[spec_wind_id]
     nfrequency = spw.getcol(columnname="NUM_CHAN")[spec_wind_id]
 
-    # Need confirm
+    # TODO:  need to be confirmed
     receptor_frame = ReceptorFrame("circular")
     nrec = receptor_frame.nrec
 
@@ -240,16 +240,16 @@ def create_gaintable_from_casa_cal_table(
     gain_residual = numpy.zeros([ntimes, nfrequency, nrec, nrec])
 
     # Get configuration
-    obs = table(tablename="%s/OBSERVATION" % msname)  #
+    obs = table(tablename=f"{msname}/OBSERVATION")  #
     ts_name = obs.getcol(columnname="TELESCOPE_NAME")
 
-    anttab = table("%s/ANTENNA" % msname, ack=False)
+    anttab = table(f"{msname}/ANTENNA", ack=False)
     names = numpy.array(anttab.getcol("NAME"))
 
-    ant_map = list()
+    ant_map = []
     actual = 0
     # This assumes that the names are actually filled in!
-    for i, name in enumerate(names):
+    for _, name in enumerate(names):
         if name != "":
             ant_map.append(actual)
             actual += 1
@@ -291,12 +291,12 @@ def create_gaintable_from_casa_cal_table(
     # time_range = obs.getcol(columnname="TIME_RANGE")
 
     # Get phasecentres
-    fieldtab = table("%s/FIELD" % msname, ack=False)
-    pc = fieldtab.getcol(columnname="PHASE_DIR")
-    print(pc.shape)
+    fieldtab = table("{msname}/FIELD", ack=False)
+    phase_dir = fieldtab.getcol(columnname="PHASE_DIR")
+
     phasecentre = SkyCoord(
-        ra=pc[0][0][0] * u.rad,
-        dec=pc[0][0][1] * u.rad,
+        ra=phase_dir[0][0][0] * u.rad,
+        dec=phase_dir[0][0][1] * u.rad,
         frame="icrs",
         equinox="J2000",
     )
