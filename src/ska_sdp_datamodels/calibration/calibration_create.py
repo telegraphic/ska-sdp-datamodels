@@ -6,6 +6,10 @@ from Visibility
 """
 
 import numpy
+from astropy import units as u
+from astropy.coordinates import EarthLocation, SkyCoord
+from astropy.units import Quantity
+from casacore.tables import table
 
 from ska_sdp_datamodels.calibration.calibration_model import (
     GainTable,
@@ -14,6 +18,7 @@ from ska_sdp_datamodels.calibration.calibration_model import (
 from ska_sdp_datamodels.configuration.config_coordinate_support import (
     hadec_to_azel,
 )
+from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
 from ska_sdp_datamodels.visibility import Visibility
 from ska_sdp_datamodels.visibility.vis_utils import (
@@ -184,3 +189,129 @@ def create_pointingtable_from_visibility(
     )
 
     return pointing_table
+
+
+def create_gaintable_from_ms(
+    msname,
+    jones_type="B",
+) -> GainTable:
+    """
+    Create gain table from visibility.
+
+    This makes an empty gain table consistent with the Visibility.
+
+    :param ms: Visibility object
+    :param jones_type: Type of calibration matrix T or G or B
+    :return: GainTable object
+
+    """
+
+    bt = table(tablename=msname)
+
+    # Get times, interval, bandpass solutions
+    gain_time = numpy.unique(bt.getcol(columnname="TIME"))
+    gain_interval = numpy.unique(bt.getcol(columnname="INTERVAL"))
+    field_id = numpy.unique(bt.getcol(columnname="FIELD_ID"))
+    gain_residual = bt.getcol(columnname="PARAMERR")
+    gains = bt.getcol(columnname="CPARAM")
+    antenna = bt.getcol(columnname="ANTENNA1")
+    spec_wind_id = bt.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
+    gain_weight = numpy.ones(gains.shape)
+
+    nants = len(numpy.unique(antenna))
+    ntimes = len(gain_time)
+
+    # Set the frequency sampling
+    spw = table(tablename=msname + "/SPECTRAL_WINDOW")
+    gain_frequency = spw.getcol(columnname="CHAN_FREQ")[spec_wind_id]
+    nfrequency = spw.getcol(columnname="NUM_CHAN")[spec_wind_id]
+
+    # Need confirm
+    receptor_frame = ReceptorFrame("circular")
+    nrec = receptor_frame.nrec
+
+    gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
+    gain = numpy.ones(gain_shape, dtype="complex")
+    if nrec > 1:
+        gain[..., 0, 1] = gains[..., 0]
+        gain[..., 1, 0] = gains[..., 1]
+
+    gain_weight = numpy.ones(gain_shape)
+    gain_residual = numpy.zeros([ntimes, nfrequency, nrec, nrec])
+
+    # Get configuration
+    obs = table(tablename="%s/OBSERVATION" % msname)  #
+    ts_name = obs.getcol(columnname="TELESCOPE_NAME")
+
+    anttab = table("%s/ANTENNA" % msname, ack=False)
+    names = numpy.array(anttab.getcol("NAME"))
+
+    ant_map = list()
+    actual = 0
+    # This assumes that the names are actually filled in!
+    for i, name in enumerate(names):
+        if name != "":
+            ant_map.append(actual)
+            actual += 1
+        else:
+            ant_map.append(-1)
+    # assert actual > 0, "Dish/station names are all blank - cannot load"
+    if actual == 0:
+        ant_map = list(range(len(names)))
+        names = numpy.repeat("No name", len(names))
+
+    mount = numpy.array(anttab.getcol("MOUNT"))[names != ""]
+    # log.info("mount is: %s" % (mount))
+    diameter = numpy.array(anttab.getcol("DISH_DIAMETER"))[names != ""]
+    xyz = numpy.array(anttab.getcol("POSITION"))[names != ""]
+    offset = numpy.array(anttab.getcol("OFFSET"))[names != ""]
+    stations = numpy.array(anttab.getcol("STATION"))[names != ""]
+    names = numpy.array(anttab.getcol("NAME"))[names != ""]
+    nants = len(names)
+
+    location = EarthLocation(
+        x=Quantity(xyz[0][0], "m"),
+        y=Quantity(xyz[0][1], "m"),
+        z=Quantity(xyz[0][2], "m"),
+    )
+
+    configuration = Configuration.constructor(
+        name=ts_name[0],
+        location=location,
+        names=names,
+        xyz=xyz,
+        mount=mount,
+        frame="ITRF",
+        receptor_frame=ReceptorFrame("linear"),
+        diameter=diameter,
+        offset=offset,
+        stations=stations,
+    )
+
+    time_range = obs.getcol(columnname="TIME_RANGE")
+
+    # Get phasecentres
+    fieldtab = table("%s/FIELD" % msname, ack=False)
+    pc = fieldtab.getcol(columnname="PHASE_DIR")
+    print(pc.shape)
+    phasecentre = SkyCoord(
+        ra=pc[0][0][0] * u.rad,
+        dec=pc[0][0][1] * u.rad,
+        frame="icrs",
+        equinox="J2000",
+    )
+
+    gain_table = GainTable.constructor(
+        gain=gain,
+        time=gain_time,
+        interval=gain_interval,
+        weight=gain_weight,
+        residual=gain_residual,
+        frequency=gain_frequency,
+        receptor_frame=receptor_frame,
+        phasecentre=phasecentre,
+        configuration=configuration,
+        jones_type=jones_type,
+    )
+
+    return gain_table
