@@ -191,16 +191,16 @@ def create_pointingtable_from_visibility(
     return pointing_table
 
 
-def create_gaintable_from_ms(
+def create_gaintable_from_casa_cal_table(
     msname,
     jones_type="B",
 ) -> GainTable:
     """
-    Create gain table from visibility.
+    Create gain table from Calibration table of CASA.
 
     This makes an empty gain table consistent with the Visibility.
 
-    :param ms: Visibility object
+    :param msname: Visibility object
     :param jones_type: Type of calibration matrix T or G or B
     :return: GainTable object
 

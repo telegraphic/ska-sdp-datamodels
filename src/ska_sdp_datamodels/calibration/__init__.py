@@ -1,6 +1,7 @@
 # pylint: disable=missing-module-docstring
 
 from .calibration_create import (
+    create_gaintable_from_casa_cal_table,
     create_gaintable_from_visibility,
     create_pointingtable_from_visibility,
 )
@@ -29,4 +30,5 @@ __all__ = [
     "convert_gaintable_to_hdf",
     "create_gaintable_from_visibility",
     "create_pointingtable_from_visibility",
+    "create_gaintable_from_casa_cal_table",
 ]
