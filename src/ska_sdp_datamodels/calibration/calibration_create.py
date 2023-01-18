@@ -9,7 +9,6 @@ import numpy
 from astropy import units as u
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.units import Quantity
-from casacore.tables import table
 
 from ska_sdp_datamodels.calibration.calibration_model import (
     GainTable,
@@ -206,16 +205,20 @@ def create_gaintable_from_casa_cal_table(
 
     """
 
+    from casacore.tables import table
+
     base_table = table(tablename=msname)
 
     # Get times, interval, bandpass solutions
     gain_time = numpy.unique(base_table.getcol(columnname="TIME"))
     gain_interval = numpy.unique(base_table.getcol(columnname="INTERVAL"))
-    # field_id = numpy.unique(bt.getcol(columnname="FIELD_ID"))
-    # gain_residual = bt.getcol(columnname="PARAMERR")
     gains = base_table.getcol(columnname="CPARAM")
     antenna = base_table.getcol(columnname="ANTENNA1")
     spec_wind_id = base_table.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
+
+    # Below are optional columns
+    # field_id = numpy.unique(bt.getcol(columnname="FIELD_ID"))
+    # gain_residual = bt.getcol(columnname="PARAMERR")
     # gain_weight = numpy.ones(gains.shape)
 
     nants = len(numpy.unique(antenna))
@@ -255,19 +258,17 @@ def create_gaintable_from_casa_cal_table(
             actual += 1
         else:
             ant_map.append(-1)
-    # assert actual > 0, "Dish/station names are all blank - cannot load"
+
     if actual == 0:
         ant_map = list(range(len(names)))
         names = numpy.repeat("No name", len(names))
 
     mount = numpy.array(anttab.getcol("MOUNT"))[names != ""]
-    # log.info("mount is: %s" % (mount))
     diameter = numpy.array(anttab.getcol("DISH_DIAMETER"))[names != ""]
     xyz = numpy.array(anttab.getcol("POSITION"))[names != ""]
     offset = numpy.array(anttab.getcol("OFFSET"))[names != ""]
     stations = numpy.array(anttab.getcol("STATION"))[names != ""]
     names = numpy.array(anttab.getcol("NAME"))[names != ""]
-    nants = len(names)
 
     location = EarthLocation(
         x=Quantity(xyz[0][0], "m"),
@@ -287,8 +288,6 @@ def create_gaintable_from_casa_cal_table(
         offset=offset,
         stations=stations,
     )
-
-    # time_range = obs.getcol(columnname="TIME_RANGE")
 
     # Get phasecentres
     fieldtab = table("{msname}/FIELD", ack=False)
