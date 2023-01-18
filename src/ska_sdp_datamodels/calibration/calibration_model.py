@@ -87,6 +87,7 @@ class GainTable(xarray.Dataset):
         :param configuration: Configuration
         :param jones_type: Type of gain: T, G, B, etc
         :param receptor_frame: Input and output receptor frames
+                               equivalent to two sides of the Jones matrix
                 If a single frame, use it for both receptor_in and receptor_out
                 If a tuple, it stands for [receptor_in, receptor_out]
         """
