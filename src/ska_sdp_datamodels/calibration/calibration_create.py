@@ -204,7 +204,7 @@ def create_gaintable_from_casa_cal_table(
     :return: GainTable object
 
     """
-
+    # pylint: disable=import-error,import-outside-toplevel
     from casacore.tables import table
 
     base_table = table(tablename=msname)
@@ -229,7 +229,8 @@ def create_gaintable_from_casa_cal_table(
     gain_frequency = spw.getcol(columnname="CHAN_FREQ")[spec_wind_id]
     nfrequency = spw.getcol(columnname="NUM_CHAN")[spec_wind_id]
 
-    # TODO:  need to be confirmed
+    # pylint: disable=fixme
+    # TODO: Need to confirm what receptor frame(s) are used
     receptor_frame = ReceptorFrame("circular")
     nrec = receptor_frame.nrec
 
