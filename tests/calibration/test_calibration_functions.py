@@ -35,6 +35,10 @@ def test_export_gaintable_to_hdf5(gain_table):
                 == gain_table.receptor_frame_in.type
             )
             assert (
+                result_gt.attrs["receptor_frame_out"]
+                == gain_table.receptor_frame_out.type
+            )
+            assert (
                 result_gt.attrs["phasecentre_coords"]
                 == gain_table.phasecentre.to_string()
             )

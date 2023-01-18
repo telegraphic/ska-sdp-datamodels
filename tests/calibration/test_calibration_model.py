@@ -180,6 +180,28 @@ def test_qa_gain_table(result_gain_table):
         assert result_qa.data[key] == value, f"{key} mismatch"
 
 
+def test_invalid_receptor_frame(result_gain_table):
+    """
+    Raise ValueError when wrong receptor frame input is given
+    """
+    result_data_vars = result_gain_table.data_vars
+    result_attrs = result_gain_table.attrs
+    result_coords = result_gain_table.coords
+
+    with pytest.raises(ValueError):
+        GainTable.constructor(
+            result_data_vars["gain"],
+            result_coords["time"],
+            result_data_vars["interval"],
+            result_data_vars["weight"],
+            result_data_vars["residual"],
+            result_coords["frequency"],
+            (RECEPTOR_FRAME, ReceptorFrame("circuloid")),
+            result_attrs["phasecentre"],
+            result_attrs["configuration"],
+        )
+
+
 def test_pointing_table_constructor_coords(result_pointing_table):
     """
     Constructor correctly generates coordinates
