@@ -91,11 +91,10 @@ def test_export_skymodel_to_text(sky_model):
     """
     with tempfile.TemporaryDirectory() as temp_dir:
         test_text = f"{temp_dir}/test.skymodel"
-        # test_text = "test.skymodel"
 
         # tested function
         export_skymodel_to_text(sky_model, test_text)
-        with open("test.skymodel", "r", encoding="utf-8") as file:
+        with open(test_text, "r", encoding="utf-8") as file:
             line_index = 0
             for line in file:
                 if line_index == 0:
