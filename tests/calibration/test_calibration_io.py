@@ -1,12 +1,12 @@
 from unittest.mock import patch
 
 import numpy
+
 from ska_sdp_datamodels.calibration.calibration_create import (
     _generate_configuration_from_cal_table,
     _get_phase_centre_from_cal_table,
     create_gaintable_from_casa_cal_table,
 )
-
 
 NTIMES = 4
 NANTS = 6

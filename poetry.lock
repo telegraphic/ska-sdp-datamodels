@@ -433,10 +433,10 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "python-casacore"
-version = "3.5.2"
+version = "3.5.1"
 description = "A wrapper around CASACORE, the radio astronomy library"
 category = "main"
-optional = true
+optional = false
 python-versions = "*"
 
 [package.dependencies]
@@ -537,7 +537,7 @@ python-casacore = ["python-casacore"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "95a03f44de98f37b29b5de2dfdf45108da0eb4270c13c400a3f85b9152104723"
+content-hash = "028b76f5406670d45fa0dc9dc1df882c896bde3a39accfeb368bc914b6c3f917"
 
 [metadata.files]
 astroid = [
@@ -889,12 +889,12 @@ pytest-cov = [
     {file = "pytest_cov-3.0.0-py3-none-any.whl", hash = "sha256:578d5d15ac4a25e5f961c938b85a05b09fdaae9deef3bb6de9a6e766622ca7a6"},
 ]
 python-casacore = [
-    {file = "python-casacore-3.5.2.tar.gz", hash = "sha256:ad70c8e08893eec928b3e38c099bda8863f5aa9d099fd00694ad2b0d48eba08f"},
-    {file = "python_casacore-3.5.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e58723013dd1f4b456ca3cc9485df8a7949bd20cc81050835458fb03fdfac47d"},
-    {file = "python_casacore-3.5.2-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c62b08e01af9d93829a771869bf1d0e42c5e44c2abc1217e3485714ed7b321f4"},
-    {file = "python_casacore-3.5.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ff9251e0cac9cf69db27d4b3ccaa2aacf38005856b704cf4806e2c3e44eeed66"},
-    {file = "python_casacore-3.5.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:702dade7a21069158839a74d9bbb770cb95bd1c1d9f4d54a79db1e4a71d01b5a"},
-    {file = "python_casacore-3.5.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:69adea36329d913c350d7e9c8e0cb78fafbefed044c188081d7d1bcdda072425"},
+    {file = "python-casacore-3.5.1.tar.gz", hash = "sha256:a577233c7311f64a8048180ee82d6946fee16e0dce2976eb516784a32d8b9133"},
+    {file = "python_casacore-3.5.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f8f74ffa0ab80fe3de8efd5ae7823ea2f16311d0902e1205adcb21d771068ddc"},
+    {file = "python_casacore-3.5.1-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9af5ab30059f2acf7fde474a6b305507ce69ec419556eb5c3bc33b93f0d656d6"},
+    {file = "python_casacore-3.5.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ce75b4653b7f05186061444e892ae9605f0e927b536abd0e38fe51738418bbd3"},
+    {file = "python_casacore-3.5.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a94f4e4e982cf64ced65e7e6a738e4425dbffba72542f385e61aaf13269781c9"},
+    {file = "python_casacore-3.5.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3389fa322729fe169da40f9c2486472cb1a321f15d154b8bd7498f612c927acc"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
