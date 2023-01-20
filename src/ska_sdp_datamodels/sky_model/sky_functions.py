@@ -245,7 +245,7 @@ def export_skymodel_to_text(skymodel, filename):
     :return:
     """
     if len(skymodel.components) > 0:
-        with open(filename, "w") as f:
+        with open(filename, "w", encoding="utf-8") as f:
             f.write(
                 "FORMAT = Name, Type, Ra, Dec, I, MajorAxis, MinorAxis, "
                 "PositionAngle, ReferenceFrequency='134e6', "
