@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import numpy
 from ska_sdp_datamodels.calibration.calibration_create import (
     _generate_configuration_from_cal_table,
@@ -12,46 +14,46 @@ NFREQ = 3
 
 
 class MockBaseTable:
-    def getcol(self, columname=None):
-        if columname == "TIME":
+    def getcol(self, columnname=None):
+        if columnname == "TIME":
             return numpy.array(
                 [4.35089331e09, 4.35089332e09, 4.35089333e09, 4.35089334e09]
             )
 
-        if columname == "INTERVAL":
+        if columnname == "INTERVAL":
             return numpy.array([10.0])
 
-        if columname == "CPARAM":
+        if columnname == "CPARAM":
             return numpy.ones((NTIMES, NANTS, NFREQ, 1))
 
-        if columname == "ANTENNA1":
+        if columnname == "ANTENNA1":
             return numpy.array([0, 1, 2, 3, 4, 5])
 
-        if columname == "SPECTRAL_WINDOW_ID":
+        if columnname == "SPECTRAL_WINDOW_ID":
             return numpy.array([0, 1])
 
 
 class MockSpectralWindowTable:
-    def getcol(self, columname=None):
-        if columname == "CHAN_FREQ":
+    def getcol(self, columnname=None):
+        if columnname == "CHAN_FREQ":
             return numpy.array([[8.0e9, 8.1e9, 8.2e9], [8.4e9, 8.5e9, 8.6e9]])
 
-        if columname == "NUM_CHAN":
+        if columnname == "NUM_CHAN":
             return numpy.array([NFREQ, NFREQ])
 
 
 class MockAntennaTable:
-    def getcol(self, columname=None):
-        if columname == "NAME":
+    def getcol(self, columnname=None):
+        if columnname == "NAME":
             return ["ANT1", "ANT2", "ANT3", "ANT4", "ANT5", "ANT6"]
 
-        if columname == "MOUNT":
+        if columnname == "MOUNT":
             return ["ALT-AZ", "ALT-AZ", "ALT-AZ", "ALT-AZ", "ALT-AZ", "ALT-AZ"]
 
-        if columname == "DISH_DIAMETER":
+        if columnname == "DISH_DIAMETER":
             return numpy.array([25.0, 25.0, 25.0, 25.0, 25.0, 25.0])
 
-        if columname == "POSITION":
+        if columnname == "POSITION":
             return numpy.array(
                 [
                     [-1601162.0, -5042003.0, 3554915.0],
@@ -63,7 +65,7 @@ class MockAntennaTable:
                 ]
             )
 
-        if columname == "OFFSET":
+        if columnname == "OFFSET":
             return numpy.array(
                 [
                     [0.00000000e00, 0.00000000e00, 0.00000000e00],
@@ -75,7 +77,7 @@ class MockAntennaTable:
                 ]
             )
 
-        if columname == "STATION":
+        if columnname == "STATION":
             return [
                 "SKAMID-CORE",
                 "SKAMID-CORE",
@@ -84,6 +86,14 @@ class MockAntennaTable:
                 "SKAMID-ARM2",
                 "SKAMID-ARM3",
             ]
+
+
+class MockFieldTable:
+    """TODO"""
+
+
+class MockObservationTable:
+    """TODO"""
 
 
 def test_generate_configuration_from_cal_table():
@@ -102,5 +112,8 @@ def test_get_phase_centre_from_cal_table():
     result = _get_phase_centre_from_cal_table()
 
 
-def test_create_gaintable_from_casa_cal_table():
-    result = create_gaintable_from_casa_cal_table()
+@patch("ska_sdp_datamodels.calibration.calibration_create._load_casa_tables")
+def test_create_gaintable_from_casa_cal_table(mock_tables):
+    mock_tables.return_value = (MockAntennaTable(), MockBaseTable(), MockFieldTable(),
+                                MockObservationTable(), MockSpectralWindowTable())
+    result = create_gaintable_from_casa_cal_table("fake_ms")
