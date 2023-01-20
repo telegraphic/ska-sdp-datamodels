@@ -2,6 +2,7 @@
 Geometry support functions.
 """
 
+import numpy
 from astroplan import Observer
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
@@ -73,3 +74,29 @@ def calculate_visibility_hourangles(vis, time=None):
     site = Observer(location=location)
     hour_angles = site.target_hour_angle(utc_time, direction).wrap_at("180d")
     return hour_angles
+
+
+def expand_polarizations(data, dtype=None):
+    """
+    Expand number of polarizations to four
+    Optionally change the data type
+    """
+
+    if dtype is None:
+        dtype = data.dtype
+    nr_polarizations = data.shape[-1]
+    if (nr_polarizations == 4) and (dtype == data.dtype):
+        # Nothing to do
+        # Return unmodified input
+        return data
+    new_shape = data.shape[:-1] + (4,)
+    data_out = numpy.zeros(new_shape, dtype=dtype)
+    if nr_polarizations == 4:
+        data_out[:] = data
+    elif nr_polarizations == 2:
+        data_out[:, :, 0] = data[:, :, 0]
+        data_out[:, :, 3] = data[:, :, 1]
+    else:
+        data_out[:, :, 0] = data[:, :, 0]
+        data_out[:, :, 3] = data[:, :, 0]
+    return data_out
