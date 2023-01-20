@@ -247,7 +247,9 @@ def export_skymodel_to_text(skymodel, filename):
     if len(skymodel.components) > 0:
         with open(filename, "w") as f:
             f.write(
-                "FORMAT = Name, Type, Ra, Dec, I, MajorAxis, MinorAxis, PositionAngle, ReferenceFrequency='134e6', SpectralIndex='[0.0]'\r\n"
+                "FORMAT = Name, Type, Ra, Dec, I, MajorAxis, MinorAxis, "
+                "PositionAngle, ReferenceFrequency='134e6', "
+                "SpectralIndex='[0.0]'\r\n"
             )
             for component in skymodel.components:
                 f.write(
