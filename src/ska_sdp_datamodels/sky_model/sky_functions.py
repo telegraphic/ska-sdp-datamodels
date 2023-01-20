@@ -235,3 +235,32 @@ def convert_hdf_to_skymodel(f):
         mask=mask,
         fixed=fixed,
     )
+
+
+def export_skymodel_to_text(skymodel, filename):
+    """Save a SkyModel to disk in a .skymodel format, in a file named test.skymodel
+    This exact filename is used in DP3 gaincal parset definition.
+
+    :param skymodel: SkyModel
+    :return:
+    """
+    if len(skymodel.components) > 0:
+        with open(filename, "w") as f:
+            f.write(
+                "FORMAT = Name, Type, Ra, Dec, I, MajorAxis, MinorAxis, PositionAngle, ReferenceFrequency='134e6', SpectralIndex='[0.0]'\r\n"
+            )
+            for component in skymodel.components:
+                f.write(
+                    str(component.name)
+                    + ", "
+                    + str(component.shape)
+                    + ", "
+                    + str(component.direction.ra)
+                    + ", "
+                    + str(component.direction.dec)
+                    + ", "
+                    + str(component.flux[0][0])
+                    + ", , , , "
+                    + str(component.frequency[0])
+                    + " \r\n"
+                )
