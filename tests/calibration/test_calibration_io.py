@@ -23,6 +23,7 @@ from ska_sdp_datamodels.science_data_model import ReceptorFrame
 NTIMES = 4
 NANTS = 6
 NFREQ = 3
+TEL_NAME = "MY-SKA"
 
 
 class MockBaseTable:
@@ -125,14 +126,17 @@ class MockFieldTable:
 class MockObservationTable:
     """
     Mock Observation Table Class
-    To be updated
     """
+
+    def getcol(self, columnname=None):
+        if columnname == "TELESCOPE_NAME":
+            return TEL_NAME
 
 
 def test_generate_configuration_from_cal_table():
-    tel_name = "MY-SKA"
+
     result = _generate_configuration_from_cal_table(
-        MockAntennaTable(), tel_name
+        MockAntennaTable(), TEL_NAME
     )
 
     location = EarthLocation(
@@ -140,7 +144,7 @@ def test_generate_configuration_from_cal_table():
         y=Quantity(-5042003.0, "m"),
         z=Quantity(3554915.0, "m"),
     )
-    assert result.attrs["name"] == tel_name
+    assert result.attrs["name"] == TEL_NAME
     assert result.attrs["location"] == location
     assert result.attrs["receptor_frame"] == ReceptorFrame("linear")
     assert result.coords["id"].data.shape == (6,)
@@ -172,3 +176,4 @@ def test_create_gaintable_from_casa_cal_table(mock_tables):
     )
     result = create_gaintable_from_casa_cal_table("fake_ms")
     assert isinstance(result, GainTable)
+    # Optional: assert specific attributes

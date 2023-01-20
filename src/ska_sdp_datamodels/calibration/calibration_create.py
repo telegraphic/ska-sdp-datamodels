@@ -191,20 +191,19 @@ def create_pointingtable_from_visibility(
 
 
 def create_gaintable_from_casa_cal_table(
-    msname,
+    table_name,
     jones_type="B",
 ) -> GainTable:
     """
     Create gain table from Calibration table of CASA.
 
     This makes an empty gain table consistent with the Visibility.
-
-    :param msname: Visibility object
+    :param table_name: Name of CASA table file
     :param jones_type: Type of calibration matrix T or G or B
     :return: GainTable object
 
     """
-    anttab, base_table, fieldtab, obs, spw = _load_casa_tables(msname)
+    anttab, base_table, fieldtab, obs, spw = _load_casa_tables(table_name)
 
     # Get times, interval, bandpass solutions
     gain_time = numpy.unique(base_table.getcol(columnname="TIME"))
@@ -297,7 +296,6 @@ def _generate_configuration_from_cal_table(antenna_table, telescope_name):
         else:
             ant_map.append(-1)
     if actual == 0:
-        ant_map = list(range(len(names)))
         names = numpy.repeat("No name", len(names))
 
     mount = numpy.array(antenna_table.getcol("MOUNT"))[names != ""]
