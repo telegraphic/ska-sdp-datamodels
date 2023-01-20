@@ -1,12 +1,24 @@
+# pylint: disable=missing-function-docstring, inconsistent-return-statements,
+# pylint: disable=too-few-public-methods
+"""
+Unit Tests to create GainTable
+from CASA Tables
+"""
 from unittest.mock import patch
 
 import numpy
+import pytest
+from astropy import units as u
+from astropy.coordinates import EarthLocation, SkyCoord
+from astropy.units import Quantity
 
 from ska_sdp_datamodels.calibration.calibration_create import (
     _generate_configuration_from_cal_table,
     _get_phase_centre_from_cal_table,
     create_gaintable_from_casa_cal_table,
 )
+from ska_sdp_datamodels.calibration.calibration_model import GainTable
+from ska_sdp_datamodels.science_data_model import ReceptorFrame
 
 NTIMES = 4
 NANTS = 6
@@ -14,6 +26,10 @@ NFREQ = 3
 
 
 class MockBaseTable:
+    """
+    Mock Base Table Class
+    """
+
     def getcol(self, columnname=None):
         if columnname == "TIME":
             return numpy.array(
@@ -34,6 +50,10 @@ class MockBaseTable:
 
 
 class MockSpectralWindowTable:
+    """
+    Mock Spectral Window Table Class
+    """
+
     def getcol(self, columnname=None):
         if columnname == "CHAN_FREQ":
             return numpy.array([[8.0e9, 8.1e9, 8.2e9], [8.4e9, 8.5e9, 8.6e9]])
@@ -43,6 +63,10 @@ class MockSpectralWindowTable:
 
 
 class MockAntennaTable:
+    """
+    Mock Antenna Table Class
+    """
+
     def getcol(self, columnname=None):
         if columnname == "NAME":
             return ["ANT1", "ANT2", "ANT3", "ANT4", "ANT5", "ANT6"]
@@ -89,31 +113,62 @@ class MockAntennaTable:
 
 
 class MockFieldTable:
-    """TODO"""
+    """
+    Mock Field Table Class
+    """
+
+    def getcol(self, columnname=None):
+        if columnname == "PHASE_DIR":
+            return numpy.array([[[0.0, 0.0]]])
 
 
 class MockObservationTable:
-    """TODO"""
+    """
+    Mock Observation Table Class
+    To be updated
+    """
 
 
 def test_generate_configuration_from_cal_table():
     tel_name = "MY-SKA"
-    result = _generate_configuration_from_cal_table(MockAntennaTable(), tel_name)
+    result = _generate_configuration_from_cal_table(
+        MockAntennaTable(), tel_name
+    )
 
+    location = EarthLocation(
+        x=Quantity(-1601162.0, "m"),
+        y=Quantity(-5042003.0, "m"),
+        z=Quantity(3554915.0, "m"),
+    )
     assert result.attrs["name"] == tel_name
-    assert result.attrs["location"] == "<expected_location>"
-    assert result.attrs["receptor_frame"] == "<expected_receptor_frame>"
-    assert result.coords.data == [0, 1, 2, 3, 4, 5]
-    # ETC, check mount, diametre, xyz, offsets, and so on
-    pass
+    assert result.attrs["location"] == location
+    assert result.attrs["receptor_frame"] == ReceptorFrame("linear")
+    assert result.coords["id"].data.shape == (6,)
+    # Optional: check mount, diametre, xyz, offsets, and so on
 
 
 def test_get_phase_centre_from_cal_table():
-    result = _get_phase_centre_from_cal_table()
+    result = _get_phase_centre_from_cal_table(MockFieldTable())
+    expected = SkyCoord(
+        ra=0.0 * u.rad,
+        dec=0.0 * u.rad,
+        frame="icrs",
+        equinox="J2000",
+    )
+    assert result == expected
+
+
+casacore = pytest.importorskip("python-casacore")
 
 
 @patch("ska_sdp_datamodels.calibration.calibration_create._load_casa_tables")
 def test_create_gaintable_from_casa_cal_table(mock_tables):
-    mock_tables.return_value = (MockAntennaTable(), MockBaseTable(), MockFieldTable(),
-                                MockObservationTable(), MockSpectralWindowTable())
+    mock_tables.return_value = (
+        MockAntennaTable(),
+        MockBaseTable(),
+        MockFieldTable(),
+        MockObservationTable(),
+        MockSpectralWindowTable(),
+    )
     result = create_gaintable_from_casa_cal_table("fake_ms")
+    assert isinstance(result, GainTable)

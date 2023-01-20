@@ -263,6 +263,7 @@ def create_gaintable_from_casa_cal_table(
 def _load_casa_tables(msname):
     # pylint: disable=import-error,import-outside-toplevel
     from casacore.tables import table
+
     base_table = table(tablename=msname)
     # spw --> spectral window
     spw = table(tablename=f"{msname}/SPECTRAL_WINDOW")
