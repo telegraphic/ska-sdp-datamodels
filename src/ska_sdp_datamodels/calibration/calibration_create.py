@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, duplicate-code
+# pylint: disable=invalid-name, duplicate-code， too-many-locals
 """
 Functions to create calibration models
 from Visibility
