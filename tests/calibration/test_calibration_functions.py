@@ -1,3 +1,5 @@
+# pylint: disable=too-many-locals
+
 """
 Test calibration data model functions.
 """

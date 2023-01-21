@@ -1,5 +1,3 @@
-# pylint: disable=too-many-locals
-
 """
 Functions to create calibration models
 from Visibility
