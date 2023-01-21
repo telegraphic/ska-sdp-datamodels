@@ -1,3 +1,5 @@
+# pylint: disable=too-many-locals
+
 """
 Polarisation-type data model unit tests.
 """
