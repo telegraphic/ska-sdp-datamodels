@@ -6,9 +6,6 @@ from Visibility
 """
 
 import numpy
-from astropy import units as u
-from astropy.coordinates import EarthLocation, SkyCoord
-from astropy.units import Quantity
 
 from ska_sdp_datamodels.calibration.calibration_model import (
     GainTable,
@@ -17,7 +14,6 @@ from ska_sdp_datamodels.calibration.calibration_model import (
 from ska_sdp_datamodels.configuration.config_coordinate_support import (
     hadec_to_azel,
 )
-from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
 from ska_sdp_datamodels.visibility import Visibility
 from ska_sdp_datamodels.visibility.vis_utils import (
@@ -188,139 +184,3 @@ def create_pointingtable_from_visibility(
     )
 
     return pointing_table
-
-
-def create_gaintable_from_casa_cal_table(
-    table_name,
-    jones_type="B",
-) -> GainTable:
-    """
-    Create gain table from Calibration table of CASA.
-
-    This makes an empty gain table consistent with the Visibility.
-    :param table_name: Name of CASA table file
-    :param jones_type: Type of calibration matrix T or G or B
-    :return: GainTable object
-
-    """
-    anttab, base_table, fieldtab, obs, spw = _load_casa_tables(table_name)
-
-    # Get times, interval, bandpass solutions
-    gain_time = numpy.unique(base_table.getcol(columnname="TIME"))
-    gain_interval = numpy.unique(base_table.getcol(columnname="INTERVAL"))
-    gains = base_table.getcol(columnname="CPARAM")
-    antenna = base_table.getcol(columnname="ANTENNA1")
-    spec_wind_id = base_table.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
-    # Below are optional columns
-    # field_id = numpy.unique(bt.getcol(columnname="FIELD_ID"))
-    # gain_residual = bt.getcol(columnname="PARAMERR")
-    # gain_weight = numpy.ones(gains.shape)
-
-    # Get the frequency sampling information
-    gain_frequency = spw.getcol(columnname="CHAN_FREQ")[spec_wind_id]
-    nfrequency = spw.getcol(columnname="NUM_CHAN")[spec_wind_id]
-
-    # pylint: disable=fixme
-    # TODO: Need to confirm what receptor frame(s) are used
-    receptor_frame = ReceptorFrame("circular")
-    nrec = receptor_frame.nrec
-
-    nants = len(numpy.unique(antenna))
-    ntimes = len(gain_time)
-    gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
-    gain = numpy.ones(gain_shape, dtype="complex")
-    if nrec > 1:
-        gain[..., 0, 1] = gains[..., 0]
-        gain[..., 1, 0] = gains[..., 1]
-
-    gain_weight = numpy.ones(gain_shape)
-    gain_residual = numpy.zeros([ntimes, nfrequency, nrec, nrec])
-
-    # Get configuration
-    ts_name = obs.getcol(columnname="TELESCOPE_NAME")[0]
-    configuration = _generate_configuration_from_cal_table(anttab, ts_name)
-
-    # Get phase_centres
-    phase_centre = _get_phase_centre_from_cal_table(fieldtab)
-
-    gain_table = GainTable.constructor(
-        gain=gain,
-        time=gain_time,
-        interval=gain_interval,
-        weight=gain_weight,
-        residual=gain_residual,
-        frequency=gain_frequency,
-        receptor_frame=receptor_frame,
-        phasecentre=phase_centre,
-        configuration=configuration,
-        jones_type=jones_type,
-    )
-
-    return gain_table
-
-
-def _load_casa_tables(msname):
-    # pylint: disable=import-error,import-outside-toplevel
-    from casacore.tables import table
-
-    base_table = table(tablename=msname)
-    # spw --> spectral window
-    spw = table(tablename=f"{msname}/SPECTRAL_WINDOW")
-    obs = table(tablename=f"{msname}/OBSERVATION")
-    anttab = table(f"{msname}/ANTENNA", ack=False)
-    fieldtab = table(f"{msname}/FIELD", ack=False)
-    return anttab, base_table, fieldtab, obs, spw
-
-
-def _get_phase_centre_from_cal_table(field_table):
-    phase_dir = field_table.getcol(columnname="PHASE_DIR")
-    phase_centre = SkyCoord(
-        ra=phase_dir[0][0][0] * u.rad,
-        dec=phase_dir[0][0][1] * u.rad,
-        frame="icrs",
-        equinox="J2000",
-    )
-    return phase_centre
-
-
-def _generate_configuration_from_cal_table(antenna_table, telescope_name):
-    names = numpy.array(antenna_table.getcol("NAME"))
-
-    ant_map = []
-    actual = 0
-    # This assumes that the names are actually filled in!
-    for _, name in enumerate(names):
-        if name != "":
-            ant_map.append(actual)
-            actual += 1
-        else:
-            ant_map.append(-1)
-    if actual == 0:
-        names = numpy.repeat("No name", len(names))
-
-    mount = numpy.array(antenna_table.getcol("MOUNT"))[names != ""]
-    diameter = numpy.array(antenna_table.getcol("DISH_DIAMETER"))[names != ""]
-    xyz = numpy.array(antenna_table.getcol("POSITION"))[names != ""]
-    offset = numpy.array(antenna_table.getcol("OFFSET"))[names != ""]
-    stations = numpy.array(antenna_table.getcol("STATION"))[names != ""]
-    names = numpy.array(antenna_table.getcol("NAME"))[names != ""]
-
-    location = EarthLocation(
-        x=Quantity(xyz[0][0], "m"),
-        y=Quantity(xyz[0][1], "m"),
-        z=Quantity(xyz[0][2], "m"),
-    )
-
-    configuration = Configuration.constructor(
-        name=telescope_name,
-        location=location,
-        names=names,
-        xyz=xyz,
-        mount=mount,
-        frame="ITRF",
-        receptor_frame=ReceptorFrame("linear"),
-        diameter=diameter,
-        offset=offset,
-        stations=stations,
-    )
-    return configuration

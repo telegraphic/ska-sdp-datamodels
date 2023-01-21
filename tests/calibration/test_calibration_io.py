@@ -12,10 +12,10 @@ from astropy import units as u
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.units import Quantity
 
-from ska_sdp_datamodels.calibration.calibration_create import (
+from ska_sdp_datamodels.calibration.calibration_functions import (
     _generate_configuration_from_cal_table,
     _get_phase_centre_from_cal_table,
-    create_gaintable_from_casa_cal_table,
+    import_gaintable_from_casa_cal_table,
 )
 from ska_sdp_datamodels.calibration.calibration_model import GainTable
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
@@ -166,7 +166,7 @@ casacore = pytest.importorskip("python-casacore")
 
 
 @patch("ska_sdp_datamodels.calibration.calibration_create._load_casa_tables")
-def test_create_gaintable_from_casa_cal_table(mock_tables):
+def test_import_gaintable_from_casa_cal_table(mock_tables):
     mock_tables.return_value = (
         MockAntennaTable(),
         MockBaseTable(),
@@ -174,6 +174,6 @@ def test_create_gaintable_from_casa_cal_table(mock_tables):
         MockObservationTable(),
         MockSpectralWindowTable(),
     )
-    result = create_gaintable_from_casa_cal_table("fake_ms")
+    result = import_gaintable_from_casa_cal_table("fake_ms")
     assert isinstance(result, GainTable)
     # Optional: assert specific attributes
