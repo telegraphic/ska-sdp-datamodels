@@ -10,6 +10,7 @@ import numpy
 from ska_sdp_datamodels.sky_model import (
     export_skycomponent_to_hdf5,
     export_skymodel_to_hdf5,
+    export_skymodel_to_text,
     import_skycomponent_from_hdf5,
     import_skymodel_from_hdf5,
 )
@@ -81,6 +82,62 @@ def test_export_skymodel_to_hdf5(sky_model):
             assert result_sm.attrs["number_skycomponents"] == 1
             for key in ["image", "gaintable", "mask"]:
                 assert key in result_sm.keys()
+
+
+def test_export_skymodel_to_text(sky_model):
+    """
+    We read back the file written by export_skymodel_to_text
+    and get the data that we used to write the file.
+    """
+
+    # Test that invalid file extension is detected
+    exception_catched = False
+    try:
+        export_skymodel_to_text(sky_model, "test.invalid")
+    except ValueError:
+        exception_catched = True
+    assert exception_catched
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_text = f"{temp_dir}/test.skymodel"
+
+        # tested function
+        export_skymodel_to_text(sky_model, test_text)
+        with open(test_text, "r", encoding="utf-8") as file:
+            line_index = 0
+            for line in file:
+                if line_index == 0:
+                    assert (
+                        line == "FORMAT = Name, Type, Ra, Dec, I, MajorAxis, "
+                        "MinorAxis, PositionAngle, ReferenceFrequency='134e6',"
+                        " SpectralIndex='[0.0]'\n"
+                    )
+                else:
+                    text = line.split(", ")
+                    assert text[0] == str(
+                        sky_model.components[line_index - 1].name
+                    )
+                    assert text[1] == str(
+                        sky_model.components[line_index - 1].shape
+                    )
+                    assert text[2] == str(
+                        sky_model.components[line_index - 1].direction.ra
+                    )
+                    assert text[3] == str(
+                        sky_model.components[line_index - 1].direction.dec
+                    )
+                    assert text[4] == str(
+                        sky_model.components[line_index - 1].flux[0][0]
+                    )
+                    assert (
+                        text[8]
+                        == str(
+                            sky_model.components[line_index - 1].frequency[0]
+                        )
+                        + " \n"
+                    )
+
+                line_index = line_index + 1
 
 
 def test_import_skymodel_from_hdf5(sky_model):

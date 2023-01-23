@@ -3,6 +3,7 @@
 main
 ----
 * Add functions to read GainTable from CASA table ([MR21](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/21))
+* add function export_skymodel_to_text, needed to add the option of calibration with DP3 in rascil ([MR23](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/23))
 * Update GainTable to read different receptor frames as inputs ([MR22](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/22))
 * get_direction_time_location and calculate_visibility_hourangles allow for user-defined time inputs ([MR20](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/20))
 * Bug fix in PointingTable.pointingtable_acc.nrec ([MR20](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/20))
