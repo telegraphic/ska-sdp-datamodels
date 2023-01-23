@@ -40,10 +40,10 @@ class MockBaseTable:
             )
 
         if columnname == "INTERVAL":
-            return numpy.array([10.0])
+            return numpy.repeat(10.0, NTIMES)
 
         if columnname == "CPARAM":
-            return numpy.ones((NTIMES, NANTS, NFREQ, 1))
+            return numpy.ones((NTIMES, NANTS, NFREQ, 2))
 
         if columnname == "ANTENNA1":
             return numpy.array([0, 1, 2, 3, 4, 5])
@@ -180,14 +180,15 @@ def test_get_phase_centre_from_cal_table():
     assert result == expected
 
 
-casacore = pytest.importorskip("python-casacore")
-
-
-@patch("ska_sdp_datamodels.calibration.calibration_create._load_casa_tables")
+@patch(
+    "ska_sdp_datamodels.calibration.calibration_functions._load_casa_tables"
+)
 def test_import_gaintable_from_casa_cal_table(mock_tables):
     """
     Test importing gaintable from cal table
     """
+    pytest.importorskip("python-casacore")
+
     mock_tables.return_value = (
         MockAntennaTable(),
         MockBaseTable(),
@@ -195,6 +196,16 @@ def test_import_gaintable_from_casa_cal_table(mock_tables):
         MockObservationTable(),
         MockSpectralWindowTable(),
     )
-    result = import_gaintable_from_casa_cal_table("fake_ms")
+    result = import_gaintable_from_casa_cal_table("test_table")
     assert isinstance(result, GainTable)
-    # Optional: assert specific attributes
+    # Specific attributes
+    expected_time = numpy.array(
+        [4.35089331e09, 4.35089332e09, 4.35089333e09, 4.35089334e09]
+    )
+    assert result.attrs["receptor_frame1"] == ReceptorFrame("linear")
+    assert (result.coords["time"] == expected_time).all()
+    assert (result.interval.data[...] == 10.0).all()
+    assert (result.gain.data[..., 0, 0] == complex(1.0, 0.0)).all()
+    assert (result.gain.data[..., 0, 1] == complex(0.0, 0.0)).all()
+    assert (result.weight.data[...] == 1.0).all()
+    assert (result.residual.data[...] == 0.0).all()

@@ -1,5 +1,3 @@
-# pylint: disable=too-many-locals
-
 """
 Unit tests for functions that
 create calibration model objects.

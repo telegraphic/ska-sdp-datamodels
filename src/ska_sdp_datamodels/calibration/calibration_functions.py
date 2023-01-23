@@ -266,14 +266,13 @@ def _get_phase_centre_from_cal_table(field_table):
 
 
 def _generate_configuration_from_cal_table(antenna_table, telescope_name):
-    names = numpy.array(antenna_table.getcol("NAME"))
 
+    names = numpy.array(antenna_table.getcol("NAME"))
     mount = numpy.array(antenna_table.getcol("MOUNT"))[names != ""]
     diameter = numpy.array(antenna_table.getcol("DISH_DIAMETER"))[names != ""]
     xyz = numpy.array(antenna_table.getcol("POSITION"))[names != ""]
     offset = numpy.array(antenna_table.getcol("OFFSET"))[names != ""]
     stations = numpy.array(antenna_table.getcol("STATION"))[names != ""]
-    antenna_names = numpy.array(antenna_table.getcol("NAME"))[names != ""]
 
     location = EarthLocation(
         x=Quantity(xyz[0][0], "m"),
@@ -284,7 +283,7 @@ def _generate_configuration_from_cal_table(antenna_table, telescope_name):
     configuration = Configuration.constructor(
         name=telescope_name,
         location=location,
-        names=antenna_names,
+        names=names,
         xyz=xyz,
         mount=mount,
         frame="ITRF",
@@ -299,6 +298,7 @@ def _generate_configuration_from_cal_table(antenna_table, telescope_name):
 def import_gaintable_from_casa_cal_table(
     table_name,
     jones_type="B",
+    rec_frame=ReceptorFrame("linear"),
 ) -> GainTable:
     """
     Create gain table from Calibration table of CASA.
@@ -313,22 +313,18 @@ def import_gaintable_from_casa_cal_table(
 
     # Get times, interval, bandpass solutions
     gain_time = numpy.unique(base_table.getcol(columnname="TIME"))
-    gain_interval = numpy.unique(base_table.getcol(columnname="INTERVAL"))
+    gain_interval = base_table.getcol(columnname="INTERVAL")
     gains = base_table.getcol(columnname="CPARAM")
     antenna = base_table.getcol(columnname="ANTENNA1")
     spec_wind_id = base_table.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
-    # Below are optional columns
-    # field_id = numpy.unique(bt.getcol(columnname="FIELD_ID"))
-    # gain_residual = bt.getcol(columnname="PARAMERR")
-    # gain_weight = numpy.ones(gains.shape)
 
     # Get the frequency sampling information
     gain_frequency = spw.getcol(columnname="CHAN_FREQ")[spec_wind_id]
     nfrequency = spw.getcol(columnname="NUM_CHAN")[spec_wind_id]
 
-    # pylint: disable=fixme
-    # TODO: Need to confirm what receptor frame(s) are used
-    receptor_frame = ReceptorFrame("circular")
+    # Get receptor frame from Measurement set input
+    # Currently we use the same for ideal/model and measured
+    receptor_frame = rec_frame
     nrec = receptor_frame.nrec
 
     nants = len(numpy.unique(antenna))
@@ -336,9 +332,13 @@ def import_gaintable_from_casa_cal_table(
     gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
     gain = numpy.ones(gain_shape, dtype="complex")
     if nrec > 1:
-        gain[..., 0, 1] = gains[..., 0]
-        gain[..., 1, 0] = gains[..., 1]
+        gain[..., 0, 0] = gains[..., 0]
+        gain[..., 1, 1] = gains[..., 1]
+        gain[..., 0, 1] = 0.0
+        gain[..., 1, 0] = 0.0
 
+    # Set the gain weight to one and residual to zero
+    # This is temporary since in current tables they are not provided.
     gain_weight = numpy.ones(gain_shape)
     gain_residual = numpy.zeros([ntimes, nfrequency, nrec, nrec])
 
