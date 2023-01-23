@@ -31,6 +31,9 @@ class MockBaseTable:
     """
 
     def getcol(self, columnname=None):
+        """
+        Get column name
+        """
         if columnname == "TIME":
             return numpy.array(
                 [4.35089331e09, 4.35089332e09, 4.35089333e09, 4.35089334e09]
@@ -55,6 +58,9 @@ class MockSpectralWindowTable:
     """
 
     def getcol(self, columnname=None):
+        """
+        Get column name
+        """
         if columnname == "CHAN_FREQ":
             return numpy.array([[8.0e9, 8.1e9, 8.2e9], [8.4e9, 8.5e9, 8.6e9]])
 
@@ -134,6 +140,9 @@ class MockObservationTable:
     """
 
     def getcol(self, columnname=None):
+        """
+        Get column name
+        """
         if columnname == "TELESCOPE_NAME":
             return TEL_NAME
 
