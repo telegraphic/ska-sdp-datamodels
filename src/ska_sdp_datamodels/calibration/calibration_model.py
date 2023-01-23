@@ -211,12 +211,12 @@ class GainTableAccessor(XarrayAccessorMixin):
 
     @property
     def receptor1(self):
-        """Receptor Input"""
+        """Measured Receptor Frame"""
         return self._obj["receptor1"]
 
     @property
     def receptor2(self):
-        """Receptor Output"""
+        """Ideal Receptor Frame"""
         return self._obj["receptor2"]
 
     def qa_gain_table(self, context=None) -> QualityAssessment:
