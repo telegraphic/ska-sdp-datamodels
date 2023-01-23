@@ -5,6 +5,8 @@
 Calibration-related data models.
 """
 
+from typing import List, Tuple, Union
+
 import numpy
 import xarray
 from astropy.time import Time
@@ -40,7 +42,8 @@ class GainTable(xarray.Dataset):
             datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
             data_model:  GainTable
-            receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
+            receptor_frame1:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
+            receptor_frame2:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
             phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
             configuration:      <xarray.Configuration> Dimensions:   (id: 115, spati...
     """  # noqa: E501
@@ -64,7 +67,9 @@ class GainTable(xarray.Dataset):
         weight: numpy.array = None,
         residual: numpy.array = None,
         frequency: numpy.array = None,
-        receptor_frame: ReceptorFrame = ReceptorFrame("linear"),
+        receptor_frame: Union[
+            ReceptorFrame, Tuple[ReceptorFrame], List[ReceptorFrame]
+        ] = ReceptorFrame("linear"),
         phasecentre=None,
         configuration=None,
         jones_type="T",
@@ -82,29 +87,62 @@ class GainTable(xarray.Dataset):
         :param weight: Weight of gain [nrows, nchan, nrec, nrec]
         :param residual: Residual of fit [nchan, nrec, nrec]
         :param frequency: Frequency [nchan]
-        :param receptor_frame: Receptor frame
         :param phasecentre: Phasecentre (SkyCoord)
         :param configuration: Configuration
         :param jones_type: Type of gain: T, G, B, etc
+        :param receptor_frame: Measured and ideal (model) data receptor frames;
+                equivalent to two sides of the Jones matrix.
+                Receptor1 stands for measured data polarisation;
+                Receptor2 stands for ideal/model data polarisation.
+                If a single frame, use it for both receptor1 and receptor2.
+                If a tuple, it stands for [receptor1, receptor2].
+                See also:
+                https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
+
         """
         nants = gain.shape[1]
         antennas = range(nants)
+        # If this doesn't work it will automatically raise a ValueError
+        if isinstance(receptor_frame, (list, tuple)):
+            receptor1, receptor2 = receptor_frame
+            if receptor1.nrec != receptor2.nrec:
+                raise ValueError(
+                    "Polarisation of the two receptors "
+                    "need to have the same length "
+                    "in order to return square matrix"
+                )
+        if isinstance(receptor_frame, ReceptorFrame):
+            receptor1 = receptor_frame
+            receptor2 = receptor_frame
+
         coords = {
             "time": time,
             "antenna": antennas,
             "frequency": frequency,
-            "receptor1": receptor_frame.names,
-            "receptor2": receptor_frame.names,
+            "receptor1": receptor1.names,
+            "receptor2": receptor2.names,
         }
 
         datavars = {}
         datavars["gain"] = xarray.DataArray(
             gain,
-            dims=["time", "antenna", "frequency", "receptor1", "receptor2"],
+            dims=[
+                "time",
+                "antenna",
+                "frequency",
+                "receptor1",
+                "receptor2",
+            ],
         )
         datavars["weight"] = xarray.DataArray(
             weight,
-            dims=["time", "antenna", "frequency", "receptor1", "receptor2"],
+            dims=[
+                "time",
+                "antenna",
+                "frequency",
+                "receptor1",
+                "receptor2",
+            ],
         )
         datavars["residual"] = xarray.DataArray(
             residual, dims=["time", "frequency", "receptor1", "receptor2"]
@@ -116,7 +154,8 @@ class GainTable(xarray.Dataset):
         )
         attrs = {}
         attrs["data_model"] = "GainTable"
-        attrs["receptor_frame"] = receptor_frame
+        attrs["receptor_frame1"] = receptor1
+        attrs["receptor_frame2"] = receptor2
         attrs["phasecentre"] = phasecentre
         attrs["configuration"] = configuration
         attrs["jones_type"] = jones_type
@@ -173,13 +212,19 @@ class GainTableAccessor(XarrayAccessorMixin):
 
     @property
     def nrec(self):
-        """Number of receivers"""
+        """Number of polarisation in receptors
+        Note that receptor1 and receptor2 need to have the same length"""
         return len(self._obj["receptor1"])
 
     @property
-    def receptors(self):
-        """Receptors"""
+    def receptor1(self):
+        """Measured Receptor Frame"""
         return self._obj["receptor1"]
+
+    @property
+    def receptor2(self):
+        """Ideal(Model) Receptor Frame"""
+        return self._obj["receptor2"]
 
     def qa_gain_table(self, context=None) -> QualityAssessment:
         """Assess the quality of a gaintable

@@ -37,7 +37,8 @@ def convert_gaintable_to_hdf(gt: GainTable, f):
         raise ValueError(f"gt is not a GainTable: {GainTable}")
 
     f.attrs["data_model"] = "GainTable"
-    f.attrs["receptor_frame"] = gt.receptor_frame.type
+    f.attrs["receptor_frame1"] = gt.receptor_frame1.type
+    f.attrs["receptor_frame2"] = gt.receptor_frame2.type
     f.attrs["phasecentre_coords"] = gt.phasecentre.to_string()
     f.attrs["phasecentre_frame"] = gt.phasecentre.frame.name
     datavars = ["time", "gain", "weight", "residual", "interval", "frequency"]
@@ -53,7 +54,8 @@ def convert_hdf_to_gaintable(f):
     :return: GainTable
     """
     assert f.attrs["data_model"] == "GainTable", "Not a GainTable"
-    receptor_frame = ReceptorFrame(f.attrs["receptor_frame"])
+    receptor_frame1 = ReceptorFrame(f.attrs["receptor_frame1"])
+    receptor_frame2 = ReceptorFrame(f.attrs["receptor_frame2"])
     s = f.attrs["phasecentre_coords"].split()
     ss = [float(s[0]), float(s[1])] * u.deg
     phasecentre = SkyCoord(
@@ -73,7 +75,7 @@ def convert_hdf_to_gaintable(f):
         weight=weight,
         residual=residual,
         interval=interval,
-        receptor_frame=receptor_frame,
+        receptor_frame=(receptor_frame1, receptor_frame2),
         phasecentre=phasecentre,
     )
     return gt

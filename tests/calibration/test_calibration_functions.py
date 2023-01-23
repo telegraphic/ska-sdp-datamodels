@@ -31,8 +31,12 @@ def test_export_gaintable_to_hdf5(gain_table):
 
             result_gt = result_file["GainTable0"]
             assert (
-                result_gt.attrs["receptor_frame"]
-                == gain_table.receptor_frame.type
+                result_gt.attrs["receptor_frame1"]
+                == gain_table.receptor_frame1.type
+            )
+            assert (
+                result_gt.attrs["receptor_frame2"]
+                == gain_table.receptor_frame2.type
             )
             assert (
                 result_gt.attrs["phasecentre_coords"]
