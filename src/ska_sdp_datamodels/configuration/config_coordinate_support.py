@@ -91,7 +91,8 @@ def hadec_to_azel(ha, dec, latitude):
 
 # pylint: disable=too-many-locals
 def ecef_to_enu(location, xyz):
-    """Convert ECEF coordinates to ENU coordinates relative to reference location.
+    """Convert ECEF coordinates to ENU coordinates
+        relative to reference location.
     :param location: Current WGS84 coordinate
     :param xyz: ECEF coordinate
     :result : enu

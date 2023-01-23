@@ -36,7 +36,7 @@ def fixture_gain_table(low_aa05_config, phase_centre):
         weight,
         residual,
         frequency,
-        RECEPTOR_FRAME,
+        (RECEPTOR_FRAME, RECEPTOR_FRAME),
         phase_centre,
         low_aa05_config,
         jones_type,
@@ -119,9 +119,10 @@ def test_gain_table_constructor_attrs(
     """
     result_attrs = result_gain_table.attrs
 
-    assert len(result_attrs) == 5
+    assert len(result_attrs) == 6
     assert result_attrs["data_model"] == "GainTable"
-    assert result_attrs["receptor_frame"] == RECEPTOR_FRAME
+    assert result_attrs["receptor_frame1"] == RECEPTOR_FRAME
+    assert result_attrs["receptor_frame2"] == RECEPTOR_FRAME
     assert result_attrs["phasecentre"] == phase_centre
     assert result_attrs["configuration"] == low_aa05_config
     assert result_attrs["jones_type"] == "T"
@@ -149,7 +150,8 @@ def test_gain_table_property_accessor(result_gain_table):
     assert accessor_object.nants == 1
     assert accessor_object.nchan == 1
     assert accessor_object.nrec == 1
-    assert accessor_object.receptors == "I"
+    assert accessor_object.receptor1 == "I"
+    assert accessor_object.receptor2 == "I"
 
 
 def test_qa_gain_table(result_gain_table):
@@ -176,6 +178,28 @@ def test_qa_gain_table(result_gain_table):
     assert result_qa.context == "Test"
     for key, value in expected_data.items():
         assert result_qa.data[key] == value, f"{key} mismatch"
+
+
+def test_invalid_receptor_frame(result_gain_table):
+    """
+    Raise ValueError when wrong receptor frame input is given
+    """
+    result_data_vars = result_gain_table.data_vars
+    result_attrs = result_gain_table.attrs
+    result_coords = result_gain_table.coords
+
+    with pytest.raises(ValueError):
+        GainTable.constructor(
+            result_data_vars["gain"],
+            result_coords["time"],
+            result_data_vars["interval"],
+            result_data_vars["weight"],
+            result_data_vars["residual"],
+            result_coords["frequency"],
+            (RECEPTOR_FRAME, ReceptorFrame("circuloid")),
+            result_attrs["phasecentre"],
+            result_attrs["configuration"],
+        )
 
 
 def test_pointing_table_constructor_coords(result_pointing_table):
