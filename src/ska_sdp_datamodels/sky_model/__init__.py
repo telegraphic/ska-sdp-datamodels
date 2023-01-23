@@ -7,6 +7,7 @@ from .sky_functions import (
     convert_skymodel_to_hdf,
     export_skycomponent_to_hdf5,
     export_skymodel_to_hdf5,
+    export_skymodel_to_text,
     import_skycomponent_from_hdf5,
     import_skymodel_from_hdf5,
 )
@@ -19,6 +20,7 @@ __all__ = [
     "import_skymodel_from_hdf5",
     "export_skycomponent_to_hdf5",
     "export_skymodel_to_hdf5",
+    "export_skymodel_to_text",
     "convert_skycomponent_to_hdf",
     "convert_hdf_to_skycomponent",
     "convert_skymodel_to_hdf",
