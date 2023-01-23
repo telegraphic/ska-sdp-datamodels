@@ -152,7 +152,9 @@ def test_generate_configuration_from_cal_table():
     Test generating configuration from cal table
     """
     result = _generate_configuration_from_cal_table(
-        MockAntennaTable(), TEL_NAME
+        MockAntennaTable(),
+        TEL_NAME,
+        ReceptorFrame("linear"),
     )
 
     location = EarthLocation(

@@ -241,6 +241,7 @@ def import_pointingtable_from_hdf5(filename):
         return ptlist
 
 
+# Below are helper functions for import_gaintable_from_casa_cal_table
 def _load_casa_tables(msname):
     # pylint: disable=import-error,import-outside-toplevel
     from casacore.tables import table
@@ -265,7 +266,9 @@ def _get_phase_centre_from_cal_table(field_table):
     return phase_centre
 
 
-def _generate_configuration_from_cal_table(antenna_table, telescope_name):
+def _generate_configuration_from_cal_table(
+    antenna_table, telescope_name, receptor_frame
+):
 
     names = numpy.array(antenna_table.getcol("NAME"))
     mount = numpy.array(antenna_table.getcol("MOUNT"))[names != ""]
@@ -287,7 +290,7 @@ def _generate_configuration_from_cal_table(antenna_table, telescope_name):
         xyz=xyz,
         mount=mount,
         frame="ITRF",
-        receptor_frame=ReceptorFrame("linear"),
+        receptor_frame=receptor_frame,
         diameter=diameter,
         offset=offset,
         stations=stations,
@@ -306,12 +309,15 @@ def import_gaintable_from_casa_cal_table(
 
     :param table_name: Name of CASA table file
     :param jones_type: Type of calibration matrix T or G or B
+    :param rec_frame: Receptor Frame for the GainTable
     :return: GainTable object
 
     """
     anttab, base_table, fieldtab, obs, spw = _load_casa_tables(table_name)
 
     # Get times, interval, bandpass solutions
+    # The gain time needs to be incremental.
+    # If values are duplicated, we only use one
     gain_time = numpy.unique(base_table.getcol(columnname="TIME"))
     gain_interval = base_table.getcol(columnname="INTERVAL")
     gains = base_table.getcol(columnname="CPARAM")
@@ -344,7 +350,9 @@ def import_gaintable_from_casa_cal_table(
 
     # Get configuration
     ts_name = obs.getcol(columnname="TELESCOPE_NAME")[0]
-    configuration = _generate_configuration_from_cal_table(anttab, ts_name)
+    configuration = _generate_configuration_from_cal_table(
+        anttab, ts_name, receptor_frame
+    )
 
     # Get phase_centres
     phase_centre = _get_phase_centre_from_cal_table(fieldtab)
