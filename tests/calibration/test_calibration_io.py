@@ -1,5 +1,4 @@
-# pylint: disable=missing-function-docstring, inconsistent-return-statements,
-# pylint: disable=too-few-public-methods
+# pylint: disable=inconsistent-return-statements, too-few-public-methods
 """
 Unit Tests to create GainTable
 from CASA Tables
@@ -69,6 +68,9 @@ class MockAntennaTable:
     """
 
     def getcol(self, columnname=None):
+        """
+        Get column name from MS File
+        """
         if columnname == "NAME":
             return ["ANT1", "ANT2", "ANT3", "ANT4", "ANT5", "ANT6"]
 
@@ -119,6 +121,9 @@ class MockFieldTable:
     """
 
     def getcol(self, columnname=None):
+        """
+        Get column name from a table
+        """
         if columnname == "PHASE_DIR":
             return numpy.array([[[0.0, 0.0]]])
 
@@ -134,7 +139,9 @@ class MockObservationTable:
 
 
 def test_generate_configuration_from_cal_table():
-
+    """
+    Test generating configuration from cal table
+    """
     result = _generate_configuration_from_cal_table(
         MockAntennaTable(), TEL_NAME
     )
@@ -152,6 +159,9 @@ def test_generate_configuration_from_cal_table():
 
 
 def test_get_phase_centre_from_cal_table():
+    """
+    Test get phase centre from cal table
+    """
     result = _get_phase_centre_from_cal_table(MockFieldTable())
     expected = SkyCoord(
         ra=0.0 * u.rad,
@@ -167,6 +177,9 @@ casacore = pytest.importorskip("python-casacore")
 
 @patch("ska_sdp_datamodels.calibration.calibration_create._load_casa_tables")
 def test_import_gaintable_from_casa_cal_table(mock_tables):
+    """
+    Test importing gaintable from cal table
+    """
     mock_tables.return_value = (
         MockAntennaTable(),
         MockBaseTable(),

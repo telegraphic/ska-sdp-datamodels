@@ -266,24 +266,12 @@ def _get_phase_centre_from_cal_table(field_table):
 def _generate_configuration_from_cal_table(antenna_table, telescope_name):
     names = numpy.array(antenna_table.getcol("NAME"))
 
-    ant_map = []
-    actual = 0
-    # This assumes that the names are actually filled in!
-    for name in names:
-        if name != "":
-            ant_map.append(actual)
-            actual += 1
-        else:
-            ant_map.append(-1)
-    if actual == 0:
-        names = numpy.repeat("No name", len(names))
-
     mount = numpy.array(antenna_table.getcol("MOUNT"))[names != ""]
     diameter = numpy.array(antenna_table.getcol("DISH_DIAMETER"))[names != ""]
     xyz = numpy.array(antenna_table.getcol("POSITION"))[names != ""]
     offset = numpy.array(antenna_table.getcol("OFFSET"))[names != ""]
     stations = numpy.array(antenna_table.getcol("STATION"))[names != ""]
-    names = numpy.array(antenna_table.getcol("NAME"))[names != ""]
+    antenna_names = numpy.array(antenna_table.getcol("NAME"))[names != ""]
 
     location = EarthLocation(
         x=Quantity(xyz[0][0], "m"),
@@ -294,7 +282,7 @@ def _generate_configuration_from_cal_table(antenna_table, telescope_name):
     configuration = Configuration.constructor(
         name=telescope_name,
         location=location,
-        names=names,
+        names=antenna_names,
         xyz=xyz,
         mount=mount,
         frame="ITRF",

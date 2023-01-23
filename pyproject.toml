@@ -21,7 +21,7 @@ pandas = "^1.5.0"
 xarray = "^2022.10.0"
 
 # optional dependencies; used by "extras"
-python-casacore = "3.5.1"
+python-casacore = "^3.5.1"
 
 [tool.poetry.extras]
 python-casacore = ["python-casacore"]
