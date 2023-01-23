@@ -238,12 +238,20 @@ def convert_hdf_to_skymodel(f):
 
 
 def export_skymodel_to_text(skymodel, filename):
-    """Save a SkyModel to disk in a .skymodel format, in a file named test.skymodel
+    """Save a SkyModel to disk in a .skymodel format, with the given filename.
     This exact filename is used in DP3 gaincal parset definition.
 
     :param skymodel: SkyModel
+    :param filename: the filename you expect the skymodel to be saved to.
+                     It should have a ".skymodel" extension.
     :return:
     """
+
+    if not filename.endswith(".skymodel"):
+        raise ValueError(
+            f"filename {filename} should have a .skymodel extension."
+        )
+
     if len(skymodel.components) > 0:
         with open(filename, "w", encoding="utf-8") as f:
             f.write(

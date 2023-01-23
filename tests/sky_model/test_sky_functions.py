@@ -89,6 +89,15 @@ def test_export_skymodel_to_text(sky_model):
     We read back the file written by export_skymodel_to_text
     and get the data that we used to write the file.
     """
+
+    # Test that invalid file extension is detected
+    exception_catched = False
+    try:
+        export_skymodel_to_text(sky_model, "test.invalid")
+    except ValueError:
+        exception_catched = True
+    assert exception_catched
+
     with tempfile.TemporaryDirectory() as temp_dir:
         test_text = f"{temp_dir}/test.skymodel"
 
