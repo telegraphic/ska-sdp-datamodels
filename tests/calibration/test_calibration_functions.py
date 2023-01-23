@@ -1,5 +1,3 @@
-
-
 """
 Test calibration data model functions.
 """
