@@ -1,5 +1,5 @@
 # pylint: disable=too-many-ancestors,too-many-arguments,too-many-locals
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, unexpected-keyword-arg
 
 """
 Visibility data model.

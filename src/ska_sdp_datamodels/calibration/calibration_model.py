@@ -25,23 +25,23 @@ class GainTable(xarray.Dataset):
     Here is an example::
 
         <xarray.GainTable>
-        Dimensions:    (antenna: 115, frequency: 3, receptor_in: 2, receptor_out: 2, time: 3)
+        Dimensions:    (antenna: 115, frequency: 3, receptor1: 2, receptor2: 2, time: 3)
         Coordinates:
           * time       (time) float64 5.085e+09 5.085e+09 5.085e+09
           * antenna    (antenna) int64 0 1 2 3 4 5 6 7 ... 108 109 110 111 112 113 114
           * frequency  (frequency) float64 1e+08 1.05e+08 1.1e+08
-          * receptor_in  (receptor_in) <U1 'X' 'Y'
-          * receptor_out  (receptor_out) <U1 'X' 'Y'
+          * receptor1  (receptor1) <U1 'X' 'Y'
+          * receptor2  (receptor2) <U1 'X' 'Y'
         Data variables:
-            gain       (time, antenna, frequency, receptor_in, receptor_out) complex128 (0...
-            weight     (time, antenna, frequency, receptor_in, receptor_out) float64 1.0 ....
-            residual   (time, frequency, receptor_in, receptor_out) float64 0.0 0.0 ... 0.0
+            gain       (time, antenna, frequency, receptor1, receptor2) complex128 (0...
+            weight     (time, antenna, frequency, receptor1, receptor2) float64 1.0 ....
+            residual   (time, frequency, receptor1, receptor2) float64 0.0 0.0 ... 0.0
             interval   (time) float32 99.72697 99.72697 99.72697
             datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
             data_model:  GainTable
-            receptor_frame_in:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
-            receptor_frame_out:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
+            receptor_frame1:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
+            receptor_frame2:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
             phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
             configuration:      <xarray.Configuration> Dimensions:   (id: 115, spati...
     """  # noqa: E501
@@ -86,26 +86,34 @@ class GainTable(xarray.Dataset):
         :param phasecentre: Phasecentre (SkyCoord)
         :param configuration: Configuration
         :param jones_type: Type of gain: T, G, B, etc
-        :param receptor_frame: Input and output receptor frames
-                               equivalent to two sides of the Jones matrix
-                If a single frame, use it for both receptor_in and receptor_out
-                If a tuple, it stands for [receptor_in, receptor_out]
+        :param receptor_frame: Measured and ideal receptor frames
+                equivalent to two sides of the Jones matrix
+                Receptor1 stands for measured/output polarisation
+                Receptor2 stands for ideal/input polarisation
+                If a single frame, use it for both receptor1 and receptor2
+                If a tuple, it stands for [receptor1, receptor2]
         """
         nants = gain.shape[1]
         antennas = range(nants)
         # If this doesn't work it will automatically raise a ValueError
         if isinstance(receptor_frame, (list, tuple)):
-            receptor_in, receptor_out = receptor_frame
+            receptor1, receptor2 = receptor_frame
+            if len(receptor1) != len(receptor2):
+                raise ValueError(
+                    "Polarisation of the two receptors "
+                    "need to have the same length "
+                    "in order to return square matrix"
+                )
         if isinstance(receptor_frame, ReceptorFrame):
-            receptor_in = receptor_frame
-            receptor_out = receptor_frame
+            receptor1 = receptor_frame
+            receptor2 = receptor_frame
 
         coords = {
             "time": time,
             "antenna": antennas,
             "frequency": frequency,
-            "receptor_in": receptor_in.names,
-            "receptor_out": receptor_out.names,
+            "receptor1": receptor1.names,
+            "receptor2": receptor2.names,
         }
 
         datavars = {}
@@ -115,8 +123,8 @@ class GainTable(xarray.Dataset):
                 "time",
                 "antenna",
                 "frequency",
-                "receptor_in",
-                "receptor_out",
+                "receptor1",
+                "receptor2",
             ],
         )
         datavars["weight"] = xarray.DataArray(
@@ -125,12 +133,12 @@ class GainTable(xarray.Dataset):
                 "time",
                 "antenna",
                 "frequency",
-                "receptor_in",
-                "receptor_out",
+                "receptor1",
+                "receptor2",
             ],
         )
         datavars["residual"] = xarray.DataArray(
-            residual, dims=["time", "frequency", "receptor_in", "receptor_out"]
+            residual, dims=["time", "frequency", "receptor1", "receptor2"]
         )
         datavars["interval"] = xarray.DataArray(interval, dims=["time"])
         datavars["datetime"] = xarray.DataArray(
@@ -139,8 +147,8 @@ class GainTable(xarray.Dataset):
         )
         attrs = {}
         attrs["data_model"] = "GainTable"
-        attrs["receptor_frame_in"] = receptor_in
-        attrs["receptor_frame_out"] = receptor_out
+        attrs["receptor_frame1"] = receptor1
+        attrs["receptor_frame2"] = receptor2
         attrs["phasecentre"] = phasecentre
         attrs["configuration"] = configuration
         attrs["jones_type"] = jones_type
@@ -197,18 +205,19 @@ class GainTableAccessor(XarrayAccessorMixin):
 
     @property
     def nrec(self):
-        """Number of receivers"""
-        return len(self._obj["receptor_in"])
+        """Number of polarisation in receptors
+        Note that receptor1 and receptor2 need to have the same length"""
+        return len(self._obj["receptor1"])
 
     @property
-    def receptor_in(self):
+    def receptor1(self):
         """Receptor Input"""
-        return self._obj["receptor_in"]
+        return self._obj["receptor1"]
 
     @property
-    def receptor_out(self):
+    def receptor2(self):
         """Receptor Output"""
-        return self._obj["receptor_out"]
+        return self._obj["receptor2"]
 
     def qa_gain_table(self, context=None) -> QualityAssessment:
         """Assess the quality of a gaintable

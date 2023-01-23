@@ -82,7 +82,7 @@ def create_gaintable_from_visibility(
     ntimes = len(gain_time)
 
     # There is only one receptor frame in Visibility
-    # Use it for both receptor_in and receptor_out
+    # Use it for both receptor1 and receptor2
     receptor_frame = ReceptorFrame(vis.visibility_acc.polarisation_frame.type)
     nrec = receptor_frame.nrec
 

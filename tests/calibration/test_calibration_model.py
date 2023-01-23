@@ -82,8 +82,8 @@ def test_gain_table_constructor_coords(result_gain_table):
         "time",
         "antenna",
         "frequency",
-        "receptor_in",
-        "receptor_out",
+        "receptor1",
+        "receptor2",
     ]
     result_coords = result_gain_table.coords
 
@@ -91,8 +91,8 @@ def test_gain_table_constructor_coords(result_gain_table):
     assert result_coords["time"] == 1
     assert result_coords["antenna"] == 0
     assert result_coords["frequency"] == 1
-    assert result_coords["receptor_in"] == "I"
-    assert result_coords["receptor_out"] == "I"
+    assert result_coords["receptor1"] == "I"
+    assert result_coords["receptor2"] == "I"
 
 
 def test_gain_table_constructor_datavars(result_gain_table):
@@ -121,8 +121,8 @@ def test_gain_table_constructor_attrs(
 
     assert len(result_attrs) == 6
     assert result_attrs["data_model"] == "GainTable"
-    assert result_attrs["receptor_frame_in"] == RECEPTOR_FRAME
-    assert result_attrs["receptor_frame_out"] == RECEPTOR_FRAME
+    assert result_attrs["receptor_frame1"] == RECEPTOR_FRAME
+    assert result_attrs["receptor_frame2"] == RECEPTOR_FRAME
     assert result_attrs["phasecentre"] == phase_centre
     assert result_attrs["configuration"] == low_aa05_config
     assert result_attrs["jones_type"] == "T"
@@ -150,8 +150,8 @@ def test_gain_table_property_accessor(result_gain_table):
     assert accessor_object.nants == 1
     assert accessor_object.nchan == 1
     assert accessor_object.nrec == 1
-    assert accessor_object.receptor_in == "I"
-    assert accessor_object.receptor_out == "I"
+    assert accessor_object.receptor1 == "I"
+    assert accessor_object.receptor2 == "I"
 
 
 def test_qa_gain_table(result_gain_table):
