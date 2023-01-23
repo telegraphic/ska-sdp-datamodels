@@ -164,7 +164,6 @@ def test_generate_configuration_from_cal_table():
     assert result.attrs["location"] == location
     assert result.attrs["receptor_frame"] == ReceptorFrame("linear")
     assert result.coords["id"].data.shape == (6,)
-    # Optional: check mount, diametre, xyz, offsets, and so on
 
 
 def test_get_phase_centre_from_cal_table():
