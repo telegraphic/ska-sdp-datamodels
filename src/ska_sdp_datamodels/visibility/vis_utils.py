@@ -80,6 +80,12 @@ def expand_polarizations(data, dtype=None):
     """
     Expand number of polarizations to four
     Optionally change the data type
+
+    :param data: numpy array containing visibility data. It has dimensions
+                (frequency, baselines, polarizations)
+    :param dtype: optional data type
+    :return: numpy array containing the input visibility data, where the
+            polarizations dimension is fixed to 4 (data is copied)
     """
 
     if dtype is None:
