@@ -1,6 +1,6 @@
 # Changelog
 
-main
+0.1.3
 ----
 * Add functions to read GainTable from CASA table ([MR21](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/21))
 * add function export_skymodel_to_text, needed to add the option of calibration with DP3 in rascil ([MR23](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/23))
