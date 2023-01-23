@@ -11,6 +11,7 @@ from .calibration_functions import (
     convert_pointingtable_to_hdf,
     export_gaintable_to_hdf5,
     export_pointingtable_to_hdf5,
+    import_gaintable_from_casa_cal_table,
     import_gaintable_from_hdf5,
     import_pointingtable_from_hdf5,
 )
@@ -29,4 +30,5 @@ __all__ = [
     "convert_gaintable_to_hdf",
     "create_gaintable_from_visibility",
     "create_pointingtable_from_visibility",
+    "import_gaintable_from_casa_cal_table",
 ]

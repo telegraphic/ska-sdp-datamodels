@@ -81,11 +81,11 @@ class GainTable(xarray.Dataset):
 
             Vobs = g_i g_j^* Vmodel
 
-        :param gain: Complex gain [nrows, nants, nchan, nrec, nrec]
-        :param time: Centroid of solution [nrows]
-        :param interval: Interval of validity
-        :param weight: Weight of gain [nrows, nchan, nrec, nrec]
-        :param residual: Residual of fit [nchan, nrec, nrec]
+        :param gain: Complex gain [ntimes, nants, nchan, nrec, nrec]
+        :param time: Centroid of solution [ntimes]
+        :param interval: Interval of validity [ntimes]
+        :param weight: Weight of gain [ntimes, nants, nchan, nrec, nrec]
+        :param residual: Residual of fit [ntimes, nchan, nrec, nrec]
         :param frequency: Frequency [nchan]
         :param phasecentre: Phasecentre (SkyCoord)
         :param configuration: Configuration
