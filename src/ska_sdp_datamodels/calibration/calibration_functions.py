@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, duplicate-code， too-many-locals
+# pylint: disable=invalid-name, too-many-locals
 
 """
 Functions working with calibration-type
@@ -349,6 +349,7 @@ def import_gaintable_from_casa_cal_table(
     # Get phase_centres
     phase_centre = _get_phase_centre_from_cal_table(fieldtab)
 
+    # pylint: disable=duplicate-code
     gain_table = GainTable.constructor(
         gain=gain,
         time=gain_time,
