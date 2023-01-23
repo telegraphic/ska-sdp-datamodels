@@ -98,7 +98,7 @@ class GainTable(xarray.Dataset):
         # If this doesn't work it will automatically raise a ValueError
         if isinstance(receptor_frame, (list, tuple)):
             receptor1, receptor2 = receptor_frame
-            if len(receptor1) != len(receptor2):
+            if receptor1.nrec != receptor2.nrec:
                 raise ValueError(
                     "Polarisation of the two receptors "
                     "need to have the same length "
