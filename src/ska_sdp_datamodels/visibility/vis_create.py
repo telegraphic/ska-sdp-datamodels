@@ -3,11 +3,13 @@ Functions to create Visibility
 """
 
 import logging
+from typing import Optional
 
 import numpy
 import pandas
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
+from numpy.typing import NDArray
 
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.configuration.config_coordinate_support import (
@@ -33,19 +35,19 @@ log = logging.getLogger("data-models-logger")
 # pylint: disable=too-many-branches,too-many-statements
 def create_visibility(
     config: Configuration,
-    times: numpy.array,
-    frequency: numpy.array,
+    times: NDArray,
+    frequency: NDArray,
     phasecentre: SkyCoord,
-    channel_bandwidth: numpy.array,
+    channel_bandwidth: NDArray,
     weight: float = 1.0,
-    polarisation_frame: PolarisationFrame = None,
-    integration_time=1.0,
-    zerow=False,
-    elevation_limit=15.0 * numpy.pi / 180.0,
-    source="unknown",
-    meta=None,
-    utc_time=None,
-    times_are_ha=True,
+    polarisation_frame: Optional[PolarisationFrame] = None,
+    integration_time: float = 1.0,
+    zerow: bool = False,
+    elevation_limit: Optional[float] = 15.0 * numpy.pi / 180.0,
+    source: str = "unknown",
+    meta: Optional[dict] = None,
+    utc_time: Optional[Time] = None,
+    times_are_ha: bool = True,
 ) -> Visibility:
     """
     Create a Visibility object with its main data array filled with complex
