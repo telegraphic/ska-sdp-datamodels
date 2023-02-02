@@ -337,9 +337,13 @@ def import_gaintable_from_casa_cal_table(
     ntimes = len(gain_time)
     gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
     gain = numpy.ones(gain_shape, dtype="complex")
+
+    # what happens if rec_frame=ReceptorFrame("stokesI") with nrec=1?
+    #    gain[..., 0, 0] = numpy.reshape(gains[..., 0],(ntimes, nants, nfrequency))
+    # what if nrec>2?
     if nrec > 1:
-        gain[..., 0, 0] = gains[..., 0]
-        gain[..., 1, 1] = gains[..., 1]
+        gain[..., 0, 0] = numpy.reshape(gains[..., 0],(ntimes, nants, nfrequency))
+        gain[..., 1, 1] = numpy.reshape(gains[..., 1],(ntimes, nants, nfrequency))
         gain[..., 0, 1] = 0.0
         gain[..., 1, 0] = 0.0
 
@@ -347,6 +351,10 @@ def import_gaintable_from_casa_cal_table(
     # This is temporary since in current tables they are not provided.
     gain_weight = numpy.ones(gain_shape)
     gain_residual = numpy.zeros([ntimes, nfrequency, nrec, nrec])
+
+    # if separate durations are stored for each antenna, cut the array back to one per solution interval
+    if numpy.shape(gain_interval)[0] == nants*ntimes:
+        gain_interval = gain_interval[::nants, ...]
 
     # Get configuration
     ts_name = obs.getcol(columnname="TELESCOPE_NAME")[0]
