@@ -343,10 +343,12 @@ def import_gaintable_from_casa_cal_table(
     #                                    (ntimes, nants, nfrequency))
     # what if nrec>2?
     if nrec > 1:
-        gain[..., 0, 0] = numpy.reshape(gains[..., 0],\
-                                        (ntimes, nants, nfrequency))
-        gain[..., 1, 1] = numpy.reshape(gains[..., 1],\
-                                        (ntimes, nants, nfrequency))
+        gain[..., 0, 0] = numpy.reshape(
+            gains[..., 0], (ntimes, nants, nfrequency)
+        )
+        gain[..., 1, 1] = numpy.reshape(
+            gains[..., 1], (ntimes, nants, nfrequency)
+        )
         gain[..., 0, 1] = 0.0
         gain[..., 1, 0] = 0.0
 
@@ -357,7 +359,7 @@ def import_gaintable_from_casa_cal_table(
 
     # If separate durations are stored for each antenna,
     # cut the array back to one per solution interval
-    if numpy.shape(gain_interval)[0] == nants*ntimes:
+    if numpy.shape(gain_interval)[0] == nants * ntimes:
         gain_interval = gain_interval[::nants, ...]
 
     # Get configuration
