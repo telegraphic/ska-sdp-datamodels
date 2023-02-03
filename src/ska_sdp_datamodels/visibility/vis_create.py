@@ -67,7 +67,7 @@ def create_visibility(
         to calculate (u, v, w) coordinates.
     times : ndarray
         One-dimensional numpy array of floating point numbers representing
-        an hour angles in radians. Specifically, the hour angles under which
+        hour angles in radians. Specifically, the hour angles under which
         the phase centre is seen from the centre of the interferometer. These
         get converted to a timestamp stored in the output Visibility, via a
         process explained in the notes.
@@ -79,7 +79,7 @@ def create_visibility(
         That code branch is not understood and likely an incorrect remnant of
         the past. Do NOT use it.
 
-        Parameter should be renamed `hour_angles` in the future, and the
+        TODO: parameter should be renamed `hour_angles`, and the
         `times_are_ha=False` branch should be removed.
     frequency : ndarray
         One-dimensional numpy array containing channel centre frequencies
@@ -90,9 +90,13 @@ def create_visibility(
         One-dimensional numpy array containing channel bandwidths in Hz.
         Must have the same length as `frequency`.
     weight : float, optional
-        Intended to mean "weight given to valid data points", but not
-        correctly implemented.
-        Leave to default value of 1.0; should be removed in the future.
+        Default weight for valid data: data associated with autocorrelation
+        baselines (ant1 == ant2) are zero-weighted, the rest are weighted by
+        this value.
+
+        TODO: some processing code might be designed around the assumption
+        that weights should be in [0, 1]. If so, default weight should be 1.0,
+        and this parameter should be removed.
     polarisation_frame : PolarisationFrame or None, optional
         Polarisation frame of the output Visibility. If None, select the
         PolarisationFrame that corresponds to the ReceptorFrame of the array,
@@ -119,12 +123,11 @@ def create_visibility(
         Visibility. How this is done is described in the notes. If None, this
         parameter is taken to be `2000-01-01T00:00:00`.
 
-        Default is leaving this to None. The alternative code path is
-        unused/untested in practice.
+        Default is leaving this to None. The alternative code path is untested.
     times_are_ha : bool, optional
         Whether to interpret `times` as hour angles. Leave this to default of
         `True`, code path for `False` suspected incorrect (see `times` above).
-        This parameter should be removed in the future.
+        TODO: parameter should be removed.
 
     Returns
     -------
@@ -136,7 +139,7 @@ def create_visibility(
     Notes
     -----
     Input hour angles are converted to a time close to `utc_time`, the latter
-    being `2000-01-01T00:00:00` by default. Firstly, the code first finds the
+    being `2000-01-01T00:00:00` by default. First, the code first finds the
     date of the transit of `phasecentre` that occurs nearest to `utc_time`;
     from there, it finds the times nearest to this transit time such that the
     phasecentre was seen under the input hour angles from the centre of the
@@ -148,7 +151,7 @@ def create_visibility(
     See: https://en.wikipedia.org/wiki/Apparent_place
 
     The output Visibility contains *at most* one time sample per entry in the
-    `times` array. If may contain fewer time samples if `elevation_limit` was
+    `times` array. It may contain fewer time samples if `elevation_limit` was
     specified.
 
     Integration times in the output Visibility are set to the difference
