@@ -49,8 +49,7 @@ def create_visibility(
     utc_time: Optional[Time] = None,
     times_are_ha: bool = True,
 ) -> Visibility:
-    """
-    Create a Visibility object with its main data array filled with complex
+    """Create a Visibility object with its main data array filled with complex
     double-precision zeros, and its axes and other attributes adequately
     initialised. What 'adequately initialised' means is explained at length in
     the notes section below, as are several important caveats.
@@ -59,82 +58,76 @@ def create_visibility(
     In particular it computes approximate (u, v, w) coordinates from scratch
     rather than taking them as an externally precalculated input. See notes.
 
-    Parameters
-    ----------
-    config : Configuration
-        Configuration object describing the interferometer array with which
-        the output Visibilities are assumed to have been observed. This is used
-        to calculate (u, v, w) coordinates.
-    times : ndarray
-        One-dimensional numpy array of floating point numbers representing
-        hour angles in radians. Specifically, the hour angles under which
-        the phase centre is seen from the centre of the interferometer. These
-        get converted to a timestamp stored in the output Visibility, via a
-        process explained in the notes.
-
+    :param config: Configuration object describing the interferometer array
+        with which the output Visibilities are assumed to have been observed.
+        This is used to calculate (u, v, w) coordinates.
+    :type config: Configuration
+    :param times: One-dimensional numpy array of floating point numbers
+        representing hour angles in radians. Specifically, the hour angles
+        under which the phase centre is seen from the centre of the
+        interferometer. These get converted to a timestamp stored in the output
+        Visibility, via a process explained in the notes.
         NOTE: how the data are interpreted is controlled by the `times_are_ha`
         parameter. `times_are_ha=True` by default and you should *always* use
         this. If `times_are_ha=False`, the data are also interpreted as radians
         and then scaled by a factor SIDEREAL_DAY_SECONDS / SOLAR_DAY_SECONDS.
         That code branch is not understood and likely an incorrect remnant of
         the past. Do NOT use it.
-
         TODO: parameter should be renamed `hour_angles`, and the
         `times_are_ha=False` branch should be removed.
-    frequency : ndarray
-        One-dimensional numpy array containing channel centre frequencies
-        in Hz.
-    phasecentre : astropy.coordinates.SkyCoord
-        Phase centre coordinates as a SkyCoord object.
-    channel_bandwidth : ndarray
-        One-dimensional numpy array containing channel bandwidths in Hz.
-        Must have the same length as `frequency`.
-    weight : float, optional
-        Default weight for valid data: data associated with autocorrelation
-        baselines (ant1 == ant2) are zero-weighted, the rest are weighted by
-        this value.
-
+    :type times: ndarray
+    :param frequency: One-dimensional numpy array containing channel centre
+        frequencies in Hz.
+    :type frequency: ndarray
+    :param phasecentre: Phase centre coordinates as a SkyCoord object.
+    :type phasecentre: astropy.coordinates.SkyCoord
+    :param channel_bandwidth: One-dimensional numpy array containing channel
+        bandwidths in Hz. Must have the same length as `frequency`.
+    :type channel_bandwidth: ndarray
+    :param weight: Default weight for valid data: data associated with
+        autocorrelation baselines (ant1 == ant2) are zero-weighted, the rest
+        are weighted by this value.
         TODO: some processing code might be designed around the assumption
         that weights should be in [0, 1]. If so, default weight should be 1.0,
         and this parameter should be removed.
-    polarisation_frame : PolarisationFrame or None, optional
-        Polarisation frame of the output Visibility. If None, select the
-        PolarisationFrame that corresponds to the ReceptorFrame of the array,
-        which is specified inside 'config'.
-    integration_time : float, optional
-        Only used in the specific case where `times` only has one element.
-        In this case, this will be the integration time associated to this
-        unique time sample in the output Visibility, in seconds.
-    zerow : bool, optional
-        If True, forcibly set the output Visibility "w" coordinate to zero at
-        the end of the initialisation process.
-    elevation_limit : float or None, optional
-        Elevation limit in radians. When creating the output Visibility,
-        discard any time samples such that the phase centre would appear to be
-        below `elevation_limit` when observed from the centre of the array.
-        If `None`, no discarding is performed.
-    source : str, optional
-        Source name carried in the attrs of the output Visibility.
-    meta : dict or None, optional
-        Optional user-defined metadata that gets stored inside the attrs of the
-        output Visibility.
-    utc_time : astropy.time.Time or None, optional
-        Used to convert input hour angles to actual timestamps in the output
-        Visibility. How this is done is described in the notes. If None, this
-        parameter is taken to be `2000-01-01T00:00:00`.
-
+    :type weight: float, optional
+    :param polarisation_frame: Polarisation frame of the output Visibility.
+        If None, select the PolarisationFrame that corresponds to the
+        ReceptorFrame of the array, which is specified inside 'config'.
+    :type polarisation_frame: PolarisationFrame or None, optional
+    :param integration_time: Only used in the specific case where `times` only
+        has one element. In this case, this will be the integration time
+        associated to this unique time sample in the output Visibility,
+        in seconds.
+    :type integration_time: float, optional
+    :param zerow: If True, forcibly set the output Visibility "w" coordinate to
+        zero at the end of the initialisation process.
+    :type zerow: bool, optional
+    :param elevation_limit: Elevation limit in radians. When creating the
+        output Visibility, discard any time samples such that the phase centre
+        would appear to be below `elevation_limit` when observed from the
+        centre of the array. If `None`, no discarding is performed.
+    :type elevation_limit: float or None, optional
+    :param source: Source name carried in the attrs of the output Visibility.
+    :type source: str, optional
+    :param meta: Optional user-defined metadata that gets stored inside the
+        attrs of the output Visibility.
+    :type meta: dict or None, optional
+    :param utc_time: Used to convert input hour angles to actual timestamps in
+        the output Visibility. How this is done is described in the notes. If
+        None, this parameter is taken to be `2000-01-01T00:00:00`.
         Default is leaving this to None. The alternative code path is untested.
-    times_are_ha : bool, optional
-        Whether to interpret `times` as hour angles. Leave this to default of
-        `True`, code path for `False` suspected incorrect (see `times` above).
+    :type utc_time: astropy.time.Time or None, optional
+    :param times_are_ha: Whether to interpret `times` as hour angles. Leave
+        this to default of `True`, code path for `False` suspected incorrect
+        (see `times` above).
         TODO: parameter should be removed.
+    :type times_are_ha: bool, optional
 
-    Returns
-    -------
-    Visibility
-        Visibility object with its main data array filled with complex
+    :returns: Visibility object with its main data array filled with complex
         double-precision zeros. What its other axes / attributes contain
         depends on the options provided (see notes below).
+    :rtype: Visibility
 
     Notes
     -----
