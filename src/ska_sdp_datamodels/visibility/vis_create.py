@@ -3,11 +3,13 @@ Functions to create Visibility
 """
 
 import logging
+from typing import Optional
 
 import numpy
 import pandas
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
+from numpy.typing import NDArray
 
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.configuration.config_coordinate_support import (
@@ -33,47 +35,125 @@ log = logging.getLogger("data-models-logger")
 # pylint: disable=too-many-branches,too-many-statements
 def create_visibility(
     config: Configuration,
-    times: numpy.array,
-    frequency: numpy.array,
+    times: NDArray,
+    frequency: NDArray,
     phasecentre: SkyCoord,
-    channel_bandwidth: numpy.array,
+    channel_bandwidth: NDArray,
     weight: float = 1.0,
-    polarisation_frame: PolarisationFrame = None,
-    integration_time=1.0,
-    zerow=False,
-    elevation_limit=15.0 * numpy.pi / 180.0,
-    source="unknown",
-    meta=None,
-    utc_time=None,
-    times_are_ha=True,
+    polarisation_frame: Optional[PolarisationFrame] = None,
+    integration_time: float = 1.0,
+    zerow: bool = False,
+    elevation_limit: Optional[float] = 15.0 * numpy.pi / 180.0,
+    source: str = "unknown",
+    meta: Optional[dict] = None,
+    utc_time: Optional[Time] = None,
+    times_are_ha: bool = True,
 ) -> Visibility:
-    """
-    Create a Visibility from Configuration, hour angles,
-    and direction of source
+    """Create a Visibility object with its main data array filled with complex
+    double-precision zeros, and its axes and other attributes adequately
+    initialised. What 'adequately initialised' means is explained at length in
+    the notes section below, as are several important caveats.
 
-    Note that we keep track of the integration time for BDA purposes
+    This function caters specifically to visibility simulation purposes.
+    In particular it computes approximate (u, v, w) coordinates from scratch
+    rather than taking them as an externally precalculated input. See notes.
 
-    The input times are hour angles in radians, these are
-    converted to UTC MJD in seconds, using utc_time as
-    the approximate time.
+    :param config: Configuration object describing the interferometer array
+        with which the output Visibilities are assumed to have been observed.
+        This is used to calculate (u, v, w) coordinates.
+    :type config: Configuration
+    :param times: One-dimensional numpy array of floating point numbers
+        representing hour angles in radians. Specifically, the hour angles
+        under which the phase centre is seen from the centre of the
+        interferometer. These get converted to a timestamp stored in the output
+        Visibility, via a process explained in the notes.
+        NOTE: how the data are interpreted is controlled by the `times_are_ha`
+        parameter. `times_are_ha=True` by default and you should *always* use
+        this. If `times_are_ha=False`, the data are also interpreted as radians
+        and then scaled by a factor SIDEREAL_DAY_SECONDS / SOLAR_DAY_SECONDS.
+        That code branch is not understood and likely an incorrect remnant of
+        the past. Do NOT use it.
+        TODO: parameter should be renamed `hour_angles`, and the
+        `times_are_ha=False` branch should be removed.
+    :type times: ndarray
+    :param frequency: One-dimensional numpy array containing channel centre
+        frequencies in Hz.
+    :type frequency: ndarray
+    :param phasecentre: Phase centre coordinates as a SkyCoord object.
+    :type phasecentre: astropy.coordinates.SkyCoord
+    :param channel_bandwidth: One-dimensional numpy array containing channel
+        bandwidths in Hz. Must have the same length as `frequency`.
+    :type channel_bandwidth: ndarray
+    :param weight: Default weight for valid data: data associated with
+        autocorrelation baselines (ant1 == ant2) are zero-weighted, the rest
+        are weighted by this value.
+        TODO: some processing code might be designed around the assumption
+        that weights should be in [0, 1]. If so, default weight should be 1.0,
+        and this parameter should be removed.
+    :type weight: float, optional
+    :param polarisation_frame: Polarisation frame of the output Visibility.
+        If None, select the PolarisationFrame that corresponds to the
+        ReceptorFrame of the array, which is specified inside 'config'.
+    :type polarisation_frame: PolarisationFrame or None, optional
+    :param integration_time: Only used in the specific case where `times` only
+        has one element. In this case, this will be the integration time
+        associated to this unique time sample in the output Visibility,
+        in seconds.
+    :type integration_time: float, optional
+    :param zerow: If True, forcibly set the output Visibility "w" coordinate to
+        zero at the end of the initialisation process.
+    :type zerow: bool, optional
+    :param elevation_limit: Elevation limit in radians. When creating the
+        output Visibility, discard any time samples such that the phase centre
+        would appear to be below `elevation_limit` when observed from the
+        centre of the array. If `None`, no discarding is performed.
+    :type elevation_limit: float or None, optional
+    :param source: Source name carried in the attrs of the output Visibility.
+    :type source: str, optional
+    :param meta: Optional user-defined metadata that gets stored inside the
+        attrs of the output Visibility.
+    :type meta: dict or None, optional
+    :param utc_time: Used to convert input hour angles to actual timestamps in
+        the output Visibility. How this is done is described in the notes. If
+        None, this parameter is taken to be `2000-01-01T00:00:00`.
+        Default is leaving this to None. The alternative code path is untested.
+    :type utc_time: astropy.time.Time or None, optional
+    :param times_are_ha: Whether to interpret `times` as hour angles. Leave
+        this to default of `True`, code path for `False` suspected incorrect
+        (see `times` above).
+        TODO: parameter should be removed.
+    :type times_are_ha: bool, optional
 
-    :param config: Configuration of antennas
-    :param times: time or hour angles in radians
-    :param frequency: frequencies (Hz] [nchan]
-    :param phasecentre: phasecentre of observation (SkyCoord)
-    :param channel_bandwidth: channel bandwidths: (Hz] [nchan]
-    :param weight: weight of a single sample
-    :param polarisation_frame: PolarisationFrame('stokesI')
-    :param integration_time: Integration time ('auto' or value in s)
-    :param zerow: bool - set w to zero
-    :param elevation_limit: in degrees
-    :param source: Source name
-    :param meta: Meta data as a dictionary
-    :param utc_time: Time of ha definition default is
-                Time("2000-01-01T00:00:00", format='isot', scale='utc')
-    :param times_are_ha: The times are hour angles (default)
-                instead of utc time (in radians)
-    :return: Visibility
+    :returns: Visibility object with its main data array filled with complex
+        double-precision zeros. What its other axes / attributes contain
+        depends on the options provided (see notes below).
+    :rtype: Visibility
+
+    Notes
+    -----
+    Input hour angles are converted to a time close to `utc_time`, the latter
+    being `2000-01-01T00:00:00` by default. First, the code first finds the
+    date of the transit of `phasecentre` that occurs nearest to `utc_time`;
+    from there, it finds the times nearest to this transit time such that the
+    phasecentre was seen under the input hour angles from the centre of the
+    interferometer array. These are the timestamps of the output visibilities.
+    Why things have been implemented that way is likely because it makes
+    calculating accurate (u, v, w) easier. Setting the date to 1 Jan 2000
+    avoids discrepancies between apparent and mean coordinates, since that
+    makes effects from the Earth's precession/nutation negligible.
+    See: https://en.wikipedia.org/wiki/Apparent_place
+
+    The output Visibility contains *at most* one time sample per entry in the
+    `times` array. It may contain fewer time samples if `elevation_limit` was
+    specified.
+
+    Integration times in the output Visibility are set to the difference
+    between the consecutive timestamps of each visibility time sample, except
+    when there is only one time sample in the output; in this case the value of
+    `integration_time` is used.
+
+    Data corresponding to autocorrelation baselines (ant1 == ant2) are both
+    flagged and zero-weighted in the output Visibility.
     """
     if phasecentre is None:
         raise ValueError("Must specify phase centre")
@@ -97,14 +177,13 @@ def create_visibility(
     )
     nbaselines = len(baselines)
 
-    # Find the number of integrations ab
+    # Find the number of integrations above elevation_limit
     ntimes = 0
     n_flagged = 0
 
     for itime, time in enumerate(times):
-
-        # Calculate the positions of the antennas as seen for this hour angle
-        # and declination
+        # Calculate the az/el of the phasecentre as seen from the centre of
+        # the array for this hour angle and declination
         if times_are_ha:
             ha = time
         else:
@@ -112,7 +191,7 @@ def create_visibility(
 
         _, elevation = hadec_to_azel(ha, phasecentre.dec.rad, latitude)
         if elevation_limit is None or (elevation > elevation_limit):
-            # check if at this time target is above an elevation_limit
+            # check if at this hour angle, phasecentre is above elevation_limit
             ntimes += 1
         else:
             # if target is below, flag it
@@ -160,8 +239,8 @@ def create_visibility(
         else:
             ha = time * (SIDEREAL_DAY_SECONDS / 86400.0)
 
-        # Calculate the positions of the antennas as seen for this hour angle
-        # and declination
+        # Calculate the az/el of the phase centre as seen from the centre of
+        # the array for this hour angle and declination
         _, elevation = hadec_to_azel(ha, phasecentre.dec.rad, latitude)
         if elevation_limit is None or (elevation > elevation_limit):
             rtimes[itime] = stime.mjd * 86400.0 + time * 86400.0 / (
