@@ -171,7 +171,8 @@ def create_visibility(
     ants_xyz = config["xyz"].data
     ants_xyz = xyz_at_latitude(ants_xyz, latitude)
     nants = len(config["names"].data)
-
+    diameter = config["diameter"].data
+    max_diameter_square = numpy.max(diameter) ** 2
     baselines = pandas.MultiIndex.from_tuples(
         generate_baselines(nants), names=("antenna1", "antenna2")
     )
@@ -254,7 +255,12 @@ def create_visibility(
 
             for ibaseline, (a1, a2) in enumerate(baselines):
                 if a1 != a2:
-                    rweight[itime, ibaseline, ...] = weight
+                    # The weight of the different diameter antennas needs to be
+                    # calculated, respectively (same equation as CASA).
+                    rweight[itime, ibaseline, ...] = weight / (
+                        (max_diameter_square / (diameter[a1] * diameter[a2]))
+                        ** 2
+                    )
                     rflags[itime, ibaseline, ...] = 0
                 else:
                     rweight[itime, ibaseline, ...] = 0.0
