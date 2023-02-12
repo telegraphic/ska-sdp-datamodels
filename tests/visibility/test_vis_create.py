@@ -41,6 +41,8 @@ def test_create_visibility(low_aa05_config, phase_centre):
     # default polarisation is linear; coming from defailt receptor frame
     # of configuration
     assert (vis.polarisation.data == ["XX", "XY", "YX", "YY"]).all()
+    # judge the sumwt
+    assert numpy.sum(vis["weight"].data) == 3000
 
 
 def test_create_visibility_no_phase_centre(low_aa05_config):

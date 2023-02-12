@@ -1,5 +1,9 @@
 # Changelog
 
+main
+----
+* Add the support of dealing with weights of different diameter antenna ([MR27](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/27))
+
 0.1.3
 ----
 * Add functions to read GainTable from CASA table ([MR21](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/21))
