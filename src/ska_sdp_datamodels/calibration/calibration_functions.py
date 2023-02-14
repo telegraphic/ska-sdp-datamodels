@@ -363,7 +363,7 @@ def import_gaintable_from_casa_cal_table(
     if len(gain_interval) == nants * ntimes:
         gain_interval = gain_interval[::nants, ...]
     elif nrow != ntimes:
-        raise ValueError(f"Column INTERVAL has unexpected length")
+        raise ValueError("Column INTERVAL has unexpected length")
 
     gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
     gain = numpy.ones(gain_shape, dtype="complex")
