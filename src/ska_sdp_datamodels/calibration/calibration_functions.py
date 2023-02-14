@@ -269,7 +269,6 @@ def _get_phase_centre_from_cal_table(field_table):
 def _generate_configuration_from_cal_table(
     antenna_table, telescope_name, receptor_frame
 ):
-
     names = numpy.array(antenna_table.getcol("NAME"))
     mount = numpy.array(antenna_table.getcol("MOUNT"))[names != ""]
     diameter = numpy.array(antenna_table.getcol("DISH_DIAMETER"))[names != ""]
@@ -318,7 +317,7 @@ def import_gaintable_from_casa_cal_table(
     # Get times, interval, bandpass solutions
     # The gain time needs to be incremental.
     # If values are duplicated, we only use one
-    gain_time = numpy.unique(base_table.getcol(columnname="TIME"))
+    gain_time = base_table.getcol(columnname="TIME")
     gain_interval = base_table.getcol(columnname="INTERVAL")
     gains = base_table.getcol(columnname="CPARAM")
     antenna = base_table.getcol(columnname="ANTENNA1")
@@ -333,20 +332,49 @@ def import_gaintable_from_casa_cal_table(
     receptor_frame = rec_frame
     nrec = receptor_frame.nrec
 
+    # The GainTable time and increment vectors should have one value per
+    # solution interval, however the main CASA cal table columns have one
+    # row for each solution interval and antenna. Need to remove duplicate
+    # values. Note that rows in the same solution interval may have different
+    # times, so use SCAN_NUMBER indices to distinguish solution intervals.
+    scan_id = base_table.getcol(columnname="SCAN_NUMBER")
+    ntimes = len(numpy.unique(scan_id))
     nants = len(numpy.unique(antenna))
-    ntimes = len(gain_time)
+
+    # check the main table shape before the reshape calls below
+    if gains.ndim != 3:
+        raise ValueError(f"Tables have unexpected shape: {gains.ndim}")
+
+    input_shape = numpy.shape(gains)
+    nrow = input_shape[0]
+    # check that there are no missing or extra rows
+    # this is possible but not with the simple reshaping below
+    if ntimes * nants != nrow:
+        raise ValueError(f"Tables have unexpected length: {nrow}")
+    if nfrequency != input_shape[1]:
+        raise ValueError(f"tables have wrong number of channels: {nfrequency}")
+    if nrec != input_shape[2]:
+        raise ValueError(f"Tables have wrong number of receptors: {nrec}")
+
+    # take the average time value per solution interval (scan_id)
+    gain_time = numpy.mean(numpy.reshape(gain_time, (ntimes, nants)), axis=1)
+
+    # take a single soln interval value per time (scan_id)
+    if len(gain_interval) == nants * ntimes:
+        gain_interval = gain_interval[::nants, ...]
+    elif nrow != ntimes:
+        raise ValueError(f"Column INTERVAL has unexpected length")
+
     gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
     gain = numpy.ones(gain_shape, dtype="complex")
 
-    # what happens if rec_frame=ReceptorFrame("stokesI") with nrec=1?
-    #    gain[..., 0, 0] = numpy.reshape(gains[..., 0],\
-    #                                    (ntimes, nants, nfrequency))
-    # what if nrec>2?
     if nrec > 1:
-        gain[..., 0, 0] = numpy.reshape(gains[..., 0],\
-                                        (ntimes, nants, nfrequency))
-        gain[..., 1, 1] = numpy.reshape(gains[..., 1],\
-                                        (ntimes, nants, nfrequency))
+        gain[..., 0, 0] = numpy.reshape(
+            gains[..., 0], (ntimes, nants, nfrequency)
+        )
+        gain[..., 1, 1] = numpy.reshape(
+            gains[..., 1], (ntimes, nants, nfrequency)
+        )
         gain[..., 0, 1] = 0.0
         gain[..., 1, 0] = 0.0
 
@@ -354,11 +382,6 @@ def import_gaintable_from_casa_cal_table(
     # This is temporary since in current tables they are not provided.
     gain_weight = numpy.ones(gain_shape)
     gain_residual = numpy.zeros([ntimes, nfrequency, nrec, nrec])
-
-    # If separate durations are stored for each antenna,
-    # cut the array back to one per solution interval
-    if numpy.shape(gain_interval)[0] == nants*ntimes:
-        gain_interval = gain_interval[::nants, ...]
 
     # Get configuration
     ts_name = obs.getcol(columnname="TELESCOPE_NAME")[0]
