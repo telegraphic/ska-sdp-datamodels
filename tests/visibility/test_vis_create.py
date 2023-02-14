@@ -41,6 +41,10 @@ def test_create_visibility(low_aa05_config, phase_centre):
     # default polarisation is linear; coming from defailt receptor frame
     # of configuration
     assert (vis.polarisation.data == ["XX", "XY", "YX", "YY"]).all()
+    # in the test, the rweight of each antenna is 1. We have 10 times,
+    # 5 frequencies, 4 polarisations, and 15 baselines,
+    # so, sumwt must be 10 * 5 * 4 * 15 = 3000.
+    assert numpy.sum(vis["weight"].data) == 3000
 
 
 def test_create_visibility_no_phase_centre(low_aa05_config):
