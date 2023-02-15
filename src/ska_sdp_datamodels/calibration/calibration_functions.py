@@ -332,31 +332,31 @@ def import_gaintable_from_casa_cal_table(
     receptor_frame = rec_frame
     nrec = receptor_frame.nrec
 
-    # The GainTable time and increment vectors should have one value per
-    # solution interval, however the main CASA cal table columns have one
-    # row for each solution interval and antenna. Need to remove duplicate
-    # values. Note that rows in the same solution interval may have different
-    # times, so use SCAN_NUMBER indices to distinguish solution intervals.
-    scan_id = base_table.getcol(columnname="SCAN_NUMBER")
-    ntimes = len(numpy.unique(scan_id))
-    nants = len(numpy.unique(antenna))
-
     # check the main table shape before the reshape calls below
     if gains.ndim != 3:
         raise ValueError(f"Tables have unexpected shape: {gains.ndim}")
 
     input_shape = numpy.shape(gains)
+
+    # Antenna rows in the same solution interval may have different times, so
+    # cannot set ntimes based on unique time tags. Use the fact that we require
+    # each antenna to have one row per solution interval to define ntimes
     nrow = input_shape[0]
-    # check that there are no missing or extra rows
-    # this is possible but not with the simple reshaping below
-    if ntimes * nants != nrow:
-        raise ValueError(f"Tables have unexpected length: {nrow}")
+    nants = len(numpy.unique(antenna))
+    if nrow % nants != 0:
+        raise ValueError("Require each antenna in each solution interval")
+    ntimes = nrow // nants
+
+    # check the other dimensions
     if nfrequency != input_shape[1]:
         raise ValueError(f"tables have wrong number of channels: {nfrequency}")
     if nrec != input_shape[2]:
         raise ValueError(f"Tables have wrong number of receptors: {nrec}")
 
-    # take the average time value per solution interval (scan_id)
+    # GainTable wants time and increment vectors with one value per solution
+    # interval, however the main CASA cal table columns have one row for each
+    # solution interval and antenna. Need to remove duplicate values.
+    # Take the average time value per solution interval (they may vary)
     gain_time = numpy.mean(numpy.reshape(gain_time, (ntimes, nants)), axis=1)
 
     # take a single soln interval value per time (scan_id)
