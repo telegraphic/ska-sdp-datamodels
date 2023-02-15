@@ -359,6 +359,10 @@ def import_gaintable_from_casa_cal_table(
     # Take the average time value per solution interval (they may vary)
     gain_time = numpy.mean(numpy.reshape(gain_time, (ntimes, nants)), axis=1)
 
+    # check that the times are increasing
+    if numpy.any(numpy.diff(gain_time) <= 0):
+        raise ValueError("Reordered times are not increasing monotonically")
+
     # take a single soln interval value per time (scan_id)
     if len(gain_interval) == nants * ntimes:
         gain_interval = gain_interval[::nants, ...]
