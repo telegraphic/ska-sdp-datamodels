@@ -297,6 +297,49 @@ def _generate_configuration_from_cal_table(
     return configuration
 
 
+def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
+    # casa gain tables can have shape [ntimes*nants, nfrequency, nrec]
+
+    if gains.ndim != 3:
+        raise ValueError(f"Expect 3d gains array, have {gains.ndim}")
+
+    input_shape = numpy.shape(gains)
+
+    nrow = input_shape[0]
+    nfrequency = input_shape[1]
+    nrec = input_shape[2]
+
+    # Antenna rows in the same solution interval may have different times,
+    # so cannot set ntimes based on unique time tags. Use the fact that we
+    # require each antenna to have one row per solution interval to define
+    # ntimes
+    antenna = numpy.unique(antenna)
+    nants = len(antenna)
+    if nrow % nants != 0:
+        raise ValueError("Require each antenna in each solution interval")
+    ntimes = nrow // nants
+
+    gains = numpy.reshape(gains, (ntimes, nants, nfrequency, nrec))
+
+    # GainTable wants time and increment vectors with one value per
+    # solution interval, however the main CASA cal table columns have
+    # one row for each solution interval and antenna. Need to remove
+    # duplicate values. Take the average time value per solution interval
+    gain_time = numpy.mean(numpy.reshape(gain_time, (ntimes, nants)), axis=1)
+
+    # check that the times are increasing
+    if numpy.any(numpy.diff(gain_time) <= 0):
+        raise ValueError(f"Time error {gain_time-gain_time[0]}")
+
+    # take a single soln interval value per time (scan_id)
+    if len(gain_interval) == nants * ntimes:
+        gain_interval = gain_interval[::nants, ...]
+    else:
+        raise ValueError(f"interval length error: {len(gain_interval)}")
+
+    return gains, gain_time, gain_interval, antenna
+
+
 def import_gaintable_from_casa_cal_table(
     table_name,
     jones_type="B",
@@ -315,8 +358,6 @@ def import_gaintable_from_casa_cal_table(
     anttab, base_table, fieldtab, obs, spw = _load_casa_tables(table_name)
 
     # Get times, interval, bandpass solutions
-    # The gain time needs to be incremental.
-    # If values are duplicated, we only use one
     gain_time = base_table.getcol(columnname="TIME")
     gain_interval = base_table.getcol(columnname="INTERVAL")
     gains = base_table.getcol(columnname="CPARAM")
@@ -332,70 +373,34 @@ def import_gaintable_from_casa_cal_table(
     receptor_frame = rec_frame
     nrec = receptor_frame.nrec
 
-    # check the main table shape before the reshape calls below
-    ndim = gains.ndim
-
-    input_shape = numpy.shape(gains)
-
-    if ndim == 4:
-        # gains seem to have shape [ntimes, nants, nfrequency, nrec]
-        ntimes = input_shape[0]
-        nants = input_shape[1]
-        if ntimes != len(gain_time):
-            raise ValueError("gain and time columns are inconsistent")
-        if nants != len(antenna):
-            raise ValueError("gain and antenna columns are inconsistent")
-
-    elif ndim == 3:
-        # gains seem to have shape [ntimes*nants, nfrequency, nrec]
-
-        # Antenna rows in the same solution interval may have different times,
-        # so cannot set ntimes based on unique time tags. Use the fact that we
-        # require each antenna to have one row per solution interval to define
-        # ntimes
-        nrow = input_shape[0]
-        nants = len(numpy.unique(antenna))
-        if nrow % nants != 0:
-            raise ValueError("Require each antenna in each solution interval")
-        ntimes = nrow // nants
-
-        # GainTable wants time and increment vectors with one value per
-        # solution interval, however the main CASA cal table columns have
-        # one row for each solution interval and antenna. Need to remove
-        # duplicate values. Take the average time value per solution interval
-        gain_time = numpy.mean(
-            numpy.reshape(gain_time, (ntimes, nants)), axis=1
+    if gains.ndim == 3:
+        gains, gain_time, gain_interval, antenna = _reshape_3d_gain_tables(
+            gains, gain_time, gain_interval, antenna
         )
 
-        # check that the times are increasing
-        if numpy.any(numpy.diff(gain_time) <= 0):
-            raise ValueError(f"Time error {gain_time-gain_time[0]}")
+    if gains.ndim != 4:
+        raise ValueError(f"Tables have unexpected shape: {gains.ndim}")
 
-        # take a single soln interval value per time (scan_id)
-        if len(gain_interval) == nants * ntimes:
-            gain_interval = gain_interval[::nants, ...]
-        else:
-            raise ValueError(f"interval length error: {len(gain_interval)}")
+    ntimes = len(gain_time)
+    nants = len(antenna)
 
-    else:
-        raise ValueError(f"Tables have unexpected shape: {ndim}")
-
-    # check the other dimensions
-    if nfrequency != input_shape[ndim - 2]:
+    # final check of the main table shape
+    input_shape = numpy.shape(gains)
+    if ntimes != input_shape[0]:
+        raise ValueError("gain and time columns are inconsistent")
+    if nants != input_shape[1]:
+        raise ValueError("gain and antenna columns are inconsistent")
+    if nfrequency != input_shape[2]:
         raise ValueError(f"tables have wrong number of channels: {nfrequency}")
-    if nrec != input_shape[ndim - 1]:
+    if nrec != input_shape[3]:
         raise ValueError(f"Tables have wrong number of receptors: {nrec}")
 
     gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
     gain = numpy.ones(gain_shape, dtype="complex")
 
     if nrec > 1:
-        gain[..., 0, 0] = numpy.reshape(
-            gains[..., 0], (ntimes, nants, nfrequency)
-        )
-        gain[..., 1, 1] = numpy.reshape(
-            gains[..., 1], (ntimes, nants, nfrequency)
-        )
+        gain[..., 0, 0] = gains[..., 0]
+        gain[..., 1, 1] = gains[..., 1]
         gain[..., 0, 1] = 0.0
         gain[..., 1, 0] = 0.0
 
