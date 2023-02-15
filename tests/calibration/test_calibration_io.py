@@ -52,7 +52,7 @@ class MockBaseTable:
             return numpy.array([0, 1])
 
 
-class MockBaseTableFull:
+class MockFullBaseTable:
     """
     Mock Base Table Class
     """
@@ -219,7 +219,7 @@ def test_get_phase_centre_from_cal_table():
 )
 def test_import_gaintable_from_casa_cal_table(mock_tables):
     """
-    Test importing gaintable from cal table
+    Test importing gaintable from a 4D cal table
     """
     pytest.importorskip("python-casacore")
 
@@ -250,12 +250,12 @@ def test_import_gaintable_from_casa_cal_table(mock_tables):
 )
 def test_import_full_gaintable_from_casa_cal_table(mock_tables):
     """
-    Test importing gaintable from cal table
+    Test importing gaintable from a standard 3D CASA cal table
     """
 
     mock_tables.return_value = (
         MockAntennaTable(),
-        MockBaseTableFull(),
+        MockFullBaseTable(),
         MockFieldTable(),
         MockObservationTable(),
         MockSpectralWindowTable(),
