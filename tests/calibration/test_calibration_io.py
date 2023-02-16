@@ -52,6 +52,38 @@ class MockBaseTable:
             return numpy.array([0, 1])
 
 
+class MockFullBaseTable:
+    """
+    Mock Base Table Class
+    """
+
+    def getcol(self, columnname=None):
+        """
+        Get column name
+        """
+        if columnname == "TIME":
+            return numpy.concatenate(
+                (
+                    numpy.repeat(4.35089331e09, NANTS),
+                    numpy.repeat(4.35089332e09, NANTS),
+                    numpy.repeat(4.35089333e09, NANTS),
+                    numpy.repeat(4.35089334e09, NANTS),
+                )
+            )
+
+        if columnname == "INTERVAL":
+            return numpy.repeat(10.0, NTIMES * NANTS)
+
+        if columnname == "CPARAM":
+            return numpy.ones((NTIMES * NANTS, NFREQ, 2))
+
+        if columnname == "ANTENNA1":
+            return numpy.array([0, 1, 2, 3, 4, 5])
+
+        if columnname == "SPECTRAL_WINDOW_ID":
+            return numpy.array([0, 1])
+
+
 class MockSpectralWindowTable:
     """
     Mock Spectral Window Table Class
@@ -187,7 +219,7 @@ def test_get_phase_centre_from_cal_table():
 )
 def test_import_gaintable_from_casa_cal_table(mock_tables):
     """
-    Test importing gaintable from cal table
+    Test importing gaintable from a 4D cal table
     """
     pytest.importorskip("python-casacore")
 
@@ -211,3 +243,30 @@ def test_import_gaintable_from_casa_cal_table(mock_tables):
     assert (result.gain.data[..., 0, 1] == complex(0.0, 0.0)).all()
     assert (result.weight.data[...] == 1.0).all()
     assert (result.residual.data[...] == 0.0).all()
+
+
+@patch(
+    "ska_sdp_datamodels.calibration.calibration_functions._load_casa_tables"
+)
+def test_import_full_gaintable_from_casa_cal_table(mock_tables):
+    """
+    Test importing gaintable from a standard 3D CASA cal table
+    """
+
+    mock_tables.return_value = (
+        MockAntennaTable(),
+        MockFullBaseTable(),
+        MockFieldTable(),
+        MockObservationTable(),
+        MockSpectralWindowTable(),
+    )
+    result = import_gaintable_from_casa_cal_table("test_table")
+    assert isinstance(result, GainTable)
+    # Specific attributes
+    expected_time = numpy.array(
+        [4.35089331e09, 4.35089332e09, 4.35089333e09, 4.35089334e09]
+    )
+    assert (result.coords["time"] == expected_time).all()
+    assert (result.interval.data[...] == 10.0).all()
+    assert (result.gain.data[..., 0, 0] == complex(1.0, 0.0)).all()
+    assert (result.gain.data[..., 0, 1] == complex(0.0, 0.0)).all()
