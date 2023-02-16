@@ -69,12 +69,12 @@ def test_import_visibility_from_hdf5(image):
         data_model_equals(result, image)
 
 
-@pytest.importorskip("zarr")
 def test_write_image_to_zarr(image):
     """
     Test to see if an image can be written to
     and read from a zarr file (via default Dataset methods)
     """
+    pytest.importorskip("zarr")
     new_image = image.copy(deep=True)
     new_image["pixels"].data[...] = numpy.random.random(image["pixels"].shape)
 
