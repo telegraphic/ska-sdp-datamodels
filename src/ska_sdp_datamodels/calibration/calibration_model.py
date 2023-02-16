@@ -4,13 +4,13 @@
 """
 Calibration-related data models.
 """
-from typing import Union, Optional, Literal, Sequence
+from typing import Literal, Optional, Sequence, Union
 
 import numpy
-from numpy.typing import NDArray
 import xarray
-from astropy.time import Time
 from astropy.coordinates import SkyCoord
+from astropy.time import Time
+from numpy.typing import NDArray
 
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import (
@@ -22,57 +22,70 @@ from ska_sdp_datamodels.xarray_accessor import XarrayAccessorMixin
 
 class GainTable(xarray.Dataset):
     """
-    Container for calibration solutions; a GainTable instance implicitly corresponds to a Visibility instance being calibrated. 
-    GainTable wraps a collection of either:
+    Container for calibration solutions; a GainTable instance implicitly
+    corresponds to a Visibility instance being calibrated. GainTable wraps a
+    collection of either:
 
     - complex-valued scalar gains, if dealing with pure Stokes I visibilities.
 
     - 2x2 complex-valued Jones matrices otherwise.
 
-    RASCIL relies on the concept of model visibilities, which are related to observed visibilities and Jones matrices as follows:
+    RASCIL relies on the concept of model visibilities, which are related to
+    observed visibilities and Jones matrices as follows:
 
-    :math:`V^{\mathrm{obs}}_{pq} = J_p V^{\mathrm{model}}_{pq} J_q^H`
+    :math:`V^{\\mathrm{obs}}_{pq} = J_p V^{\\mathrm{model}}_{pq} J_q^H`
 
-    where p, q are antenna indices, :math:`J_k` denotes the Jones matrix for antenna k, and the H superscript is Hermitian transpose.
+    where p, q are antenna indices, :math:`J_k` denotes the Jones matrix for
+    antenna k, and the H superscript is Hermitian transpose.
     For scalar visibilities and gains :math:`g_k`, this can be rewritten as
 
-    :math:`V^{\mathrm{obs}}_{pq} = g_p g_q^* V^{\mathrm{model}}_{pq}`
+    :math:`V^{\\mathrm{obs}}_{pq} = g_p g_q^* V^{\\mathrm{model}}_{pq}`
 
     **Coordinates**
 
-    - time: time centroids of solutions, in seconds elapsed (on the UTC scale) since the MJD reference epoch, ``[ntimes]``.
+    - time: time centroids of solutions, in seconds elapsed (on the UTC scale)
+      since the MJD reference epoch, ``[ntimes]``.
 
     - antenna: integer antenna indices starting at 0, ``[nants]``
 
     - frequency: frequency centroids of solutions in Hz, ``[nchan]``
 
-    - receptor1: polarisation hands of measured data polarisation, ``[nrec]``. Most likely ``['X', 'Y']`` or ``['I']``.
+    - receptor1: polarisation hands of measured data polarisation, ``[nrec]``.
+      Most likely ``['X', 'Y']`` or ``['I']``.
 
-    - receptor2: polarisation hands of ideal/model data polarisation, ``[nrec]``
+    - receptor2: polarisation hands of ideal/model data polarisation,
+      ``[nrec]``
 
-    TODO (VM): The idea of allowing two different receptor frames is explained below:
-    https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
+    TODO (VM): The idea of allowing two different receptor frames is explained
+    in: https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
 
-    However, by definition of a Jones matrix, I think these should always be the same.
-    Leaving this notice until settled with relevant parties.
+    However, by definition of a Jones matrix, I think these should always be
+    the same. Leaving this notice until settled with relevant parties.
 
     **Data variables**
 
-    - gain: scalar gains or Jones matrices, complex-valued ``[ntimes, nants, nchan, nrec, nrec]``.
-      ``nrec=2`` if storing Jones matrices, ``nrec=1`` if storing complex gains.
+    - gain: scalar gains or Jones matrices, complex-valued
+      ``[ntimes, nants, nchan, nrec, nrec]``. ``nrec=2`` if storing Jones
+      matrices, ``nrec=1`` if storing complex gains.
 
-    - weight: "gain weights", TODO: precise meaning and purpose under investigation, real-valued with same shape as ``gain``.
-      Previously documented as "The weight is usually that output from gain solvers".
+    - weight: "gain weights", TODO: precise meaning and purpose under
+      investigation, real-valued with same shape as ``gain``. Previously
+      documented as "The weight is usually that output from gain solvers".
 
-    - residual: fit residuals returned by the gain solver, real-valued ``[ntimes, nchan, nrec, nrec]``
+    - residual: fit residuals returned by the gain solver, real-valued
+      ``[ntimes, nchan, nrec, nrec]``
 
-    - datetime: time centroids of solutions, in np.datetime64 format, ``[ntimes]``. Effectively a copy of the "time" coordinate but with a different representation.
+    - datetime: time centroids of solutions, in np.datetime64 format,
+      ``[ntimes]``. Effectively a copy of the "time" coordinate but with a
+      different representation.
 
-    - interval: length of time for which solutions are valid in seconds, ``[ntimes]``
+    - interval: length of time for which solutions are valid in seconds,
+      ``[ntimes]``
 
     **Attributes**
 
-    - jones_type: capital letter denoting the Jones term this GainTable represents.
+    - jones_type: capital letter denoting the Jones term this GainTable
+      represents.
 
     - phasecentre: Phase centre coordinates as an astropy SkyCoord object.
 
@@ -82,7 +95,8 @@ class GainTable(xarray.Dataset):
 
     - receptor_frame2: ReceptorFrame for model data.
 
-    - data_model: name of this class, used internally for saving to / loading from files.
+    - data_model: name of this class, used internally for saving to / loading
+      from files.
 
     Here is an example::
 
@@ -128,9 +142,9 @@ class GainTable(xarray.Dataset):
         weight: Optional[NDArray] = None,
         residual: Optional[NDArray] = None,
         frequency: Optional[NDArray] = None,
-        receptor_frame: Optional[Union[
-            ReceptorFrame, Sequence[ReceptorFrame]
-        ]] = None,
+        receptor_frame: Optional[
+            Union[ReceptorFrame, Sequence[ReceptorFrame]]
+        ] = None,
         phasecentre: Optional[SkyCoord] = None,
         configuration: Optional[Configuration] = None,
         jones_type: Literal["T", "G", "B"] = "T",
@@ -141,9 +155,10 @@ class GainTable(xarray.Dataset):
         :param gain: Complex gains [ntimes, nants, nchan, nrec, nrec]
         :type gain: ndarray or None, optional
 
-        :param time: Centroids of solutions, in seconds elapsed since the MJD reference epoch [ntimes]
+        :param time: Centroids of solutions, in seconds elapsed since the MJD
+            reference epoch [ntimes]
         :type time: ndarray or None, optional
-        
+
         :param interval: Intervals of validity in seconds [ntimes]
         :type interval: ndarray or None, optional
 
@@ -160,22 +175,25 @@ class GainTable(xarray.Dataset):
             equivalent to two sides of the Jones matrix.
             Receptor1 stands for measured data polarisation;
             Receptor2 stands for ideal/model data polarisation.
-            If None, use a linear receptor frame for both receptor1 and receptor2.
-            If ReceptorFrame instance, use it for both receptor1 and receptor2.
-            If two-element sequence, interpret as [receptor1, receptor2].
-            See also:
+            If None, use a linear receptor frame for both receptor1 and
+            receptor2. If ReceptorFrame instance, use it for both receptor1
+            and receptor2. If two-element sequence, interpret as
+            [receptor1, receptor2]. See also:
             https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
-            TODO (VM): I think both receptor frames should be identical by definition,
-            see comment in class docstring.
-        :type receptor_frame: ReceptorFrame or sequence of two ReceptorFrames or None, optional
+            TODO (VM): I think both receptor frames should be identical by
+            definition, see comment in class docstring.
+        :type receptor_frame: ReceptorFrame or sequence of two ReceptorFrames
+            or None, optional
 
-        :param phasecentre: Phase centre coordinates as an astropy SkyCoord object
+        :param phasecentre: Phase centre coordinates
         :type phasecentre: astropy.coord.SkyCoord or None, optional
 
-        :param configuration: Configuration object describing the array configuration
+        :param configuration: Configuration object describing the array
+            configuration
         :type configuration: Configuration or None, optional
 
-        :param jones_type: Capital letter denoting the Jones term this GainTable will represent.
+        :param jones_type: Capital letter denoting the Jones term this
+            GainTable will represent.
         :type jones_type: str, optional
         """
         nants = gain.shape[1]

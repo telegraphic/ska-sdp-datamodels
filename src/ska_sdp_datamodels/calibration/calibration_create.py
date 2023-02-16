@@ -1,6 +1,7 @@
 # pylint: disable=invalid-name, too-many-locals
 """
-Functions to create and initialise calibration models GainTable and PointingTable.
+Functions to create and initialise calibration models GainTable and
+PointingTable.
 """
 from typing import Literal, Union
 
@@ -39,28 +40,31 @@ def create_gaintable_from_visibility(
     In the first case, gains are initialised to unity. In the second case,
     Jones matrices are initialised to the identity matrix.
 
-    :param vis: Visibility object for which we want to create a matching GainTable
+    :param vis: Visibility object for which we want to create a matching
+        GainTable
     :type vis: Visibility
-    :param timeslice: Defines the time scale over which each gain solution is valid.
-        This is used to define the time axis of the GainTable. This parameter is
-        interpreted as follows depending on its type:
+    :param timeslice: Defines the time scale over which each gain solution is
+        valid. This is used to define the time axis of the GainTable. This
+        parameter is interpreted as follows depending on its type:
 
         - float: this is a custom time interval in seconds. Input timestamps
-          are grouped by intervals of this duration, and said groups are separately
-          averaged to produce the output time axis.
+          are grouped by intervals of this duration, and said groups are
+          separately averaged to produce the output time axis.
 
         - "auto" or None: match the time resolution of the input, i.e. copy
           the time axis of the input Visibility
 
     :type timeslice: float, str or None, optional
     :param jones_type: Type of Jones term, one of {"T", "G", "B"}.
-        The frequency axis of the output GainTable depends on the value provided:
+        The frequency axis of the output GainTable depends on the value
+        provided:
 
-        - "B": the output frequency axis is the same as that of the input Visibility.
+        - "B": the output frequency axis is the same as that of the input
+          Visibility.
 
         - "T" or "G": the solution is assumed to be frequency-independent,
-          and the frequency axis of the output contains a single value: the average
-          frequency of the input Visibility's channels.
+          and the frequency axis of the output contains a single value: the
+          average frequency of the input Visibility's channels.
 
     :type jones_type: str, optional
     :return: GainTable object; its "gain" data variable is always 5-dimensional
