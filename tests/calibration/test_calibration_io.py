@@ -61,7 +61,7 @@ class MockBaseTable:
 
 class MockFullBaseTable:
     """
-    Mock Base Table Class
+    Mock Base Table Class with a row for each time and antenna combination
     """
 
     def getcol(self, columnname=None):
@@ -98,6 +98,125 @@ class MockFullBaseTable:
             return "B Jones"
 
 
+class MockLeakageBaseTable:
+    """
+    Mock Base Table Class with leakage terms rather than gains
+    """
+
+    def getcol(self, columnname=None):
+        """
+        Get column name
+        """
+        if columnname == "TIME":
+            return numpy.concatenate(
+                (
+                    numpy.repeat(4.35089331e09, NANTS),
+                    numpy.repeat(4.35089332e09, NANTS),
+                    numpy.repeat(4.35089333e09, NANTS),
+                    numpy.repeat(4.35089334e09, NANTS),
+                )
+            )
+
+        if columnname == "INTERVAL":
+            return numpy.repeat(10.0, NTIMES * NANTS)
+
+        if columnname == "CPARAM":
+            return 0.1 * numpy.ones((NTIMES * NANTS, NFREQ, 2))
+
+        if columnname == "ANTENNA1":
+            return numpy.array([0, 1, 2, 3, 4, 5])
+
+        if columnname == "SPECTRAL_WINDOW_ID":
+            return numpy.array([0, 1])
+
+    def getkeyword(self, keyword=None):
+        """
+        Get the value of a table keyword
+        """
+        if keyword == "VisCal":
+            return "Df Jones"
+
+
+class MockDelayBaseTable:
+    """
+    Mock Base Table Class with leakage terms rather than gains
+    """
+
+    def getcol(self, columnname=None):
+        """
+        Get column name
+        """
+        if columnname == "TIME":
+            return numpy.concatenate(
+                (
+                    numpy.repeat(4.35089331e09, NANTS),
+                    numpy.repeat(4.35089332e09, NANTS),
+                    numpy.repeat(4.35089333e09, NANTS),
+                    numpy.repeat(4.35089334e09, NANTS),
+                )
+            )
+
+        if columnname == "INTERVAL":
+            return numpy.repeat(10.0, NTIMES * NANTS)
+
+        if columnname == "FPARAM":
+            return numpy.ones((NTIMES * NANTS, 1, 2))
+
+        if columnname == "ANTENNA1":
+            return numpy.array([0, 1, 2, 3, 4, 5])
+
+        if columnname == "SPECTRAL_WINDOW_ID":
+            return numpy.array([0])
+
+    def getkeyword(self, keyword=None):
+        """
+        Get the value of a table keyword
+        """
+        if keyword == "VisCal":
+            return "K Jones"
+
+
+class MockKcrossBaseTable:
+    """
+    Mock Base Table Class with leakage terms rather than gains
+    """
+
+    def getcol(self, columnname=None):
+        """
+        Get column name
+        """
+        if columnname == "TIME":
+            return numpy.concatenate(
+                (
+                    numpy.repeat(4.35089331e09, NANTS),
+                    numpy.repeat(4.35089332e09, NANTS),
+                    numpy.repeat(4.35089333e09, NANTS),
+                    numpy.repeat(4.35089334e09, NANTS),
+                )
+            )
+
+        if columnname == "INTERVAL":
+            return numpy.repeat(10.0, NTIMES * NANTS)
+
+        if columnname == "FPARAM":
+            delay = numpy.zeros((NTIMES * NANTS, 1, 2))
+            delay[..., 0] = 1
+            return delay
+
+        if columnname == "ANTENNA1":
+            return numpy.array([0, 1, 2, 3, 4, 5])
+
+        if columnname == "SPECTRAL_WINDOW_ID":
+            return numpy.array([0])
+
+    def getkeyword(self, keyword=None):
+        """
+        Get the value of a table keyword
+        """
+        if keyword == "VisCal":
+            return "Kcross Jones"
+
+
 class MockSpectralWindowTable:
     """
     Mock Spectral Window Table Class
@@ -112,6 +231,22 @@ class MockSpectralWindowTable:
 
         if columnname == "NUM_CHAN":
             return numpy.array([NFREQ, NFREQ])
+
+
+class MockDelaySpectralWindowTable:
+    """
+    Mock Spectral Window Table Class
+    """
+
+    def getcol(self, columnname=None):
+        """
+        Get column name
+        """
+        if columnname == "CHAN_FREQ":
+            return numpy.array([[8.1e9]])
+
+        if columnname == "NUM_CHAN":
+            return numpy.array([1])
 
 
 class MockAntennaTable:
@@ -264,7 +399,8 @@ def test_import_gaintable_from_casa_cal_table(mock_tables):
 )
 def test_import_full_gaintable_from_casa_cal_table(mock_tables):
     """
-    Test importing gaintable from a standard 3D CASA cal table
+    Test importing gaintable from a standard 3D CASA cal table with a row for
+    each time and antenna combination
     """
 
     mock_tables.return_value = (
@@ -284,3 +420,92 @@ def test_import_full_gaintable_from_casa_cal_table(mock_tables):
     assert (result.interval.data[...] == 10.0).all()
     assert (result.gain.data[..., 0, 0] == complex(1.0, 0.0)).all()
     assert (result.gain.data[..., 0, 1] == complex(0.0, 0.0)).all()
+    assert (result.gain.data[..., 1, 0] == complex(0.0, 0.0)).all()
+    assert (result.gain.data[..., 1, 1] == complex(1.0, 0.0)).all()
+
+
+@patch(
+    "ska_sdp_datamodels.calibration.calibration_functions._load_casa_tables"
+)
+def test_import_leakage_gaintable_from_casa_cal_table(mock_tables):
+    """
+    Test importing gaintable from a standard 3D CASA cal table with leakages
+    instead of gains
+    """
+
+    mock_tables.return_value = (
+        MockAntennaTable(),
+        MockLeakageBaseTable(),
+        MockFieldTable(),
+        MockObservationTable(),
+        MockSpectralWindowTable(),
+    )
+    result = import_gaintable_from_casa_cal_table("test_table")
+    assert isinstance(result, GainTable)
+    # Specific attributes
+    assert (result.gain.data[..., 0, 0] == complex(1.0, 0.0)).all()
+    assert (result.gain.data[..., 0, 1] == complex(0.1, 0.0)).all()
+    assert (result.gain.data[..., 1, 0] == complex(0.1, 0.0)).all()
+    assert (result.gain.data[..., 1, 1] == complex(1.0, 0.0)).all()
+
+
+@patch(
+    "ska_sdp_datamodels.calibration.calibration_functions._load_casa_tables"
+)
+def test_import_delay_gaintable_from_casa_cal_table(mock_tables):
+    """
+    Test importing gaintable from a 4D cal table
+    """
+
+    mock_tables.return_value = (
+        MockAntennaTable(),
+        MockDelayBaseTable(),
+        MockFieldTable(),
+        MockObservationTable(),
+        MockDelaySpectralWindowTable(),
+    )
+    result = import_gaintable_from_casa_cal_table("test_table")
+    assert isinstance(result, GainTable)
+    # Specific attributes
+    # ensure that there is a single frequency value
+    assert len(result.coords["frequency"]) == 1
+    assert result.gain.shape[2] == 1
+    ns2rad = 2 * numpy.pi * result.coords["frequency"].data[0] * 1e-9
+    gain = numpy.exp(1j * ns2rad * 1)
+    assert (result.gain.data[..., 0, 0] == gain).all()
+    assert (result.gain.data[..., 0, 1] == complex(0.0, 0.0)).all()
+    assert (result.gain.data[..., 1, 0] == complex(0.0, 0.0)).all()
+    assert (result.gain.data[..., 1, 1] == gain).all()
+    assert (result.weight.data[...] == 1.0).all()
+    assert (result.residual.data[...] == 0.0).all()
+
+
+@patch(
+    "ska_sdp_datamodels.calibration.calibration_functions._load_casa_tables"
+)
+def test_import_kcross_gaintable_from_casa_cal_table(mock_tables):
+    """
+    Test importing gaintable from a 4D cal table
+    """
+
+    mock_tables.return_value = (
+        MockAntennaTable(),
+        MockKcrossBaseTable(),
+        MockFieldTable(),
+        MockObservationTable(),
+        MockDelaySpectralWindowTable(),
+    )
+    result = import_gaintable_from_casa_cal_table("test_table")
+    assert isinstance(result, GainTable)
+    # Specific attributes
+    # ensure that there is a single frequency value
+    assert len(result.coords["frequency"]) == 1
+    assert result.gain.shape[2] == 1
+    ns2rad = 2 * numpy.pi * result.coords["frequency"].data[0] * 1e-9
+    gain = numpy.exp(1j * ns2rad * 1)
+    assert (result.gain.data[..., 0, 0] == complex(1.0, 0.0)).all()
+    assert (result.gain.data[..., 0, 1] == gain).all()
+    assert (result.gain.data[..., 1, 0] == numpy.conj(gain)).all()
+    assert (result.gain.data[..., 1, 1] == complex(1.0, 0.0)).all()
+    assert (result.weight.data[...] == 1.0).all()
+    assert (result.residual.data[...] == 0.0).all()
