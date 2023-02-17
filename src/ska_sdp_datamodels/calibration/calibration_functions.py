@@ -343,6 +343,57 @@ def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
     return gains, gain_time, gain_interval, antenna
 
 
+def _gain_tables_to_jones(table, frequency, is_leakage, is_delay):
+    table_shape = table.shape
+    ntimes = table_shape[0]
+    nants = table_shape[1]
+    nfrequency = table_shape[2]
+    nrec = table_shape[3]
+
+    gain = numpy.ones((ntimes, nants, nfrequency, nrec, nrec), dtype="complex")
+
+    if nrec == 1:
+        gain[..., 0, 0] = table[..., 0]
+    elif nrec == 2 and not is_delay:
+        if not is_leakage:
+            # standard table Jones: G or B = [[gx,0],[0,gy]]
+            gain[..., 0, 0] = table[..., 0]
+            gain[..., 0, 1] = 0.0
+            gain[..., 1, 0] = 0.0
+            gain[..., 1, 1] = table[..., 1]
+        else:
+            # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
+            # dyx is not defined with a -1 coeff in CASA
+            gain[..., 0, 0] = 1.0
+            gain[..., 0, 1] = table[..., 0]
+            gain[..., 1, 0] = table[..., 1]
+            gain[..., 1, 1] = 1.0
+    elif nrec == 2 and is_delay:
+        # convert ns time delays to phase at the reference frequency
+        ns2rad = 2 * numpy.pi * frequency[0] * 1e-9
+        if nfrequency != 1:
+            raise ValueError("expect a single channel for delay fits")
+        if not is_leakage:
+            # standard table Jones: G = [[gx,0],[0,gy]]
+            phase = ns2rad * table
+            gain[..., 0, 0] = numpy.exp(1j * phase[..., 0])
+            gain[..., 0, 1] = 0.0
+            gain[..., 1, 0] = 0.0
+            gain[..., 1, 1] = numpy.exp(1j * phase[..., 1])
+        else:
+            # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
+            phase = ns2rad * (table[..., 0] - table[..., 1])
+            dxy = numpy.exp(1j * phase)
+            gain[..., 0, 0] = 1.0
+            gain[..., 0, 1] = dxy
+            gain[..., 1, 0] = numpy.conj(dxy)
+            gain[..., 1, 1] = 1.0
+    else:
+        raise ValueError(f"Unsure how to import {nrec} polarisations")
+
+    return gain
+
+
 def import_gaintable_from_casa_cal_table(
     table_name,
     jones_type="B",
@@ -371,7 +422,7 @@ def import_gaintable_from_casa_cal_table(
     try:
         table_jones_type = base_table.getkeyword("VisCal")
     except RuntimeError:
-        log.warning(f"no keyword VisCal. Assuming {jones_type} Jones")
+        log.warning("no keyword VisCal. Assuming %s Jones", jones_type)
         table_jones_type = jones_type
 
     # interpret the VisCal string so we know how to read and stored the data
@@ -424,53 +475,11 @@ def import_gaintable_from_casa_cal_table(
     if nrec != input_shape[3]:
         raise ValueError(f"Tables have wrong number of receptors: {nrec}")
 
-    gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
-    gain = numpy.ones(gain_shape, dtype="complex")
-
-    if nrec == 1:
-        gain[..., 0, 0] = numpy.reshape(
-            gains[..., 0], (ntimes, nants, nfrequency)
-        )
-    elif nrec == 2 and not is_delay:
-        if not is_leakage:
-            # standard gains Jones: G = [[gx,0],[0,gy]]
-            gain[..., 0, 0] = gains[..., 0]
-            gain[..., 0, 1] = 0.0
-            gain[..., 1, 0] = 0.0
-            gain[..., 1, 1] = gains[..., 1]
-        else:
-            # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
-            # dyx is not defined with a -1 coeff in CASA
-            gain[..., 0, 0] = 1.0
-            gain[..., 0, 1] = gains[..., 0]
-            gain[..., 1, 0] = gains[..., 1]
-            gain[..., 1, 1] = 1.0
-    elif nrec == 2 and is_delay:
-        # convert to phase at the reference frequency
-        if nfrequency != 1:
-            raise ValueError(f"expect a single channel for delay fits")
-        if not is_leakage:
-            # standard gains Jones: G = [[gx,0],[0,gy]]
-            phase = 2 * numpy.pi * gain_frequency[0] * 1e-9 * gains
-            gain[..., 0, 0] = numpy.exp(1j * phase[..., 0])
-            gain[..., 0, 1] = 0.0
-            gain[..., 1, 0] = 0.0
-            gain[..., 1, 1] = numpy.exp(1j * phase[..., 1])
-        else:
-            # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
-            ns2rad = 2 * numpy.pi * gain_frequency[0] * 1e-9
-            phase = ns2rad * (gains[..., 0] - gains[..., 1])
-            dxy = numpy.exp(1j * phase)
-            gain[..., 0, 0] = 1.0
-            gain[..., 0, 1] = dxy
-            gain[..., 1, 0] = numpy.conj(dxy)
-            gain[..., 1, 1] = 1.0
-    else:
-        raise ValueError(f"Unsure how to import {nrec} polarisations")
+    gain = _gain_tables_to_jones(gains, gain_frequency, is_leakage, is_delay)
 
     # Set the gain weight to one and residual to zero
     # This is temporary since in current tables they are not provided.
-    gain_weight = numpy.ones(gain_shape)
+    gain_weight = numpy.ones(gain.shape)
     gain_residual = numpy.zeros([ntimes, nfrequency, nrec, nrec])
 
     # Get configuration
