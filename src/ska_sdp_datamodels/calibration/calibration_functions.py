@@ -7,6 +7,7 @@ data models.
 
 import collections
 from typing import List, Union
+import logging
 
 import h5py
 import numpy
@@ -25,6 +26,8 @@ from ska_sdp_datamodels.configuration import (
 )
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
+
+log = logging.getLogger("data-models-logger")
 
 
 def convert_gaintable_to_hdf(gt: GainTable, f):
@@ -340,6 +343,19 @@ def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
     return gains, gain_time, gain_interval, antenna
 
 
+# move this question to a MR comment
+
+    # Is function param jones_type needed? Can it not be set from table keyword VisCal?
+    #  - "B" if VisCal = "B Jones"
+    #  - "G" if VisCal = "G Jones"
+    #  - "D" if VisCal = "Df Jones"
+    #  - "T" if VisCal = "K Jones"
+    #  - "T" if VisCal = "Kcross Jones"
+    # If not used to set jones_type, it should be stored somewhere
+    # Could have it unset by default, in which case it is set from table_jones_type,
+    # otherwise it is compared with table_jones_type and an error raised if inconsistent
+    # Or just remove it entirely, and default to B is table_jones_type isn't set
+
 def import_gaintable_from_casa_cal_table(
     table_name,
     jones_type="B",
@@ -360,9 +376,32 @@ def import_gaintable_from_casa_cal_table(
     # Get times, interval, bandpass solutions
     gain_time = base_table.getcol(columnname="TIME")
     gain_interval = base_table.getcol(columnname="INTERVAL")
-    gains = base_table.getcol(columnname="CPARAM")
     antenna = base_table.getcol(columnname="ANTENNA1")
     spec_wind_id = base_table.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
+
+    # Determine calibration solution type
+    table_jones_type = ""
+    try:
+        table_jones_type = base_table.getkeyword("VisCal")
+    except RuntimeError:
+        log.warning(f"no keyword \"VisCal\". Assuming {jones_type} Jones")
+        table_jones_type = jones_type
+
+    # interpret the VisCal string so we know how to read and stored the data
+    # "G Jones", "B Jones", "Df Jones", "K Jones", "Kcross Jones"
+    is_delay = False
+    if table_jones_type[0] == "K":
+        is_delay = True
+    is_leakage = False
+    if table_jones_type.find("Df")==0 or table_jones_type.find("Kcross")==0:
+        is_leakage = True
+
+    # gains and leakages are stored in CPARAM[nrec,nfrequency]
+    # delays are stored in FPARAM[nrec,1]
+    if is_delay:
+        gains = base_table.getcol(columnname="FPARAM")
+    else:
+        gains = base_table.getcol(columnname="CPARAM")
 
     # Get the frequency sampling information
     gain_frequency = spw.getcol(columnname="CHAN_FREQ")[spec_wind_id]
