@@ -1,8 +1,9 @@
 # pylint: disable=invalid-name, too-many-locals
 """
-Functions to create calibration models
-from Visibility
+Functions to create and initialise calibration models GainTable and
+PointingTable.
 """
+from typing import Literal, Union
 
 import numpy
 
@@ -22,19 +23,55 @@ from ska_sdp_datamodels.visibility.vis_utils import (
 
 def create_gaintable_from_visibility(
     vis: Visibility,
-    timeslice=None,
-    jones_type="T",
+    timeslice: Union[float, Literal["auto"], None] = None,
+    jones_type: Literal["T", "G", "B"] = "T",
 ) -> GainTable:
     """
-    Create gain table from visibility.
+    Create a unity- or identity-initialised GainTable consistent with the
+    given Visibility.
 
-    This makes an empty gain table consistent with the Visibility.
+    GainTable either represents:
 
-    :param vis: Visibility object
-    :param timeslice: Time interval between solutions (s)
-    :param jones_type: Type of calibration matrix T or G or B
-    :return: GainTable object
+    - a collection of complex-valued scalar gains, if Visibility carries only
+      Stokes I data.
 
+    - a collection of 2x2 complex-valued Jones matrices otherwise.
+
+    In the first case, gains are initialised to unity. In the second case,
+    Jones matrices are initialised to the identity matrix.
+
+    :param vis: Visibility object for which we want to create a matching
+        GainTable
+    :type vis: Visibility
+    :param timeslice: Defines the time scale over which each gain solution is
+        valid. This is used to define the time axis of the GainTable. This
+        parameter is interpreted as follows depending on its type:
+
+        - float: this is a custom time interval in seconds. Input timestamps
+          are grouped by intervals of this duration, and said groups are
+          separately averaged to produce the output time axis.
+
+        - "auto" or None: match the time resolution of the input, i.e. copy
+          the time axis of the input Visibility
+
+    :type timeslice: float, str or None, optional
+    :param jones_type: Type of Jones term, one of {"T", "G", "B"}.
+        The frequency axis of the output GainTable depends on the value
+        provided:
+
+        - "B": the output frequency axis is the same as that of the input
+          Visibility.
+
+        - "T" or "G": the solution is assumed to be frequency-independent,
+          and the frequency axis of the output contains a single value: the
+          average frequency of the input Visibility's channels.
+
+    :type jones_type: str, optional
+    :return: GainTable object; its "gain" data variable is always 5-dimensional
+        ``[ntimes, nants, nfreqs, nrec, nrec]`` but some axes may have a
+        length of 1 as explained above. In particular, ``nrec=1`` when given
+        pure Stokes I visibilities.
+    :rtype: GainTable
     """
     nants = vis.visibility_acc.nants
 
