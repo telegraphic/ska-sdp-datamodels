@@ -30,8 +30,9 @@ class GainTable(xarray.Dataset):
 
     - 2x2 complex-valued Jones matrices otherwise.
 
-    RASCIL relies on the concept of model visibilities, which are related to
-    observed visibilities and Jones matrices as follows:
+    GainTable currently serves calibration processing functions that rely on
+    the concept of model visibilities, which are related to observed
+    visibilities and Jones matrices as follows:
 
     :math:`V^{\\mathrm{obs}}_{pq} = J_p V^{\\mathrm{model}}_{pq} J_q^H`
 
@@ -56,11 +57,29 @@ class GainTable(xarray.Dataset):
     - receptor2: polarisation hands of ideal/model data polarisation,
       ``[nrec]``
 
-    TODO (VM): The idea of allowing two different receptor frames is explained
+    The idea of allowing two different receptor frames is explained
     in: https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
 
-    However, by definition of a Jones matrix, I think these should always be
-    the same. Leaving this notice until settled with relevant parties.
+    TODO (Opinionated comment, VM):
+    However, GainTable represents Jones matrices, and the application of a
+    Jones matrix by itself on a voltage/electric field vector cannot change
+    the polarisation basis in which it is expressed (e.g. linear or circular).
+    Jones matrices are a representation of a linear function in one specific
+    vector basis, in which both the input and output vectors must be expressed
+    (which here means receptor1 = receptor2 by definition).
+    Basis changes matrices represent, mathematically speaking, a distinct
+    operator.
+    
+    See Smirnov 2011, especially section 6.3:
+    https://arxiv.org/pdf/1101.1764.pdf
+
+    I'd argue that trying to merge the two concepts of Jones matrix and basis
+    change matrix inside the same class is incorrect, and would be
+    over-engineering even if it was. There isn't, and likely won't be a use
+    case for this, since both SKA-Mid and Low have linearly polarised
+    receptors, giving us a privileged base in which to work. Leaving this
+    (admittedly opinionated) notice until discussed and settled with relevant
+    parties.
 
     **Data variables**
 
@@ -180,8 +199,7 @@ class GainTable(xarray.Dataset):
             and receptor2. If two-element sequence, interpret as
             [receptor1, receptor2]. See also:
             https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
-            TODO (VM): I think both receptor frames should be identical by
-            definition, see comment in class docstring.
+
         :type receptor_frame: ReceptorFrame or sequence of two ReceptorFrames
             or None, optional
 
