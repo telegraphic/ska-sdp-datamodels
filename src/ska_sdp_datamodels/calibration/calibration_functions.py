@@ -6,8 +6,8 @@ data models.
 """
 
 import collections
-from typing import List, Union
 import logging
+from typing import List, Union
 
 import h5py
 import numpy
@@ -343,19 +343,6 @@ def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
     return gains, gain_time, gain_interval, antenna
 
 
-# move this question to a MR comment
-
-    # Is function param jones_type needed? Can it not be set from table keyword VisCal?
-    #  - "B" if VisCal = "B Jones"
-    #  - "G" if VisCal = "G Jones"
-    #  - "D" if VisCal = "Df Jones"
-    #  - "T" if VisCal = "K Jones"
-    #  - "T" if VisCal = "Kcross Jones"
-    # If not used to set jones_type, it should be stored somewhere
-    # Could have it unset by default, in which case it is set from table_jones_type,
-    # otherwise it is compared with table_jones_type and an error raised if inconsistent
-    # Or just remove it entirely, and default to B is table_jones_type isn't set
-
 def import_gaintable_from_casa_cal_table(
     table_name,
     jones_type="B",
@@ -384,7 +371,7 @@ def import_gaintable_from_casa_cal_table(
     try:
         table_jones_type = base_table.getkeyword("VisCal")
     except RuntimeError:
-        log.warning(f"no keyword \"VisCal\". Assuming {jones_type} Jones")
+        log.warning(f"no keyword VisCal. Assuming {jones_type} Jones")
         table_jones_type = jones_type
 
     # interpret the VisCal string so we know how to read and stored the data
@@ -393,7 +380,10 @@ def import_gaintable_from_casa_cal_table(
     if table_jones_type[0] == "K":
         is_delay = True
     is_leakage = False
-    if table_jones_type.find("Df")==0 or table_jones_type.find("Kcross")==0:
+    if (
+        table_jones_type.find("Df") == 0
+        or table_jones_type.find("Kcross") == 0
+    ):
         is_leakage = True
 
     # gains and leakages are stored in CPARAM[nrec,nfrequency]
@@ -461,16 +451,16 @@ def import_gaintable_from_casa_cal_table(
             raise ValueError(f"expect a single channel for delay fits")
         if not is_leakage:
             # standard gains Jones: G = [[gx,0],[0,gy]]
-            phase = 2*numpy.pi * gain_frequency[0] * 1e-9 * gains
-            gain[..., 0, 0] = numpy.exp(1j*phase[...,0])
+            phase = 2 * numpy.pi * gain_frequency[0] * 1e-9 * gains
+            gain[..., 0, 0] = numpy.exp(1j * phase[..., 0])
             gain[..., 0, 1] = 0.0
             gain[..., 1, 0] = 0.0
-            gain[..., 1, 1] = numpy.exp(1j*phase[...,1])
+            gain[..., 1, 1] = numpy.exp(1j * phase[..., 1])
         else:
             # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
-            phase = 2 * numpy.pi * gain_frequency[0] * \
-                    1e-9 * (gains[...,0] - gains[...,1])
-            dxy = numpy.exp(1j*phase)
+            ns2rad = 2 * numpy.pi * gain_frequency[0] * 1e-9
+            phase = ns2rad * (gains[..., 0] - gains[..., 1])
+            dxy = numpy.exp(1j * phase)
             gain[..., 0, 0] = 1.0
             gain[..., 0, 1] = dxy
             gain[..., 1, 0] = numpy.conj(dxy)
