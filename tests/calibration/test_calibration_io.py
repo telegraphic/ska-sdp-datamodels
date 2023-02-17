@@ -400,7 +400,7 @@ def test_import_gaintable_from_casa_cal_table(mock_tables):
 def test_import_full_gaintable_from_casa_cal_table(mock_tables):
     """
     Test importing gaintable from a standard 3D CASA cal table with a row for
-    each time and antenna combination
+    each time and antenna combination (VisCal type "G Jones" or "B Jones")
     """
 
     mock_tables.return_value = (
@@ -430,7 +430,7 @@ def test_import_full_gaintable_from_casa_cal_table(mock_tables):
 def test_import_leakage_gaintable_from_casa_cal_table(mock_tables):
     """
     Test importing gaintable from a standard 3D CASA cal table with leakages
-    instead of gains
+    instead of gains (VisCal type "Df Jones")
     """
 
     mock_tables.return_value = (
@@ -454,7 +454,8 @@ def test_import_leakage_gaintable_from_casa_cal_table(mock_tables):
 )
 def test_import_delay_gaintable_from_casa_cal_table(mock_tables):
     """
-    Test importing gaintable from a 4D cal table
+    Test importing gaintable from a standard 3D CASA cal table containing
+    co-pol delays (VisCal type "K Jones")
     """
 
     mock_tables.return_value = (
@@ -485,7 +486,8 @@ def test_import_delay_gaintable_from_casa_cal_table(mock_tables):
 )
 def test_import_kcross_gaintable_from_casa_cal_table(mock_tables):
     """
-    Test importing gaintable from a 4D cal table
+    Test importing gaintable from a standard 3D CASA cal table containing
+    cross-pol delays (VisCal type "Kcross Jones")
     """
 
     mock_tables.return_value = (
