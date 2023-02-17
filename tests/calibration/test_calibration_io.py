@@ -51,8 +51,6 @@ class MockBaseTable:
         if columnname == "SPECTRAL_WINDOW_ID":
             return numpy.array([0, 1])
 
-        table_jones_type = base_table.getkeyword("VisCal")
-
     def getkeyword(self, keyword=None):
         """
         Get the value of a table keyword
