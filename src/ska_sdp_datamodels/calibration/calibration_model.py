@@ -69,7 +69,7 @@ class GainTable(xarray.Dataset):
     (which here means receptor1 = receptor2 by definition).
     Basis changes matrices represent, mathematically speaking, a distinct
     operator.
-    
+
     See Smirnov 2011, especially section 6.3:
     https://arxiv.org/pdf/1101.1764.pdf
 
