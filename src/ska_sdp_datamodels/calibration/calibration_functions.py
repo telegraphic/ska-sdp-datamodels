@@ -437,11 +437,46 @@ def import_gaintable_from_casa_cal_table(
     gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
     gain = numpy.ones(gain_shape, dtype="complex")
 
-    if nrec > 1:
-        gain[..., 0, 0] = gains[..., 0]
-        gain[..., 1, 1] = gains[..., 1]
-        gain[..., 0, 1] = 0.0
-        gain[..., 1, 0] = 0.0
+    if nrec == 1:
+        gain[..., 0, 0] = numpy.reshape(
+            gains[..., 0], (ntimes, nants, nfrequency)
+        )
+    elif nrec == 2 and not is_delay:
+        if not is_leakage:
+            # standard gains Jones: G = [[gx,0],[0,gy]]
+            gain[..., 0, 0] = gains[..., 0]
+            gain[..., 0, 1] = 0.0
+            gain[..., 1, 0] = 0.0
+            gain[..., 1, 1] = gains[..., 1]
+        else:
+            # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
+            # dyx is not defined with a -1 coeff in CASA
+            gain[..., 0, 0] = 1.0
+            gain[..., 0, 1] = gains[..., 0]
+            gain[..., 1, 0] = gains[..., 1]
+            gain[..., 1, 1] = 1.0
+    elif nrec == 2 and is_delay:
+        # convert to phase at the reference frequency
+        if nfrequency != 1:
+            raise ValueError(f"expect a single channel for delay fits")
+        if not is_leakage:
+            # standard gains Jones: G = [[gx,0],[0,gy]]
+            phase = 2*numpy.pi * gain_frequency[0] * 1e-9 * gains
+            gain[..., 0, 0] = numpy.exp(1j*phase[...,0])
+            gain[..., 0, 1] = 0.0
+            gain[..., 1, 0] = 0.0
+            gain[..., 1, 1] = numpy.exp(1j*phase[...,1])
+        else:
+            # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
+            phase = 2 * numpy.pi * gain_frequency[0] * \
+                    1e-9 * (gains[...,0] - gains[...,1])
+            dxy = numpy.exp(1j*phase)
+            gain[..., 0, 0] = 1.0
+            gain[..., 0, 1] = dxy
+            gain[..., 1, 0] = numpy.conj(dxy)
+            gain[..., 1, 1] = 1.0
+    else:
+        raise ValueError(f"Unsure how to import {nrec} polarisations")
 
     # Set the gain weight to one and residual to zero
     # This is temporary since in current tables they are not provided.
