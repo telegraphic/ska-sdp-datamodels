@@ -300,6 +300,54 @@ def _generate_configuration_from_cal_table(
     return configuration
 
 
+def _set_jones_type(base_table, jones_type):
+    # Obtain the calibration solution type from the table and use this in
+    # preference to any user-defined value. If the table does not have this
+    # information, use the user-defined value.
+
+    table_jones_type = ""
+    try:
+        table_jones_type = base_table.getkeyword("VisCal")
+        log.info("Using table Jones type %s", table_jones_type)
+    except RuntimeError:
+        log.warning("No main-table keyword VisCal")
+
+    if table_jones_type == "":
+        log.info("Using user-defined Jones type %s", jones_type)
+        table_jones_type = jones_type
+    else:
+        # update jones_type based on the VisCal keyword
+        if table_jones_type[0] == "G":
+            # "G Jones"
+            jones_type = "G"
+        if table_jones_type[0] == "D":
+            # "Df Jones"
+            jones_type = "D"
+        if table_jones_type[0] == "B":
+            # "B Jones"
+            jones_type = "B"
+        if table_jones_type[0] == "K":
+            # "K Jones" or "Kcross Jones"
+            # are these the same as "T"? Keep distinct until sure
+            jones_type = "K"
+
+    # interpret the VisCal string so we know how to read and stored the data
+    # "G Jones", "B Jones", "Df Jones", "K Jones", "Kcross Jones"
+    is_delay = False
+    if table_jones_type[0] == "K":
+        # "K Jones" or "Kcross Jones" delay terms
+        is_delay = True
+    is_leakage = False
+    if (
+        # "Df Jones" or "Kcross Jones" leakage terms
+        table_jones_type.find("D") == 0
+        or table_jones_type.find("Kcross") == 0
+    ):
+        is_leakage = True
+
+    return jones_type, is_leakage, is_delay
+
+
 def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
     # casa gain tables can have shape [ntimes*nants, nfrequency, nrec]
 
@@ -404,7 +452,8 @@ def import_gaintable_from_casa_cal_table(
     This import gain table form calibration table of CASA.
 
     :param table_name: Name of CASA table file
-    :param jones_type: Type of calibration matrix T or G or B
+    :param jones_type: Type of calibration matrix T or G or B.
+        Overwritten if table keyword "VisCal" is set
     :param rec_frame: Receptor Frame for the GainTable
     :return: GainTable object
 
@@ -417,25 +466,8 @@ def import_gaintable_from_casa_cal_table(
     antenna = base_table.getcol(columnname="ANTENNA1")
     spec_wind_id = base_table.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
 
-    # Determine calibration solution type
-    table_jones_type = ""
-    try:
-        table_jones_type = base_table.getkeyword("VisCal")
-    except RuntimeError:
-        log.warning("no keyword VisCal. Assuming %s Jones", jones_type)
-        table_jones_type = jones_type
-
-    # interpret the VisCal string so we know how to read and stored the data
-    # "G Jones", "B Jones", "Df Jones", "K Jones", "Kcross Jones"
-    is_delay = False
-    if table_jones_type[0] == "K":
-        is_delay = True
-    is_leakage = False
-    if (
-        table_jones_type.find("Df") == 0
-        or table_jones_type.find("Kcross") == 0
-    ):
-        is_leakage = True
+    # Obtain the calibration solution type from the table
+    jones_type, is_leakage, is_delay = _set_jones_type(base_table, jones_type)
 
     # gains and leakages are stored in CPARAM[nrec,nfrequency]
     # delays are stored in FPARAM[nrec,1]
