@@ -322,19 +322,13 @@ def _set_jones_type(base_table, jones_type):
         table_jones_type = jones_type
     else:
         # update jones_type based on the VisCal keyword
-        if table_jones_type[0] == "G":
-            # "G Jones"
-            jones_type = "G"
-        if table_jones_type[0] == "D":
-            # "Df Jones"
-            jones_type = "D"
-        if table_jones_type[0] == "B":
-            # "B Jones"
-            jones_type = "B"
-        if table_jones_type[0] == "K":
-            # "K Jones" or "Kcross Jones"
-            # are these the same as "T"? Keep distinct until sure
-            jones_type = "K"
+        # this should just be the first character
+        #  - "G Jones" -> "G"
+        #  - "B Jones" -> "B"
+        #  - "Df Jones" -> "D"
+        #  - "K Jones" -> "K"
+        #  - "Kcross Jones" -> "K"
+        jones_type = table_jones_type[0]
 
     # interpret the VisCal string so we know how to read and stored the data
     # "G Jones", "B Jones", "Df Jones", "K Jones", "Kcross Jones"
