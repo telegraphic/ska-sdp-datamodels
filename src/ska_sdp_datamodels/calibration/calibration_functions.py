@@ -301,10 +301,15 @@ def _generate_configuration_from_cal_table(
 
 
 def _set_jones_type(base_table, jones_type):
-    # Obtain the calibration solution type from the table and use this in
-    # preference to any user-defined value. If the table does not have this
-    # information, use the user-defined value.
+    """
+    Obtain the calibration solution type from the table and use this in
+    preference to any user-defined value. If the table does not have this
+    information, use the user-defined value.
 
+    :param base_table: main CASA table
+    :param jones_type: user-defined jones_type string
+    :return: reformatted numpy arrays gains, gain_time, gain_interval, antenna
+    """
     table_jones_type = ""
     try:
         table_jones_type = base_table.getkeyword("VisCal")
@@ -349,7 +354,19 @@ def _set_jones_type(base_table, jones_type):
 
 
 def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
-    # casa gain tables can have shape [ntimes*nants, nfrequency, nrec]
+    """
+    reformat casa gain tables with shape [ntimes*nants, nfrequency, nrec] to
+    have shape [ntimes, nants, nfrequency, nrec]. Initial rows are assumed to
+    cycle through antennas for each time step. Time and antenana arrays are
+    also reduced to one row per time or antenna respectively.
+
+    :param gains: numpy array with shape [ntimes*nants, nfrequency, nrec]
+    :param gain_time: numpy array with shape [ntimes*nants]
+    :param gain_interval: numpy array with shape [ntimes*nants]
+    :param antenna: numpy array with shape [ntimes*nants]
+    :return: reformatted numpy arrays gains, gain_time, gain_interval, antenna
+
+    """
 
     if gains.ndim != 3:
         raise ValueError(f"Expect 3d gains array, have {gains.ndim}")
@@ -392,6 +409,14 @@ def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
 
 
 def _gain_tables_to_jones(table, frequency, is_leakage, is_delay):
+    """
+    Add the two table polarisations into Jones matrices in an appropriate way
+
+    :param table: numpy gains array with shape [ntimes*nants,nfrequency,nrec]
+    :param frequency: list of frequencies for converting time delay to phase
+    :param is_leakage: list of frequencies for converting time delay to phase
+    :return: numpy gains array with shape [ntimes*nants,nfrequency,nrec,nrec]
+    """
     table_shape = table.shape
     ntimes = table_shape[0]
     nants = table_shape[1]
@@ -418,6 +443,8 @@ def _gain_tables_to_jones(table, frequency, is_leakage, is_delay):
             gain[..., 1, 1] = 1.0
     elif nrec == 2 and is_delay:
         # convert ns time delays to phase at the reference frequency
+        if frequency is None:
+            raise ValueError("Require frequency list for delay conversion")
         ns2rad = 2 * numpy.pi * frequency[0] * 1e-9
         if nfrequency != 1:
             raise ValueError("expect a single channel for delay fits")
