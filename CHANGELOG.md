@@ -2,7 +2,9 @@
 
 main
 ----
+* Add support for a wider varient of casa calibration tables, G, B, Df, K and Kcross ([MR30](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/30))
 * Add the support of dealing with weights of different diameter antenna ([MR27](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/27))
+* Add support for casa calibration tables with a row for each time and antenna combination ([MR26](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/26))
 
 0.1.3
 ----

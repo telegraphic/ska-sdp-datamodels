@@ -6,6 +6,7 @@ data models.
 """
 
 import collections
+import logging
 from typing import List, Union
 
 import h5py
@@ -25,6 +26,8 @@ from ska_sdp_datamodels.configuration import (
 )
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
+
+log = logging.getLogger("data-models-logger")
 
 
 def convert_gaintable_to_hdf(gt: GainTable, f):
@@ -297,8 +300,67 @@ def _generate_configuration_from_cal_table(
     return configuration
 
 
+def _set_jones_type(base_table, jones_type):
+    """
+    Obtain the calibration solution type from the table and use this in
+    preference to any user-defined value. If the table does not have this
+    information, use the user-defined value.
+
+    :param base_table: main CASA table
+    :param jones_type: user-defined jones_type string
+    :return: reformatted numpy arrays gains, gain_time, gain_interval, antenna
+    """
+    table_jones_type = ""
+    try:
+        table_jones_type = base_table.getkeyword("VisCal")
+        log.info("Using table Jones type %s", table_jones_type)
+    except RuntimeError:
+        log.warning("No main-table keyword VisCal")
+
+    if table_jones_type == "":
+        log.info("Using user-defined Jones type %s", jones_type)
+        table_jones_type = jones_type
+    else:
+        # update jones_type based on the VisCal keyword
+        # this should just be the first character
+        #  - "G Jones" -> "G"
+        #  - "B Jones" -> "B"
+        #  - "Df Jones" -> "D"
+        #  - "K Jones" -> "K"
+        #  - "Kcross Jones" -> "K"
+        jones_type = table_jones_type[0]
+
+    # interpret the VisCal string so we know how to read and stored the data
+    # "G Jones", "B Jones", "Df Jones", "K Jones", "Kcross Jones"
+    is_delay = False
+    if table_jones_type[0] == "K":
+        # "K Jones" or "Kcross Jones" delay terms
+        is_delay = True
+    is_leakage = False
+    if (
+        # "Df Jones" or "Kcross Jones" leakage terms
+        table_jones_type.find("D") == 0
+        or table_jones_type.find("Kcross") == 0
+    ):
+        is_leakage = True
+
+    return jones_type, is_leakage, is_delay
+
+
 def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
-    # casa gain tables can have shape [ntimes*nants, nfrequency, nrec]
+    """
+    reformat casa gain tables with shape [ntimes*nants, nfrequency, nrec] to
+    have shape [ntimes, nants, nfrequency, nrec]. Initial rows are assumed to
+    cycle through antennas for each time step. Time and antenana arrays are
+    also reduced to one row per time or antenna respectively.
+
+    :param gains: numpy array with shape [ntimes*nants, nfrequency, nrec]
+    :param gain_time: numpy array with shape [ntimes*nants]
+    :param gain_interval: numpy array with shape [ntimes*nants]
+    :param antenna: numpy array with shape [ntimes*nants]
+    :return: reformatted numpy arrays gains, gain_time, gain_interval, antenna
+
+    """
 
     if gains.ndim != 3:
         raise ValueError(f"Expect 3d gains array, have {gains.ndim}")
@@ -340,6 +402,67 @@ def _reshape_3d_gain_tables(gains, gain_time, gain_interval, antenna):
     return gains, gain_time, gain_interval, antenna
 
 
+def _gain_tables_to_jones(table, frequency, is_leakage, is_delay):
+    """
+    Add the two table polarisations into Jones matrices in an appropriate way
+
+    :param table: numpy gains array with shape [ntimes*nants,nfrequency,nrec]
+    :param frequency: list of frequencies for converting time delay to phase
+    :param is_leakage: list of frequencies for converting time delay to phase
+    :return: numpy gains array with shape [ntimes*nants,nfrequency,nrec,nrec]
+    """
+    table_shape = table.shape
+    ntimes = table_shape[0]
+    nants = table_shape[1]
+    nfrequency = table_shape[2]
+    nrec = table_shape[3]
+
+    gain = numpy.ones((ntimes, nants, nfrequency, nrec, nrec), dtype="complex")
+
+    if nrec == 1:
+        gain[..., 0, 0] = table[..., 0]
+    elif nrec == 2 and not is_delay:
+        if not is_leakage:
+            # standard table Jones: G or B = [[gx,0],[0,gy]]
+            gain[..., 0, 0] = table[..., 0]
+            gain[..., 0, 1] = 0.0
+            gain[..., 1, 0] = 0.0
+            gain[..., 1, 1] = table[..., 1]
+        else:
+            # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
+            # dyx is not defined with a -1 coeff in CASA
+            gain[..., 0, 0] = 1.0
+            gain[..., 0, 1] = table[..., 0]
+            gain[..., 1, 0] = table[..., 1]
+            gain[..., 1, 1] = 1.0
+    elif nrec == 2 and is_delay:
+        # convert ns time delays to phase at the reference frequency
+        if frequency is None:
+            raise ValueError("Require frequency list for delay conversion")
+        ns2rad = 2 * numpy.pi * frequency[0] * 1e-9
+        if nfrequency != 1:
+            raise ValueError("expect a single channel for delay fits")
+        if not is_leakage:
+            # standard table Jones: G = [[gx,0],[0,gy]]
+            phase = ns2rad * table
+            gain[..., 0, 0] = numpy.exp(1j * phase[..., 0])
+            gain[..., 0, 1] = 0.0
+            gain[..., 1, 0] = 0.0
+            gain[..., 1, 1] = numpy.exp(1j * phase[..., 1])
+        else:
+            # standard leakages Jones: D = [[1,dxy],[-dyx,1]]
+            phase = ns2rad * (table[..., 0] - table[..., 1])
+            dxy = numpy.exp(1j * phase)
+            gain[..., 0, 0] = 1.0
+            gain[..., 0, 1] = dxy
+            gain[..., 1, 0] = numpy.conj(dxy)
+            gain[..., 1, 1] = 1.0
+    else:
+        raise ValueError(f"Unsure how to import {nrec} polarisations")
+
+    return gain
+
+
 def import_gaintable_from_casa_cal_table(
     table_name,
     jones_type="B",
@@ -350,7 +473,8 @@ def import_gaintable_from_casa_cal_table(
     This import gain table form calibration table of CASA.
 
     :param table_name: Name of CASA table file
-    :param jones_type: Type of calibration matrix T or G or B
+    :param jones_type: Type of calibration matrix T or G or B.
+        Overwritten if table keyword "VisCal" is set
     :param rec_frame: Receptor Frame for the GainTable
     :return: GainTable object
 
@@ -360,9 +484,18 @@ def import_gaintable_from_casa_cal_table(
     # Get times, interval, bandpass solutions
     gain_time = base_table.getcol(columnname="TIME")
     gain_interval = base_table.getcol(columnname="INTERVAL")
-    gains = base_table.getcol(columnname="CPARAM")
     antenna = base_table.getcol(columnname="ANTENNA1")
     spec_wind_id = base_table.getcol(columnname="SPECTRAL_WINDOW_ID")[0]
+
+    # Obtain the calibration solution type from the table
+    jones_type, is_leakage, is_delay = _set_jones_type(base_table, jones_type)
+
+    # gains and leakages are stored in CPARAM[nrec,nfrequency]
+    # delays are stored in FPARAM[nrec,1]
+    if is_delay:
+        gains = base_table.getcol(columnname="FPARAM")
+    else:
+        gains = base_table.getcol(columnname="CPARAM")
 
     # Get the frequency sampling information
     gain_frequency = spw.getcol(columnname="CHAN_FREQ")[spec_wind_id]
@@ -395,18 +528,11 @@ def import_gaintable_from_casa_cal_table(
     if nrec != input_shape[3]:
         raise ValueError(f"Tables have wrong number of receptors: {nrec}")
 
-    gain_shape = [ntimes, nants, nfrequency, nrec, nrec]
-    gain = numpy.ones(gain_shape, dtype="complex")
-
-    if nrec > 1:
-        gain[..., 0, 0] = gains[..., 0]
-        gain[..., 1, 1] = gains[..., 1]
-        gain[..., 0, 1] = 0.0
-        gain[..., 1, 0] = 0.0
+    gain = _gain_tables_to_jones(gains, gain_frequency, is_leakage, is_delay)
 
     # Set the gain weight to one and residual to zero
     # This is temporary since in current tables they are not provided.
-    gain_weight = numpy.ones(gain_shape)
+    gain_weight = numpy.ones(gain.shape)
     gain_residual = numpy.zeros([ntimes, nfrequency, nrec, nrec])
 
     # Get configuration
