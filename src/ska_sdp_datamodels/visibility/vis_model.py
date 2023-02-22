@@ -12,16 +12,17 @@ import numpy
 import pandas
 import xarray
 from astropy import constants as const
-from astropy.time import Time
 from astropy.coordinates import SkyCoord
+from astropy.time import Time
 from numpy.typing import NDArray
 
+from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import (
     PolarisationFrame,
     QualityAssessment,
 )
 from ska_sdp_datamodels.xarray_accessor import XarrayAccessorMixin
-from ska_sdp_datamodels.configuration import Configuration
+
 
 class Visibility(xarray.Dataset):
     """
