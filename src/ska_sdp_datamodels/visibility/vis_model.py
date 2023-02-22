@@ -6,19 +6,22 @@ Visibility data model.
 """
 
 import warnings
+from typing import Optional, Union
 
 import numpy
 import pandas
 import xarray
 from astropy import constants as const
 from astropy.time import Time
+from astropy.coordinates import SkyCoord
+from numpy.typing import NDArray
 
 from ska_sdp_datamodels.science_data_model import (
     PolarisationFrame,
     QualityAssessment,
 )
 from ska_sdp_datamodels.xarray_accessor import XarrayAccessorMixin
-
+from ska_sdp_datamodels.configuration import Configuration
 
 class Visibility(xarray.Dataset):
     """
@@ -135,21 +138,21 @@ class Visibility(xarray.Dataset):
     @classmethod
     def constructor(
         cls,
-        frequency=None,
-        channel_bandwidth=None,
-        phasecentre=None,
-        configuration=None,
-        uvw=None,
-        time=None,
-        vis=None,
-        weight=None,
-        integration_time=None,
-        flags=None,
-        baselines=None,
-        polarisation_frame=PolarisationFrame("stokesI"),
-        source="anonymous",
-        meta=None,
-        low_precision="float64",
+        frequency: Optional[NDArray] = None,
+        channel_bandwidth: Optional[NDArray] = None,
+        phasecentre: Optional[SkyCoord] = None,
+        configuration: Optional[Configuration] = None,
+        uvw: Optional[NDArray] = None,
+        time: Optional[NDArray] = None,
+        vis: Optional[NDArray] = None,
+        weight: Optional[NDArray] = None,
+        integration_time: Optional[NDArray] = None,
+        flags: Optional[NDArray] = None,
+        baselines: Optional[pandas.MultiIndex] = None,
+        polarisation_frame: PolarisationFrame = PolarisationFrame("stokesI"),
+        source: str = "anonymous",
+        meta: Optional[dict] = None,
+        low_precision: Union[str, type] = "float64",
     ):
         """
         Create a new Visibility instance.
