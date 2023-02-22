@@ -276,7 +276,7 @@ def create_configuration_from_LLAfile(
 
     :param antfile: Antenna file name.
                     File should have either (lat, long) or
-                    (tation name, lat, long).
+                    (station name, lat, long).
                     Otherwise, raise an error.
     :param location: Earthlocation of array
     :param mount: mount type: 'azel', 'xy', 'equatorial'
