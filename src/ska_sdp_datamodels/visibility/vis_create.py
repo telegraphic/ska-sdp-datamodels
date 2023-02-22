@@ -54,6 +54,12 @@ def create_visibility(
     initialised. What 'adequately initialised' means is explained at length in
     the notes section below, as are several important caveats.
 
+    FIXME (bug ?): the output Visibility has UVW coordinates with the same
+    sign convention as Measurement Set (i.e. antenna2 - antenna1), yet the
+    ``create_visibility_from_ms`` function of rascil-main flips the sign
+    of UVW upon loading. The latter is suspected consistent with RASCIL
+    internals.
+
     This function caters specifically to visibility simulation purposes.
     In particular it computes approximate (u, v, w) coordinates from scratch
     rather than taking them as an externally precalculated input. See notes.
