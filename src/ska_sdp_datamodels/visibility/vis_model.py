@@ -57,6 +57,8 @@ class Visibility(xarray.Dataset):
       ``[ntimes, nbaselines, 3]``. This departs from the classical
       convention of expressing (u, v, w) in wavelengths, but reduces memory
       footprint by a factor ``nchan``.
+      NOTE: the sign convention is the *opposite* of what Measurement Set uses.
+      https://casa.nrao.edu/casadocs/casa-5.4.1/reference-material/measurement-set
 
     - weight: weights are the inverse noise variances associated with each
       data point; real-valued, same shape as ``vis``.
@@ -76,9 +78,10 @@ class Visibility(xarray.Dataset):
 
     - phasecentre: phase centre coordinates as an astropy SkyCoord object.
 
-    - configuration: array configuration as a Configuration object.
+    - configuration: Configuration object describing the array with which the
+      visibilities were observed.
 
-    - _polarisation_frame: :ref:`PolarisationFrame` object describing the
+    - _polarisation_frame: PolarisationFrame object describing the
       polarisation representation of the visibility data.
 
     - source: source name as a string
@@ -92,7 +95,7 @@ class Visibility(xarray.Dataset):
     Here is an example::
 
         <xarray.Visibility>
-        Dimensions:            (baselines: 6670, frequency: 3, polarisation: 4, time: 3, uvw_index: 3)
+        Dimensions:            (baselines: 6670, frequency: 3, polarisation: 4, time: 3, spatial: 3)
         Coordinates:
           * time               (time) float64 5.085e+09 5.085e+09 5.085e+09
           * baselines          (baselines) MultiIndex
@@ -100,14 +103,14 @@ class Visibility(xarray.Dataset):
           - antenna2           (baselines) int64 0 1 2 3 4 5 ... 112 113 114 113 114 114
           * frequency          (frequency) float64 1e+08 1.05e+08 1.1e+08
           * polarisation       (polarisation) <U2 'XX' 'XY' 'YX' 'YY'
-          * spatial            (uvw_index) <U1 'u' 'v' 'w'
+          * spatial            (spatial) <U1 'u' 'v' 'w'
         Data variables:
             integration_time   (time) float32 99.72697 99.72697 99.72697
             datetime           (time) datetime64[ns] 2000-01-01T03:54:07.843184299 .....
             vis                (time, baselines, frequency, polarisation) complex128 ...
             weight             (time, baselines, frequency, polarisation) float32 0.0...
             flags              (time, baselines, frequency, polarisation) int32 0.0...
-            uvw                (time, baselines, uvw_index) float64 0.0 0.0 ... 0.0 0.0
+            uvw                (time, baselines, spatial) float64 0.0 0.0 ... 0.0 0.0
             channel_bandwidth  (frequency) float64 1e+07 1e+07 1e+07
         Attributes:
             data_model:          Visibility
@@ -148,22 +151,63 @@ class Visibility(xarray.Dataset):
         meta=None,
         low_precision="float64",
     ):
-        """Visibility
+        """
+        Create a new Visibility instance.
 
-        :param frequency: Frequency [nchan]
-        :param channel_bandwidth: Channel bandwidth [nchan]
-        :param phasecentre: Phasecentre (SkyCoord)
-        :param configuration: Configuration
-        :param uvw: UVW coordinates (m) [:, nant, nant, 3]
-        :param time: Time (UTC) [:]
-        :param baselines: List of baselines
-        :param flags: Flags [:, nant, nant, nchan]
-        :param weight: [:, nant, nant, nchan, npol]
-        :param integration_time: Integration time [:]
-        :param polarisation_frame: Polarisation_Frame
-                e.g. Polarisation_Frame("linear")
-        :param source: Source name
-        :param meta: Meta info
+        :param frequency: Centre frequencies of channels in Hz [nchan]
+        :type frequency: ndarray or None, optional
+
+        :param channel_bandwidth: Channel bandwidths in Hz [nchan]
+        :type channel_bandwidth: ndarray or None, optional
+
+        :param phasecentre: Coordinates of the phase centre
+        :type phasecentre: astropy.coordinates.SkyCoord or None, optional
+
+        :param configuration: Configuration object describing the array with
+            which the visibilities were observed.
+        :type configuration: Configuration or None, optional
+
+        :param uvw: UVW coordinates in metres [ntimes, nbaselines, 3]. The sign
+            convention is the *opposite* of that of Measurement Set.
+        :type uvw: ndarray or None, optional
+
+        :param time: Centre times of visibility samples, in seconds elapsed
+            since the MJD reference epoch (on the UTC scale) [ntimes]
+        :type time: ndarray or None, optional
+
+        :param vis: Visibility data [ntimes, nbaselines, nchan, npol].
+        :type vis: ndarray or None, optional
+
+        :param baselines: Sequence of baselines as a pandas.MultiIndex object;
+            it is expected to contain two levels (in pandas parlance) called
+            "antenna1" and "antenna2", in that order.
+        :type baselines: pandas.MultiIndex
+
+        :param flags: Flags associated with the visibility data,
+            integer-valued, same shape as ``vis`` argument.
+        :type flags: ndarray or None, optional
+
+        :param weight: Weights of the visibility data, i.e. inverse of noise
+            variances for each data point, same shape as ``vis`` argument.
+        :type weight: ndarray or None, optional
+
+        :param integration_time: Integration times in seconds [ntimes].
+        :type integration_time: ndarray or None, optional
+
+        :param polarisation_frame: PolarisationFrame object describing the
+            polarisation representation of the visibility data.
+        :type polarisation_frame: PolarisationFrame
+
+        :param source: Source name.
+        :type source: str, optional
+
+        :param meta: Optional dictionary of user-defined metadata to carry.
+        :type meta: dict or None, optional
+
+        :param low_precision: numpy dtype under which to store the
+            integration_time and weight data variables. Can be given as string
+            or numpy dtype (e.g. "float64" or np.float64).
+        :type low_precision: str or type, optional
         """
         if weight is None:
             weight = numpy.ones(vis.shape)
