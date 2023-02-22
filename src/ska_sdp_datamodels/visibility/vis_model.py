@@ -22,18 +22,72 @@ from ska_sdp_datamodels.xarray_accessor import XarrayAccessorMixin
 
 class Visibility(xarray.Dataset):
     """
-    Visibility xarray.Dataset class
+    Container for visibilities associated to an observation with one direction.
+    It only stores *rectangular* data, i.e. with consistent baseline, frequency
+    and polarisation axes in time (unlike Measurement Sets which are much
+    more flexible).
 
-    Visibility is defined to hold an observation with one direction.
+    **Coordinates**
 
-    The phasecentre is the direct of delay tracking i.e. n=0.
-    If uvw are rotated then this should be updated with the
-    new delay tracking centre.
+    - time: centre times of visibility samples, in seconds elapsed since the
+      MJD reference epoch (on the UTC scale), ``[ntimes]``.
 
-    Polarisation frame is the same for the entire data set and can be
-    stokesI, circular, circularnp, linear, linearnp.
+    - baselines: pandas.MultiIndex holding integer tuples that represent
+      pairs (antenna1, antenna2). Autocorrelation baselines are included.
 
-    The configuration is stored as an attribute.
+    - frequency: centre frequencies of channels in Hz, ``[nchan]``.
+
+    - polarisation: string labels for the polarisation axis, ``[npol]``.
+      Matches the ``polarisation_frame`` attribute (see below). There are
+      multiple possibilities here. For example, if
+      ``["XX", "XY", "YX", "YY"]``, ``vis`` represents unrolled visibility
+      matrices expressed in a linear basis. If ``["I", "Q", "U", "V"]``,
+      ``vis`` represents stokes vectors. May also be just ``["I"]`` for pure
+      stokes I visibilities, etc.
+
+    - spatial: string labels for the columns of the ``uvw`` data variable.
+      This is always the 3-element sequence ``["u", "v", "w"]``.
+
+    **Data Variables**
+
+    - vis: visibility data, complex-valued
+      ``[ntimes, nbaselines, nchan, npol]``.
+
+    - uvw: (u, v, w) coordinates expressed in metres,
+      ``[ntimes, nbaselines, 3]``. This departs from the classical
+      convention of expressing (u, v, w) in wavelengths, but reduces memory
+      footprint by a factor ``nchan``.
+
+    - weight: weights are the inverse noise variances associated with each
+      data point; real-valued, same shape as ``vis``.
+
+    - flags: flags associated with the data, integer-valued, same shape as
+      ``vis``. 0 means valid data, 1 means should be ignored.
+
+    - datetime: centre times of visibility samples, in np.datetime64 format,
+      ``[ntimes]``. Effectively a copy of the "time" coordinate but with a
+      different representation.
+
+    - integration_time: integration times in seconds, ``[ntimes]``.
+
+    - channel_bandwidth: channel widths in Hz, ``[nchan]``.
+
+    **Attributes**
+
+    - phasecentre: phase centre coordinates as an astropy SkyCoord object.
+
+    - configuration: array configuration as a Configuration object.
+
+    - _polarisation_frame: :ref:`PolarisationFrame` object describing the
+      polarisation representation of the visibility data.
+
+    - source: source name as a string
+
+    - meta: either None or an optional user-defined dictionary of additional
+      metadata.
+
+    - data_model: name of this class, used internally for saving to / loading
+      from files.
 
     Here is an example::
 
@@ -46,7 +100,7 @@ class Visibility(xarray.Dataset):
           - antenna2           (baselines) int64 0 1 2 3 4 5 ... 112 113 114 113 114 114
           * frequency          (frequency) float64 1e+08 1.05e+08 1.1e+08
           * polarisation       (polarisation) <U2 'XX' 'XY' 'YX' 'YY'
-          * uvw_index          (uvw_index) <U1 'u' 'v' 'w'
+          * spatial            (uvw_index) <U1 'u' 'v' 'w'
         Data variables:
             integration_time   (time) float32 99.72697 99.72697 99.72697
             datetime           (time) datetime64[ns] 2000-01-01T03:54:07.843184299 .....
@@ -56,9 +110,10 @@ class Visibility(xarray.Dataset):
             uvw                (time, baselines, uvw_index) float64 0.0 0.0 ... 0.0 0.0
             channel_bandwidth  (frequency) float64 1e+07 1e+07 1e+07
         Attributes:
+            data_model:          Visibility
             phasecentre:         <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
             configuration:       <xarray.Configuration>Dimensions:   (id: 115, spat...
-            polarisation_frame:  linear
+            _polarisation_frame: linear
             source:              unknown
             meta:                None
     """  # noqa:E501 pylint: disable=line-too-long
