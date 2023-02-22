@@ -351,8 +351,8 @@ def create_named_configuration(
 
     Possible configurations are::
         LOWBD2
-        LOWBD2-CORE
-        LOW == LOWR3
+        LOWBD2-CORE (Core 166 antennas)
+        LOW == LOWR4 (LOWR3 still available)
         LOW-AA0.5
         MID == MIDR5
         MID-AA0.5
