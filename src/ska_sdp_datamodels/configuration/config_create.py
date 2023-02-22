@@ -29,10 +29,13 @@ ANTENNA_FILES = {
         __name__, "example_antenna_files/ska/LOWBD2-CORE.csv"
     ).name,
     "LOW": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/LOW_SKA-TEL-SKO-0000422_Rev3.txt"
+        __name__, "example_antenna_files/ska/LOW_SKA-TEL-SKO-0000422_Rev4.txt"
     ).name,
     "LOWR3": pkg_resources.resource_stream(
         __name__, "example_antenna_files/ska/LOW_SKA-TEL-SKO-0000422_Rev3.txt"
+    ).name,
+    "LOWR4": pkg_resources.resource_stream(
+        __name__, "example_antenna_files/ska/LOW_SKA-TEL-SKO-0000422_Rev4.txt"
     ).name,
     "LOW-AA0.5": pkg_resources.resource_stream(
         __name__, "example_antenna_files/ska/SKA1-LOW-AA0.5-v1.1_AA0p5.txt"
@@ -271,7 +274,10 @@ def create_configuration_from_LLAfile(
     """
     Define configuration from a longitude-latitude file
 
-    :param antfile: Antenna file name
+    :param antfile: Antenna file name.
+                    File should have either (lat, long) or
+                    (station name, lat, long).
+                    Otherwise, raise an error.
     :param location: Earthlocation of array
     :param mount: mount type: 'azel', 'xy', 'equatorial'
     :param names: Antenna names e.g. "VLA%d"
@@ -286,11 +292,26 @@ def create_configuration_from_LLAfile(
     :return: Configuration
     """
 
-    antxyz = numpy.genfromtxt(antfile, delimiter=",")
+    antxyz = numpy.genfromtxt(
+        antfile, delimiter=",", dtype=None, encoding="utf-8"
+    )
 
     nants = antxyz.shape[0]
 
-    lon, lat = antxyz[:, 0], antxyz[:, 1]
+    # Earlier files may not have station information
+    # Just the longitude and latitude.
+    if len(antxyz[0]) == 2:
+        lon, lat = antxyz[:, 0], antxyz[:, 1]
+    elif len(antxyz[0]) == 3:
+        # Because it's read in as a tuple
+        # Need to manually extract lon, lat
+        lon = numpy.array([antxyz[i][1] for i in range(len(antxyz))])
+        lat = numpy.array([antxyz[i][2] for i in range(len(antxyz))])
+    else:
+        raise ValueError(
+            "Non-standard station layout, please check the antenna file."
+        )
+
     x, y, z = lla_to_ecef(lat * units.deg, lon * units.deg, alt)
     antxyz = numpy.stack((x, y, z), axis=1)
 
@@ -330,8 +351,8 @@ def create_named_configuration(
 
     Possible configurations are::
         LOWBD2
-        LOWBD2-CORE
-        LOW == LOWR3
+        LOWBD2-CORE (Core 166 antennas)
+        LOW == LOWR4 (LOWR3 still available)
         LOW-AA0.5
         MID == MIDR5
         MID-AA0.5
@@ -405,7 +426,7 @@ def create_named_configuration(
             ecef=False,
             **kwargs,
         )
-    elif name in ["LOW", "LOWR3"]:
+    elif name in ["LOW", "LOWR3", "LOWR4"]:
         location = low_location
         log.debug(
             "create_named_configuration: %s\n\t%s\n\t%s",

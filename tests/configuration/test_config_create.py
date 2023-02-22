@@ -153,6 +153,7 @@ def test_create_configuration_from_file_ecef_no_loc():
         ["LOWBD2-CORE", "LOW", "LOWBD2_", "XY"],
         ["LOW", "LOW", "SKA", "XY"],
         ["LOWR3", "LOW", "SKA", "XY"],
+        ["LOWR4", "LOW", "SKA", "XY"],
         ["LOW-AA0.5", "LOW", "S0", "XY"],
         [
             "MID",
