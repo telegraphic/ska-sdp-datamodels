@@ -12,6 +12,8 @@ from .vis_io_and_convert import (
     import_visibility_from_hdf5,
 )
 from .vis_model import FlagTable, Visibility
+from .base import *
+from .visibility_fitting import *
 
 __all__ = [
     "Visibility",
