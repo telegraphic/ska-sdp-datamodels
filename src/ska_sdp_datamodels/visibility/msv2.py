@@ -12,8 +12,8 @@ import shutil
 import numpy
 from astropy.time import Time
 
-from rascil.processing_components.visibility.msv2fund import MS_UVData, BaseData
-from rascil.processing_components.visibility.msv2supp import (
+from ska_sdp_datamodels.visibility.msv2fund import BaseData, MS_UVData
+from ska_sdp_datamodels.visibility.msv2supp import (
     STOKES_CODES,
     geo_to_ecef,
     get_eci_transform,
@@ -26,8 +26,9 @@ try:
 
     class WriteMs(BaseData):
         """
-        Class for storing visibility data and writing the data, along with array
-        geometry, frequency setup, etc., to a CASA measurement set.
+        Class for storing visibility data and writing the data, along
+        with array geometry, frequency setup, etc., to a CASA
+        measurement set.
         """
 
         _STOKES_CODES = STOKES_CODES
@@ -43,9 +44,10 @@ try:
             if_delete=False,
         ):
             """
-            Initialize a new Measurement set object using a filename and a reference time
-            given in seconds since the UNIX 1970 ephem, a python datetime object, or a
-            string in the format of 'YYYY-MM-DDTHH:MM:SS'.
+            Initialize a new Measurement set object using a filename
+            and a reference time given in seconds since the UNIX 1970
+            ephem, a python datetime object, or a string in the format
+            of 'YYYY-MM-DDTHH:MM:SS'.
 
             :param filename: Measurementsets file
             :param ref_time: Observational date & time
@@ -75,8 +77,8 @@ try:
 
         def set_geometry(self, site_config, antennas, bits=8):
             """
-            Given a station and an array of stands, set the relevant common observation
-            parameters and add entries to the self.array list.
+            Given a station and an array of stands, set the relevant common
+            observation parameters and add entries to the self.array list.
 
             :param site_config:  RASCIL Configuration
             :param antennas: Antenna array
@@ -97,7 +99,9 @@ try:
                 latitude = site_config.location.geodetic[1].to("rad").value
                 altitude = site_config.location.height.to("meter").value
 
-                arrayX, arrayY, arrayZ = geo_to_ecef(latitude, longitude, altitude)
+                arrayX, arrayY, arrayZ = geo_to_ecef(
+                    latitude, longitude, altitude
+                )
             else:
                 arrayX, arrayY, arrayZ = 0, 0, 0
 
@@ -125,7 +129,11 @@ try:
                 for i, ant_name in enumerate(stands):
                     ants.append(
                         self._Antenna(
-                            stands[i], xyz[i, 0], xyz[i, 1], xyz[i, 2], bits=bits
+                            stands[i],
+                            xyz[i, 0],
+                            xyz[i, 1],
+                            xyz[i, 2],
+                            bits=bits,
                         )
                     )
                     mapper.append(stands[i])
@@ -139,7 +147,8 @@ try:
                     "inputAnts": antennas,
                 }
             )
-            # {'center': [0., 0., 0.], 'ants': ants, 'mapper': mapper, 'inputAnts': antennas})
+            # {'center': [0., 0., 0.], 'ants': ants, 'mapper': mapper,
+            # 'inputAnts': antennas})
 
         def add_data_set(
             self,
@@ -212,7 +221,8 @@ try:
             tb.putinfo(
                 {
                     "type": "Measurement Set",
-                    "readme": "This is a MeasurementSet Table holding measurements from a Telescope",
+                    "readme": "This is a MeasurementSet Table holding"
+                    + " measurements from a Telescope",
                 }
             )
             tb.putkeyword("MS_VERSION", numpy.float32(2.0))
@@ -262,7 +272,9 @@ try:
                 },
             )
             col3 = tableutil.makescacoldesc(
-                "TYPE", "ground-based", comment="Antenna type (e.g. SPACE-BASED)"
+                "TYPE",
+                "ground-based",
+                comment="Antenna type (e.g. SPACE-BASED)",
             )
             col4 = tableutil.makescacoldesc(
                 "DISH_DIAMETER",
@@ -278,7 +290,9 @@ try:
                 "FLAG_ROW", False, comment="Flag for this row"
             )
             col6 = tableutil.makescacoldesc(
-                "MOUNT", "alt-az", comment="Mount type e.g. alt-az, equatorial, etc."
+                "MOUNT",
+                "alt-az",
+                comment="Mount type e.g. alt-az, equatorial, etc.",
             )
             col7 = tableutil.makescacoldesc(
                 "NAME", "none", comment="Antenna name, e.g. VLA22, CA03"
@@ -290,7 +304,9 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7, col8]
             )
-            tb = table("%s/ANTENNA" % self.basename, desc, nrow=self.nant, ack=False)
+            tb = table(
+                "%s/ANTENNA" % self.basename, desc, nrow=self.nant, ack=False
+            )
 
             tb.putcol("OFFSET", numpy.zeros((self.nant, 3)), 0, self.nant)
             tb.putcol("TYPE", ["GROUND-BASED"] * self.nant, 0, self.nant)
@@ -322,7 +338,10 @@ try:
                 self.nant,
             )
             tb.putcol(
-                "NAME", [ant.getName() for ant in self.array[0]["ants"]], 0, self.nant
+                "NAME",
+                [ant.getName() for ant in self.array[0]["ants"]],
+                0,
+                self.nant,
             )
             tb.putcol(
                 "STATION",
@@ -345,7 +364,9 @@ try:
                         ant.z,
                     ],
                 )
-                tb.putcell("DISH_DIAMETER", i, self.site_config["diameter"].data[i])
+                tb.putcell(
+                    "DISH_DIAMETER", i, self.site_config["diameter"].data[i]
+                )
                 # tb.putcell('FLAG_ROW', i, False)
                 tb.putcell("MOUNT", i, self.site_config["mount"].data[i])
                 tb.putcell("NAME", i, ant.getName())
@@ -377,21 +398,27 @@ try:
                 "CORR_TYPE",
                 0,
                 1,
-                comment="The polarization type for each correlation product, as a Stokes enum.",
+                comment="The polarization type for each correlation"
+                + " product, as a Stokes enum.",
             )
             col2 = tableutil.makearrcoldesc(
                 "CORR_PRODUCT",
                 0,
                 2,
-                comment="Indices describing receptors of feed going into correlation",
+                comment="Indices describing receptors of feed going "
+                + "into correlation",
             )
             col3 = tableutil.makescacoldesc("FLAG_ROW", False, comment="flag")
             col4 = tableutil.makescacoldesc(
-                "NUM_CORR", self.nStokes, comment="Number of correlation products"
+                "NUM_CORR",
+                self.nStokes,
+                comment="Number of correlation products",
             )
 
             desc = tableutil.maketabdesc([col1, col2, col3, col4])
-            tb = table("%s/POLARIZATION" % self.basename, desc, nrow=1, ack=False)
+            tb = table(
+                "%s/POLARIZATION" % self.basename, desc, nrow=1, ack=False
+            )
 
             tb.putcell("CORR_TYPE", 0, self.stokes)
             tb.putcell("CORR_PRODUCT", 0, prds.T)
@@ -417,7 +444,8 @@ try:
                 "BEAM_OFFSET",
                 0.0,
                 2,
-                comment="Beam position offset (on sky but in antennareference frame)",
+                comment="Beam position offset (on sky but in antennareference "
+                + "frame)",
                 keywords={
                     "QuantumUnits": ["rad", "rad"],
                     "MEASINFO": {"type": "direction", "Ref": "J2000"},
@@ -427,7 +455,8 @@ try:
                 "POLARIZATION_TYPE",
                 "X",
                 1,
-                comment="Type of polarization to which a given RECEPTOR responds",
+                comment="Type of polarization to which a given RECEPTOR "
+                + "responds",
             )
             col4 = tableutil.makearrcoldesc(
                 "POL_RESPONSE",
@@ -450,12 +479,15 @@ try:
             col6 = tableutil.makescacoldesc(
                 "ANTENNA_ID", 0, comment="ID of antenna in this array"
             )
-            col7 = tableutil.makescacoldesc("BEAM_ID", -1, comment="Id for BEAM model")
+            col7 = tableutil.makescacoldesc(
+                "BEAM_ID", -1, comment="Id for BEAM model"
+            )
             col8 = tableutil.makescacoldesc("FEED_ID", 0, comment="Feed id")
             col9 = tableutil.makescacoldesc(
                 "INTERVAL",
                 0.0,
-                comment="Interval for which this set of parameters is accurate",
+                comment="Interval for which this set of parameters "
+                + "is accurate",
                 keywords={
                     "QuantumUnits": [
                         "s",
@@ -468,12 +500,15 @@ try:
                 comment="Number of receptors on this feed (probably 1 or 2)",
             )
             col11 = tableutil.makescacoldesc(
-                "SPECTRAL_WINDOW_ID", -1, comment="ID for this spectral window setup"
+                "SPECTRAL_WINDOW_ID",
+                -1,
+                comment="ID for this spectral window setup",
             )
             col12 = tableutil.makescacoldesc(
                 "TIME",
                 0.0,
-                comment="Midpoint of time for which this set of parameters is accurate",
+                comment="Midpoint of time for which this set of parameters "
+                + "is accurate",
                 keywords={
                     "QuantumUnits": [
                         "s",
@@ -498,7 +533,9 @@ try:
                     col12,
                 ]
             )
-            tb = table("%s/FEED" % self.basename, desc, nrow=self.nant, ack=False)
+            tb = table(
+                "%s/FEED" % self.basename, desc, nrow=self.nant, ack=False
+            )
 
             presp = numpy.zeros((self.nant, 2, 2), dtype=complex)
             if self.stokes[0] > 8:
@@ -521,10 +558,14 @@ try:
                 presp[:, 1, 1] = 1.0
 
             tb.putcol("POSITION", numpy.zeros((self.nant, 3)), 0, self.nant)
-            tb.putcol("BEAM_OFFSET", numpy.zeros((self.nant, 2, 2)), 0, self.nant)
+            tb.putcol(
+                "BEAM_OFFSET", numpy.zeros((self.nant, 2, 2)), 0, self.nant
+            )
             tb.putcol("POLARIZATION_TYPE", ptype, 0, self.nant)
             tb.putcol("POL_RESPONSE", presp, 0, self.nant)
-            tb.putcol("RECEPTOR_ANGLE", numpy.zeros((self.nant, 2)), 0, self.nant)
+            tb.putcol(
+                "RECEPTOR_ANGLE", numpy.zeros((self.nant, 2)), 0, self.nant
+            )
             tb.putcol("ANTENNA_ID", list(range(self.nant)), 0, self.nant)
             tb.putcol(
                 "BEAM_ID",
@@ -603,11 +644,15 @@ try:
                     "MEASINFO": {"type": "epoch", "Ref": "UTC"},
                 },
             )
-            col2 = tableutil.makearrcoldesc("LOG", "none", 1, comment="Observing log")
+            col2 = tableutil.makearrcoldesc(
+                "LOG", "none", 1, comment="Observing log"
+            )
             col3 = tableutil.makearrcoldesc(
                 "SCHEDULE", "none", 1, comment="Observing schedule"
             )
-            col4 = tableutil.makescacoldesc("FLAG_ROW", False, comment="Row flag")
+            col4 = tableutil.makescacoldesc(
+                "FLAG_ROW", False, comment="Row flag"
+            )
             col5 = tableutil.makescacoldesc(
                 "OBSERVER", "ZASKY", comment="Name of observer(s)"
             )
@@ -637,7 +682,9 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7, col8, col9]
             )
-            tb = table("%s/OBSERVATION" % self.basename, desc, nrow=1, ack=False)
+            tb = table(
+                "%s/OBSERVATION" % self.basename, desc, nrow=1, ack=False
+            )
 
             # from astropy.time import Time
             # utcStart = Time(self.data[0].obstime, format='mjd',scale='utc')
@@ -662,42 +709,52 @@ try:
 
             # Source
             if self.site_config.location is not None:
-                longitude = self.site_config.location.geodetic[0].to("rad").value
-                latitude = self.site_config.location.geodetic[1].to("rad").value
-                altitude = self.site_config.location.height.to("meter").value
+                # longitude = (
+                #     self.site_config.location.geodetic[0].to("rad").value
+                # )
+                latitude = (
+                    self.site_config.location.geodetic[1].to("rad").value
+                )
+                # altitude = self.site_config.location.height.to("meter").value
 
             nameList = []
             posList = []
             sourceID = 0
             for dataSet in self.data:
                 if dataSet.pol == self.stokes[0]:
-                    utc0 = Time(dataSet.obstime, format="mjd", scale="utc")
-                    utc = utc0.jd
+                    # utc0 = Time(dataSet.obstime, format="mjd", scale="utc")
+                    # utc = utc0.jd
 
                     currSourceName = dataSet.source
 
-                    if currSourceName is None or currSourceName not in nameList:
+                    if (
+                        currSourceName is None
+                        or currSourceName not in nameList
+                    ):
                         sourceID += 1
 
                         if dataSet.source is None:
                             # currSourceName = dataSet.source.name
 
-                            ### Zenith pointings
+                            # Zenith pointings
                             sidereal = Time(
                                 dataSet.obstime / 86400.0,
                                 format="mjd",
                                 scale="utc",
                                 location=self.site_config.location,
                             )
-                            sidereal_time = sidereal.sidereal_time("apparent").value
+                            sidereal_time = sidereal.sidereal_time(
+                                "apparent"
+                            ).value
                             ra = sidereal_time * 15
                             dec = latitude
-                            # equ = astro.equ_posn(obs.sidereal_time() * 180 / numpy.pi, obs.lat * 180 / numpy.pi)
+                            # equ = astro.equ_posn(obs.sidereal_time() * 180 /
+                            # numpy.pi, obs.lat * 180 / numpy.pi)
                             from astropy.coordinates import Angle
 
                             raHms = Angle(sidereal_time, "hour")
                             d, m, s = raHms.dms
-                            ### format 'source' name based on local sidereal time
+                            # format 'source' name based on local sidereal time
                             name = "T%02d%02d%02d%01d" % (
                                 d,
                                 m,
@@ -710,7 +767,9 @@ try:
                             name = dataSet.source
 
                         # J2000 zenith equatorial coordinates
-                        posList.append([ra * numpy.pi / 180, dec * numpy.pi / 180])
+                        posList.append(
+                            [ra * numpy.pi / 180, dec * numpy.pi / 180]
+                        )
 
                         # name
                         nameList.append(name)
@@ -749,12 +808,14 @@ try:
             col4 = tableutil.makescacoldesc(
                 "CODE",
                 "none",
-                comment="Special characteristics of source, e.g. Bandpass calibrator",
+                comment="Special characteristics of source, e.g. "
+                + "Bandpass calibrator",
             )
             col5 = tableutil.makescacoldesc(
                 "INTERVAL",
                 0.0,
-                comment="Interval of time for which this set of parameters is accurate",
+                comment="Interval of time for which this set of "
+                + "parameters is accurate",
                 keywords={
                     "QuantumUnits": [
                         "s",
@@ -762,19 +823,26 @@ try:
                 },
             )
             col6 = tableutil.makescacoldesc(
-                "NAME", "none", comment="Name of source as given during observations"
+                "NAME",
+                "none",
+                comment="Name of source as given during observations",
             )
             col7 = tableutil.makescacoldesc(
                 "NUM_LINES", 0, comment="Number of spectral lines"
             )
-            col8 = tableutil.makescacoldesc("SOURCE_ID", 0, comment="Source id")
+            col8 = tableutil.makescacoldesc(
+                "SOURCE_ID", 0, comment="Source id"
+            )
             col9 = tableutil.makescacoldesc(
-                "SPECTRAL_WINDOW_ID", -1, comment="ID for this spectral window setup"
+                "SPECTRAL_WINDOW_ID",
+                -1,
+                comment="ID for this spectral window setup",
             )
             col10 = tableutil.makescacoldesc(
                 "TIME",
                 0.0,
-                comment="Midpoint of time for which this set of parameters is accurate.",
+                comment="Midpoint of time for which this set of "
+                + "parameters is accurate.",
                 keywords={
                     "QuantumUnits": [
                         "s",
@@ -827,7 +895,9 @@ try:
                     col13,
                 ]
             )
-            tb = table("%s/SOURCE" % self.basename, desc, nrow=nSource, ack=False)
+            tb = table(
+                "%s/SOURCE" % self.basename, desc, nrow=nSource, ack=False
+            )
 
             for i in range(nSource):
                 tb.putcell("DIRECTION", i, posList[i])
@@ -853,7 +923,8 @@ try:
                 "DELAY_DIR",
                 0.0,
                 2,
-                comment="Direction of delay center (e.g. RA, DEC)as polynomial in time.",
+                comment="Direction of delay center (e.g. RA, DEC)as "
+                + "polynomial in time.",
                 keywords={
                     "QuantumUnits": ["rad", "rad"],
                     "MEASINFO": {"type": "direction", "Ref": "J2000"},
@@ -873,7 +944,8 @@ try:
                 "REFERENCE_DIR",
                 0.0,
                 2,
-                comment="Direction of REFERENCE center (e.g. RA, DEC).as polynomial in time.",
+                comment="Direction of REFERENCE center (e.g. RA, DEC)."
+                + "as polynomial in time.",
                 keywords={
                     "QuantumUnits": ["rad", "rad"],
                     "MEASINFO": {"type": "direction", "Ref": "J2000"},
@@ -882,16 +954,21 @@ try:
             col4 = tableutil.makescacoldesc(
                 "CODE",
                 "none",
-                comment="Special characteristics of field, e.g. Bandpass calibrator",
+                comment="Special characteristics of field, e.g. "
+                + "Bandpass calibrator",
             )
-            col5 = tableutil.makescacoldesc("FLAG_ROW", False, comment="Row Flag")
+            col5 = tableutil.makescacoldesc(
+                "FLAG_ROW", False, comment="Row Flag"
+            )
             col6 = tableutil.makescacoldesc(
                 "NAME", "none", comment="Name of this field"
             )
             col7 = tableutil.makescacoldesc(
                 "NUM_POLY", 0, comment="Polynomial order of _DIR columns"
             )
-            col8 = tableutil.makescacoldesc("SOURCE_ID", 0, comment="Source id")
+            col8 = tableutil.makescacoldesc(
+                "SOURCE_ID", 0, comment="Source id"
+            )
             col9 = tableutil.makescacoldesc(
                 "TIME",
                 (tStart + tStop) / 2,
@@ -907,7 +984,9 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7, col8, col9]
             )
-            tb = table("%s/FIELD" % self.basename, desc, nrow=nSource, ack=False)
+            tb = table(
+                "%s/FIELD" % self.basename, desc, nrow=nSource, ack=False
+            )
 
             for i in range(nSource):
                 tb.putcell(
@@ -963,7 +1042,8 @@ try:
                 "CHAN_FREQ",
                 0.0,
                 1,
-                comment="Center frequencies for each channel in the data matrix",
+                comment="Center frequencies for each channel in "
+                + "the data matrix",
                 keywords={
                     "QuantumUnits": [
                         "Hz",
@@ -1048,7 +1128,9 @@ try:
                 },
             )
             col7 = tableutil.makescacoldesc("FLAG_ROW", False, comment="flag")
-            col8 = tableutil.makescacoldesc("FREQ_GROUP", 1, comment="Frequency group")
+            col8 = tableutil.makescacoldesc(
+                "FREQ_GROUP", 1, comment="Frequency group"
+            )
             col9 = tableutil.makescacoldesc(
                 "FREQ_GROUP_NAME", "group1", comment="Frequency group name"
             )
@@ -1056,9 +1138,13 @@ try:
                 "IF_CONV_CHAIN", 0, comment="The IF conversion chain number"
             )
             col11 = tableutil.makescacoldesc(
-                "NAME", "%i channels" % self.nchan, comment="Spectral window name"
+                "NAME",
+                "%i channels" % self.nchan,
+                comment="Spectral window name",
             )
-            col12 = tableutil.makescacoldesc("NET_SIDEBAND", 0, comment="Net sideband")
+            col12 = tableutil.makescacoldesc(
+                "NET_SIDEBAND", 0, comment="Net sideband"
+            )
             col13 = tableutil.makescacoldesc(
                 "NUM_CHAN", 0, comment="Number of spectral channels"
             )
@@ -1092,7 +1178,10 @@ try:
                 ]
             )
             tb = table(
-                "%s/SPECTRAL_WINDOW" % self.basename, desc, nrow=nBand, ack=False
+                "%s/SPECTRAL_WINDOW" % self.basename,
+                desc,
+                nrow=nBand,
+                ack=False,
             )
 
             for i, freq in enumerate(self.freq):
@@ -1107,14 +1196,22 @@ try:
                     + numpy.arange(self.nchan) * self.channelWidth,
                 )
                 tb.putcell("REF_FREQUENCY", i, self.refVal)
-                tb.putcell("CHAN_WIDTH", i, numpy.repeat(freq.chWidth, self.nchan))
-                tb.putcell("EFFECTIVE_BW", i, numpy.repeat(freq.chWidth, self.nchan))
-                tb.putcell("RESOLUTION", i, numpy.repeat(freq.chWidth, self.nchan))
+                tb.putcell(
+                    "CHAN_WIDTH", i, numpy.repeat(freq.chWidth, self.nchan)
+                )
+                tb.putcell(
+                    "EFFECTIVE_BW", i, numpy.repeat(freq.chWidth, self.nchan)
+                )
+                tb.putcell(
+                    "RESOLUTION", i, numpy.repeat(freq.chWidth, self.nchan)
+                )
                 tb.putcell("FLAG_ROW", i, False)
                 tb.putcell("FREQ_GROUP", i, i + 1)
                 tb.putcell("FREQ_GROUP_NAME", i, "group%i" % (i + 1))
                 tb.putcell("IF_CONV_CHAIN", i, i)
-                tb.putcell("NAME", i, "IF %i, %i channels" % (i + 1, self.nchan))
+                tb.putcell(
+                    "NAME", i, "IF %i, %i channels" % (i + 1, self.nchan)
+                )
                 tb.putcell("NET_SIDEBAND", i, 0)
                 tb.putcell("NUM_CHAN", i, self.nchan)
                 tb.putcell("TOTAL_BANDWIDTH", i, freq.totalBW)
@@ -1132,9 +1229,13 @@ try:
             nBand = len(self.freq)
 
             if self.site_config.location is not None:
-                longitude = self.site_config.location.geodetic[0].to("deg").value
-                latitude = self.site_config.location.geodetic[1].to("deg").value
-                altitude = self.site_config.location.height.to("meter").value
+                # longitude = (
+                #     self.site_config.location.geodetic[0].to("deg").value
+                # )
+                latitude = (
+                    self.site_config.location.geodetic[1].to("deg").value
+                )
+                # altitude = self.site_config.location.height.to("meter").value
 
             mapper = self.array[0]["mapper"]
 
@@ -1163,7 +1264,8 @@ try:
                 options=4,
                 datamanagertype="TiledColumnStMan",
                 datamanagergroup="Data",
-                comment="The data flags, array of bools with same shape as data",
+                comment="The data flags, array of bools with same"
+                + " shape as data",
             )
             col3 = tableutil.makearrcoldesc(
                 "FLAG_CATEGORY",
@@ -1210,7 +1312,8 @@ try:
                 datamanagertype="TiledColumnStMan",
                 datamanagergroup="Sigma",
                 valuetype="float",
-                comment="Estimated rms noise for channel with unity bandpass response",
+                comment="Estimated rms noise for channel with "
+                + "unity bandpass response",
             )
             col6 = tableutil.makescacoldesc(
                 "ANTENNA1", 0, comment="ID of first antenna in interferometer"
@@ -1377,28 +1480,31 @@ try:
 
                 # Deal with defininig the values of the new data set
                 if dataSet.pol == self.stokes[0]:
-                    ## Figure out the new date/time for the observation
+                    # Figure out the new date/time for the observation
 
                     from astropy.time import Time
 
-                    utc = Time(dataSet.obstime, format="mjd", scale="utc")
-                    utc0 = utc.mjd
+                    # utc = Time(dataSet.obstime, format="mjd", scale="utc")
+                    # utc0 = utc.mjd
 
                     if dataSet.source is None:
-                        ### Zenith pointings
+                        # Zenith pointings
                         sidereal = Time(
                             dataSet.obstime / 86400.0,
                             format="mjd",
                             scale="utc",
                             location=self.site_config.location,
                         )
-                        sidereal_time = sidereal.sidereal_time("apparent").value
-                        # equ = astro.equ_posn(obs.sidereal_time() * 180 / numpy.pi, obs.lat * 180 / numpy.pi)
+                        sidereal_time = sidereal.sidereal_time(
+                            "apparent"
+                        ).value
+                        # equ = astro.equ_posn(obs.sidereal_time() * 180
+                        # / numpy.pi, obs.lat * 180 / numpy.pi)
                         from astropy.coordinates import Angle
 
                         raHms = Angle(sidereal_time, "hour")
                         d, m, s = raHms.dms
-                        ### format 'source' name based on local sidereal time
+                        # format 'source' name based on local sidereal time
                         name = "T%02d%02d%02d%01d" % (
                             d,
                             m,
@@ -1406,19 +1512,19 @@ try:
                             int((s - int(s)) * 10.0),
                         )
                     else:
-                        ### Real-live sources (ephem.Body instances)
-                        ra = dataSet.phasecentre.ra.value
-                        dec = dataSet.phasecentre.dec.value
+                        # Real-live sources (ephem.Body instances)
+                        # ra = dataSet.phasecentre.ra.value
+                        # dec = dataSet.phasecentre.dec.value
                         name = dataSet.source
 
-                    ## Update the source ID
+                    # Update the source ID
                     try:
                         sourceID = _sourceTable.index(name)
                     except ValueError:
                         _sourceTable.append(name)
                         sourceID = _sourceTable.index(name)
 
-                    ## Compute the uvw coordinates of all baselines
+                    # Compute the uvw coordinates of all baselines
                     if dataSet.source is None:
                         HA = 0.0
                         dec = latitude
@@ -1434,8 +1540,8 @@ try:
                     else:
                         uvwCoords = dataSet.uvw
 
-                    ## Populate the metadata
-                    ### Add in the baselines
+                    # Populate the metadata
+                    # Add in the baselines
                     try:
                         ant1List
                         ant2List
@@ -1454,22 +1560,29 @@ try:
                     uvwList = -uvwCoords[order, :]
 
                     # Add in the new date/time and integration time
-                    inttimeList = [float(dataSet.inttime) for bl in dataSet.baselines]
+                    inttimeList = [
+                        float(dataSet.inttime) for bl in dataSet.baselines
+                    ]
                     timeList = [
                         float(dataSet.obstime + dataSet.inttime / 2.0)
                         for bl in dataSet.baselines
                     ]
 
-                    timeList_Centroid = [
-                        dataSet.obstime + dataSet.inttime for bl in dataSet.baselines
-                    ]
+                    # timeList_Centroid = [
+                    #     dataSet.obstime + dataSet.inttime
+                    #     for bl in dataSet.baselines
+                    # ]
 
                     # Add in the new new source ID and name
                     sourceList = [sourceID for bl in dataSet.baselines]
 
                 # Zero out the visibility data
                 try:
-                    matrix.shape = (len(order), self.nStokes, nBand * self.nchan)
+                    matrix.shape = (
+                        len(order),
+                        self.nStokes,
+                        nBand * self.nchan,
+                    )
                     flag_matrix.shape = (
                         len(order),
                         self.nStokes,
@@ -1489,16 +1602,18 @@ try:
                         dtype=complex,
                     )
                     flag_matrix = numpy.zeros(
-                        (len(order), self.nStokes, self.nchan * nBand), dtype=bool
+                        (len(order), self.nStokes, self.nchan * nBand),
+                        dtype=bool,
                     )
                     weight_spectrum_matrix = numpy.ones(
-                        (len(order), self.nStokes, self.nchan * nBand), dtype=float
+                        (len(order), self.nStokes, self.nchan * nBand),
+                        dtype=float,
                     )
 
                 # Save the visibility data in the right order
-                matrix[:, self.stokes.index(dataSet.pol), :] = dataSet.visibilities[
-                    order, :
-                ]
+                matrix[
+                    :, self.stokes.index(dataSet.pol), :
+                ] = dataSet.visibilities[order, :]
                 if dataSet.weights is not None:
                     weight_spectrum_matrix[
                         :, self.stokes.index(dataSet.pol), :
@@ -1507,13 +1622,24 @@ try:
                     dataSet.flags[order, :] == 1
                 )
 
-                # Deal with saving the data once all of the polarizations have been added to 'matrix'
+                # Deal with saving the data once all of the polarizations
+                # have been added to 'matrix'
                 if dataSet.pol == self.stokes[-1]:
                     nBL = uvwList.shape[0]
                     tb.addrows(nBand * nBL)
 
-                    matrix.shape = (len(order), self.nStokes, nBand, self.nchan)
-                    flag_matrix.shape = (len(order), self.nStokes, nBand, self.nchan)
+                    matrix.shape = (
+                        len(order),
+                        self.nStokes,
+                        nBand,
+                        self.nchan,
+                    )
+                    flag_matrix.shape = (
+                        len(order),
+                        self.nStokes,
+                        nBand,
+                        self.nchan,
+                    )
                     weight_spectrum_matrix.shape = (
                         len(order),
                         self.nStokes,
@@ -1522,21 +1648,32 @@ try:
                     )
 
                     for j in range(nBand):
-                        fg = numpy.zeros((nBL, self.nStokes, self.nchan), dtype=bool)
-                        fc = numpy.zeros((nBL, self.nStokes, self.nchan, 1), dtype=bool)
+                        # fg = numpy.zeros(
+                        #     (nBL, self.nStokes, self.nchan), dtype=bool
+                        # )
+                        fc = numpy.zeros(
+                            (nBL, self.nStokes, self.nchan, 1), dtype=bool
+                        )
                         wg = numpy.ones((nBL, self.nStokes))
                         sg = numpy.ones((nBL, self.nStokes)) * 9999
 
                         tb.putcol("UVW", uvwList, i, nBL)
                         # tb.putcol('FLAG', fg.transpose(0, 2, 1), i, nBL)
                         tb.putcol(
-                            "FLAG", flag_matrix[..., j, :].transpose(0, 2, 1), i, nBL
+                            "FLAG",
+                            flag_matrix[..., j, :].transpose(0, 2, 1),
+                            i,
+                            nBL,
                         )
-                        tb.putcol("FLAG_CATEGORY", fc.transpose(0, 3, 2, 1), i, nBL)
+                        tb.putcol(
+                            "FLAG_CATEGORY", fc.transpose(0, 3, 2, 1), i, nBL
+                        )
                         tb.putcol("WEIGHT", wg, i, nBL)
                         tb.putcol(
                             "WEIGHT_SPECTRUM",
-                            weight_spectrum_matrix[..., j, :].transpose(0, 2, 1),
+                            weight_spectrum_matrix[..., j, :].transpose(
+                                0, 2, 1
+                            ),
                             i,
                             nBL,
                         )
@@ -1629,7 +1766,12 @@ try:
                         )
                         tb.putcol("TIME", timeList, i, nBL)
                         tb.putcol("TIME_CENTROID", timeList, i, nBL)
-                        tb.putcol("DATA", matrix[..., j, :].transpose(0, 2, 1), i, nBL)
+                        tb.putcol(
+                            "DATA",
+                            matrix[..., j, :].transpose(0, 2, 1),
+                            i,
+                            nBL,
+                        )
                         i += nBL
                     s += 1
 
@@ -1638,17 +1780,24 @@ try:
 
             # Data description
 
-            col1 = tableutil.makescacoldesc("FLAG_ROW", False, comment="Flag this row")
+            col1 = tableutil.makescacoldesc(
+                "FLAG_ROW", False, comment="Flag this row"
+            )
             col2 = tableutil.makescacoldesc(
                 "POLARIZATION_ID", 0, comment="Pointer to polarization table"
             )
             col3 = tableutil.makescacoldesc(
-                "SPECTRAL_WINDOW_ID", 0, comment="Pointer to spectralwindow table"
+                "SPECTRAL_WINDOW_ID",
+                0,
+                comment="Pointer to spectralwindow table",
             )
 
             desc = tableutil.maketabdesc([col1, col2, col3])
             tb = table(
-                "%s/DATA_DESCRIPTION" % self.basename, desc, nrow=nBand, ack=False
+                "%s/DATA_DESCRIPTION" % self.basename,
+                desc,
+                nrow=nBand,
+                ack=False,
             )
 
             for i in range(nBand):
@@ -1691,7 +1840,9 @@ try:
             col3 = tableutil.makescacoldesc(
                 "TYPE", "flag", comment="Type of flag (FLAG or UNFLAG)"
             )
-            col4 = tableutil.makescacoldesc("REASON", "reason", comment="Flag reason")
+            col4 = tableutil.makescacoldesc(
+                "REASON", "reason", comment="Flag reason"
+            )
             col5 = tableutil.makescacoldesc(
                 "LEVEL", 0, comment="Flag level - revision level"
             )
@@ -1699,7 +1850,9 @@ try:
                 "SEVERITY", 0, comment="Severity code (0-10)"
             )
             col7 = tableutil.makescacoldesc(
-                "APPLIED", False, comment="True if flag has been applied to main table"
+                "APPLIED",
+                False,
+                comment="True if flag has been applied to main table",
             )
             col8 = tableutil.makescacoldesc(
                 "COMMAND", "command", comment="Flagging command"
@@ -1731,7 +1884,9 @@ try:
                 0,
                 comment="Observation id (index in OBSERVATION table)",
             )
-            col3 = tableutil.makescacoldesc("MESSAGE", "message", comment="Log message")
+            col3 = tableutil.makescacoldesc(
+                "MESSAGE", "message", comment="Log message"
+            )
             col4 = tableutil.makescacoldesc(
                 "PRIORITY", "NORMAL", comment="Message priority"
             )
@@ -1763,7 +1918,9 @@ try:
 
             # POINTING
 
-            col1 = tableutil.makescacoldesc("ANTENNA_ID", 0, comment="Antenna Id")
+            col1 = tableutil.makescacoldesc(
+                "ANTENNA_ID", 0, comment="Antenna Id"
+            )
             col2 = tableutil.makescacoldesc(
                 "TIME",
                 0.0,
@@ -1788,7 +1945,9 @@ try:
             col4 = tableutil.makescacoldesc(
                 "NAME", "name", comment="Pointing position name"
             )
-            col5 = tableutil.makescacoldesc("NUM_POLY", 0, comment="Series order")
+            col5 = tableutil.makescacoldesc(
+                "NUM_POLY", 0, comment="Series order"
+            )
             col6 = tableutil.makescacoldesc(
                 "TIME_ORIGIN",
                 0.0,
@@ -1834,12 +1993,18 @@ try:
 
             # Processor
 
-            col1 = tableutil.makescacoldesc("TYPE", "type", comment="Processor type")
+            col1 = tableutil.makescacoldesc(
+                "TYPE", "type", comment="Processor type"
+            )
             col2 = tableutil.makescacoldesc(
                 "SUB_TYPE", "subtype", comment="Processor sub type"
             )
-            col3 = tableutil.makescacoldesc("TYPE_ID", 0, comment="Processor type id")
-            col4 = tableutil.makescacoldesc("MODE_ID", 0, comment="Processor mode id")
+            col3 = tableutil.makescacoldesc(
+                "TYPE_ID", 0, comment="Processor type id"
+            )
+            col4 = tableutil.makescacoldesc(
+                "MODE_ID", 0, comment="Processor mode id"
+            )
             col5 = tableutil.makescacoldesc("FLAG_ROW", False, comment="flag")
 
             desc = tableutil.maketabdesc([col1, col2, col3, col4, col5])
@@ -1877,14 +2042,22 @@ try:
                 },
             )
             col5 = tableutil.makescacoldesc(
-                "SUB_SCAN", 0, comment="Sub scan number, relative to scan number"
+                "SUB_SCAN",
+                0,
+                comment="Sub scan number, relative to scan number",
             )
             col6 = tableutil.makescacoldesc(
-                "OBS_MODE", "mode", comment="Observing mode, e.g., OFF_SPECTRUM"
+                "OBS_MODE",
+                "mode",
+                comment="Observing mode, e.g., OFF_SPECTRUM",
             )
-            col7 = tableutil.makescacoldesc("FLAG_ROW", False, comment="Row flag")
+            col7 = tableutil.makescacoldesc(
+                "FLAG_ROW", False, comment="Row flag"
+            )
 
-            desc = tableutil.maketabdesc([col1, col2, col3, col4, col5, col6, col7])
+            desc = tableutil.maketabdesc(
+                [col1, col2, col3, col4, col5, col6, col7]
+            )
             tb = table("%s/STATE" % self.basename, desc, nrow=0, ack=False)
 
             tb.flush()
@@ -1892,8 +2065,9 @@ try:
 
     class Ms(WriteMs):
         """
-        Class for storing visibility data and writing the data, along with array
-        geometry, frequency setup, etc., to a CASA measurement set.
+        Class for storing visibility data and writing the data,
+        along with array geometry, frequency setup, etc., to a
+        CASA measurement set.
         """
 
         _STOKES_CODES = STOKES_CODES
@@ -1908,18 +2082,26 @@ try:
             if_delete=False,
         ):
             """
-            Initialize a new MeasurementSets object using a filename and a reference time
-            given in seconds since the UNIX 1970 ephem, a python datetime object, or a
-            string in the format of 'YYYY-MM-DDTHH:MM:SS'.
+            Initialize a new MeasurementSets object using a filename
+            and a reference time given in seconds since the UNIX 1970 ephem,
+            a python datetime object, or a string in the format of
+            'YYYY-MM-DDTHH:MM:SS'.
 
             """
             super(Ms, self).__init__(
-                filename, ref_time, source_name, frame, verbose, if_delete=if_delete
+                filename,
+                ref_time,
+                source_name,
+                frame,
+                verbose,
+                if_delete=if_delete,
             )
 
 except ImportError:
     import warnings
 
-    warnings.warn("Cannot import casacore.tables, MS support disabled", ImportWarning)
+    warnings.warn(
+        "Cannot import casacore.tables, MS support disabled", ImportWarning
+    )
 
     raise RuntimeError("Cannot import casacore.tables, MS support disabled")

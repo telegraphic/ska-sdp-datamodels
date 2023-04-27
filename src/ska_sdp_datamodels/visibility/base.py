@@ -17,18 +17,18 @@ import re
 import numpy
 import pandas
 from astropy import units as u
-from astropy.coordinates import SkyCoord, EarthLocation
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.io import fits
 from astropy.time import Time
 from astropy.units import Quantity
+from rascil import phyconst
+
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
-    ReceptorFrame,
     PolarisationFrame,
+    ReceptorFrame,
 )
 from ska_sdp_datamodels.visibility.vis_model import Visibility
-
-from rascil import phyconst
 
 log = logging.getLogger("rascil-logger")
 
@@ -40,8 +40,8 @@ log = logging.getLogger("rascil-logger")
 def generate_baselines(nant):
     """Generate mapping from antennas to baselines
 
-    Note that we need to include autocorrelations since some input measurement sets
-    may contain autocorrelations
+    Note that we need to include autocorrelations since some input
+    measurement sets may contain autocorrelations
 
     :param nant:
     :return:
@@ -52,42 +52,42 @@ def generate_baselines(nant):
 
 
 def extend_visibility_to_ms(msname, bvis):
-    try:
-        import casacore.tables.tableutil as pt
-        from casacore.tables import (
-            makescacoldesc,
-            makearrcoldesc,
-            table,
-            maketabdesc,
-            tableexists,
-            tableiswritable,
-            tableinfo,
-            tablefromascii,
-            tabledelete,
-            makecoldesc,
-            msconcat,
-            removeDerivedMSCal,
-            taql,
-            tablerename,
-            tablecopy,
-            tablecolumn,
-            addDerivedMSCal,
-            removeImagingColumns,
-            addImagingColumns,
-            required_ms_desc,
-            tabledefinehypercolumn,
-            default_ms,
-            makedminfo,
-            default_ms_subtable,
-        )
-        from rascil.processing_components.visibility.msv2fund import Antenna, Stand
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError("casacore is not installed")
+    # try:
+    # import casacore.tables.tableutil as pt
+    # from casacore.tables import (
+    #     addDerivedMSCal,
+    #     addImagingColumns,
+    #     default_ms,
+    #     default_ms_subtable,
+    #     makearrcoldesc,
+    #     makecoldesc,
+    #     makedminfo,
+    #     makescacoldesc,
+    #     maketabdesc,
+    #     msconcat,
+    #     removeDerivedMSCal,
+    #     removeImagingColumns,
+    #     required_ms_desc,
+    #     table,
+    #     tablecolumn,
+    #     tablecopy,
+    #     tabledefinehypercolumn,
+    #     tabledelete,
+    #     tableexists,
+    #     tablefromascii,
+    #     tableinfo,
+    #     tableiswritable,
+    #     tablerename,
+    #     taql,
+    # )
+    # from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
+    # except ModuleNotFoundError:
+    #     raise ModuleNotFoundError("casacore is not installed")
 
-    try:
-        from rascil.processing_components.visibility import msv2
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError("cannot import msv2")
+    # try:
+    #     from ska_sdp_datamodels.visibility import msv2
+    # except ModuleNotFoundError:
+    #     raise ModuleNotFoundError("cannot import msv2")
 
     # Determine if file exists
     import os
@@ -103,10 +103,12 @@ def extend_visibility_to_ms(msname, bvis):
 def extend_visibility_ms_row(msname, vis):
     """Minimal Visibility to MS converter
 
-    The MS format is much more general than the RASCIL Visibility so we cut many corners. This requires casacore to be
+    The MS format is much more general than the RASCIL Visibility so we
+     cut many corners. This requires casacore to be
     installed. If not an exception ModuleNotFoundError is raised.
 
-    Write a list of Visibility's to a MS file, split by field and spectral window
+    Write a list of Visibility's to a MS file, split by field and
+    spectral window
 
     :param msname: File name of MS
     :param vis_list: list of Visibility
@@ -114,41 +116,17 @@ def extend_visibility_ms_row(msname, vis):
     """
 
     try:
-        import casacore.tables.tableutil as pt
-        from casacore.tables import (
-            makescacoldesc,
-            makearrcoldesc,
-            table,
-            maketabdesc,
-            tableexists,
-            tableiswritable,
-            tableinfo,
-            tablefromascii,
-            tabledelete,
-            makecoldesc,
-            msconcat,
-            removeDerivedMSCal,
-            taql,
-            tablerename,
-            tablecopy,
-            tablecolumn,
-            addDerivedMSCal,
-            removeImagingColumns,
-            addImagingColumns,
-            required_ms_desc,
-            tabledefinehypercolumn,
-            default_ms,
-            makedminfo,
-            default_ms_subtable,
-        )
-        from rascil.processing_components.visibility.msv2fund import Antenna, Stand
+        # import casacore.tables.tableutil as pt
+        from casacore.tables import table
+
+        # from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
     except ModuleNotFoundError:
         raise ModuleNotFoundError("casacore is not installed")
 
-    try:
-        from rascil.processing_components.visibility import msv2
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError("cannot import msv2")
+    # try:
+    #     from ska_sdp_datamodels.visibility import msv2
+    # except ModuleNotFoundError:
+    #     raise ModuleNotFoundError("cannot import msv2")
 
     ms_temp = msname + "____"
     export_visibility_to_ms(ms_temp, [vis], source_name=None)
@@ -164,7 +142,8 @@ def extend_visibility_ms_row(msname, vis):
         t.flush()
         t.close()
     finally:
-        import os, shutil
+        import os
+        import shutil
 
         if os.path.exists(ms_temp):
             shutil.rmtree(ms_temp, ignore_errors=False)
@@ -173,10 +152,12 @@ def extend_visibility_ms_row(msname, vis):
 def export_visibility_to_ms(msname, vis_list, source_name=None):
     """Minimal Visibility to MS converter
 
-    The MS format is much more general than the RASCIL Visibility so we cut many corners. This requires casacore to be
+    The MS format is much more general than the RASCIL Visibility
+    so we cut many corners. This requires casacore to be
     installed. If not an exception ModuleNotFoundError is raised.
 
-    Write a list of Visibility's to a MS file, split by field and spectral window
+    Write a list of Visibility's to a MS file, split by field and
+    spectral window
 
     :param msname: File name of MS
     :param vis_list: list of Visibility
@@ -185,39 +166,12 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
     :return:
     """
     try:
-        import casacore.tables.tableutil as pt
-        from casacore.tables import (
-            makescacoldesc,
-            makearrcoldesc,
-            table,
-            maketabdesc,
-            tableexists,
-            tableiswritable,
-            tableinfo,
-            tablefromascii,
-            tabledelete,
-            makecoldesc,
-            msconcat,
-            removeDerivedMSCal,
-            taql,
-            tablerename,
-            tablecopy,
-            tablecolumn,
-            addDerivedMSCal,
-            removeImagingColumns,
-            addImagingColumns,
-            required_ms_desc,
-            tabledefinehypercolumn,
-            default_ms,
-            makedminfo,
-            default_ms_subtable,
-        )
-        from rascil.processing_components.visibility.msv2fund import Antenna, Stand
+        from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
     except ModuleNotFoundError:
         raise ModuleNotFoundError("casacore is not installed")
 
     try:
-        from rascil.processing_components.visibility import msv2
+        from ska_sdp_datamodels.visibility import msv2
     except ModuleNotFoundError:
         raise ModuleNotFoundError("cannot import msv2")
 
@@ -234,8 +188,8 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
         if source_name is None:
             source_name = vis.source
         # Check polarisation
-        npol = vis.visibility_acc.npol
-        nchan = vis.visibility_acc.nchan
+        # npol = vis.visibility_acc.npol
+        # nchan = vis.visibility_acc.nchan
         if vis.visibility_acc.polarisation_frame.type == "linear":
             polarization = ["XX", "XY", "YX", "YY"]
         elif vis.visibility_acc.polarisation_frame.type == "linearnp":
@@ -328,16 +282,17 @@ def list_ms(msname, ack=False):
 
     For example::
         print(list_ms('3C277.1_avg.ms'))
-        (['1302+5748', '0319+415', '1407+284', '1252+5634', '1331+305'], [0, 1, 2, 3])
+        (['1302+5748', '0319+415', '1407+284', '1252+5634', '1331+305'],
+          [0, 1, 2, 3])
     """
     try:
         from casacore.tables import table  # pylint: disable=import-error
     except ModuleNotFoundError:
         raise ModuleNotFoundError("casacore is not installed")
-    try:
-        from rascil.processing_components.visibility import msv2
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError("cannot import msv2")
+    # try:
+    #     from ska_sdp_datamodels.visibility import msv2
+    # except ModuleNotFoundError:
+    #     raise ModuleNotFoundError("cannot import msv2")
 
     tab = table(msname, ack=ack)
     log.debug("list_ms: %s" % str(tab.info()))
@@ -364,21 +319,25 @@ def create_visibility_from_ms(
 ):
     """Minimal MS to Visibility converter
 
-    The MS format is much more general than the RASCIL Visibility so we cut many corners.
-    This requires casacore to be installed. If not an exception ModuleNotFoundError is raised.
+    The MS format is much more general than the RASCIL Visibility so we cut
+    many corners. This requires casacore to be installed. If not an exception
+    ModuleNotFoundError is raised.
 
     Creates a list of Visibility's, split by field and spectral window
 
-    Reading of a subset of channels is possible using either start_chan and end_chan or channnum. Using start_chan
-    and end_chan is preferred since it only reads the channels required. Channum is more flexible and can be used to
-    read a random list of channels.
+    Reading of a subset of channels is possible using either start_chan and
+    end_chan or channnum. Using start_chan and end_chan is preferred since
+    it only reads the channels required. Channum is more flexible and can
+    be used to read a random list of channels.
 
     :param msname: File name of MS
-    :param channum: range of channels e.g. range(17,32), default is None meaning all
+    :param channum: range of channels e.g. range(17,32), default is None
+                    meaning all
     :param start_chan: Starting channel to read
     :param end_chan: End channel to read
     :param ack: Ask casacore to acknowledge each table operation
-    :param datacolumn: MS data column to read DATA, CORRECTED_DATA, or MODEL_DATA
+    :param datacolumn: MS data column to read DATA, CORRECTED_DATA, or
+                    MODEL_DATA
     :param selected_sources: Sources to select
     :param selected_dds: Data descriptors to select
     :param average_channels: Average all channels read
@@ -387,8 +346,9 @@ def create_visibility_from_ms(
     For example::
 
         selected_sources = ['1302+5748', '1252+5634']
-        bvis_list = create_visibility_from_ms('../../data/3C277.1_avg.ms', datacolumn='CORRECTED_DATA',
-                                           selected_sources=selected_sources)
+        bvis_list = create_visibility_from_ms('../../data/3C277.1_avg.ms',
+            datacolumn='CORRECTED_DATA',
+            selected_sources=selected_sources)
         sources = numpy.unique([bv.source for bv in bvis_list])
         print(sources)
         ['1252+5634' '1302+5748']
@@ -398,10 +358,10 @@ def create_visibility_from_ms(
         from casacore.tables import table  # pylint: disable=import-error
     except ModuleNotFoundError:
         raise ModuleNotFoundError("casacore is not installed")
-    try:
-        from rascil.processing_components.visibility import msv2
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError("cannot import msv2")
+    # try:
+    #     from ska_sdp_datamodels.visibility import msv2
+    # except ModuleNotFoundError:
+    #     raise ModuleNotFoundError("cannot import msv2")
 
     tab = table(msname, ack=ack)
     log.debug("create_visibility_from_ms: %s" % str(tab.info()))
@@ -423,7 +383,7 @@ def create_visibility_from_ms(
         dds = selected_dds
 
     log.info(
-        "create_visibility_from_ms: Reading unique fields %s, unique data descriptions %s"
+        "create_visibility_from_ms: Reading uni. fields %s, uni. data descs %s"
         % (str(fields), str(dds))
     )
     vis_list = list()
@@ -441,22 +401,31 @@ def create_visibility_from_ms(
             ms = ftab.query("DATA_DESC_ID==%d" % dd, style="")
             assert (
                 ms.nrows() > 0
-            ), "Empty selection for FIELD_ID=%d and DATA_DESC_ID=%d" % (field, dd)
-            log.debug("create_visibility_from_ms: Found %d rows" % (ms.nrows()))
+            ), "Empty selection for FIELD_ID=%d and DATA_DESC_ID=%d" % (
+                field,
+                dd,
+            )
+            log.debug(
+                "create_visibility_from_ms: Found %d rows" % (ms.nrows())
+            )
             # The TIME column has descriptor:
-            # {'valueType': 'double', 'dataManagerType': 'IncrementalStMan', 'dataManagerGroup': 'TIME',
+            # {'valueType': 'double', 'dataManagerType': 'IncrementalStMan',
+            #   'dataManagerGroup': 'TIME',
             # 'option': 0, 'maxlen': 0, 'comment': 'Modified Julian Day',
-            # 'keywords': {'QuantumUnits': ['s'], 'MEASINFO': {'type': 'epoch', 'Ref': 'UTC'}}}
+            # 'keywords': {'QuantumUnits': ['s'], 'MEASINFO': {'type': 'epoch',
+            #   'Ref': 'UTC'}}}
             otime = ms.getcol("TIME")
             datacol = ms.getcol(datacolumn, nrow=1)
             datacol_shape = list(datacol.shape)
             channels = datacol.shape[-2]
-            log.debug("create_visibility_from_ms: Found %d channels" % (channels))
+            log.debug(
+                "create_visibility_from_ms: Found %d channels" % (channels)
+            )
             if channum is None:
                 if start_chan is not None and end_chan is not None:
                     try:
                         log.debug(
-                            "create_visibility_from_ms: Reading channels from %d to %d"
+                            "create_vis_from_ms: Reading channs from %d to %d"
                             % (start_chan, end_chan)
                         )
                         blc = [start_chan, 0]
@@ -467,7 +436,9 @@ def create_visibility_from_ms(
                         ms_weight = ms.getcol("WEIGHT")
 
                     except IndexError:
-                        raise IndexError("channel number exceeds max. within ms")
+                        raise IndexError(
+                            "channel number exceeds max. within ms"
+                        )
 
                 else:
                     log.debug(
@@ -481,9 +452,14 @@ def create_visibility_from_ms(
                         ms_flags = ms.getcol("FLAG")[:, channum, :]
                         channum = range(channels)
                     except IndexError:
-                        raise IndexError("channel number exceeds max. within ms")
+                        raise IndexError(
+                            "channel number exceeds max. within ms"
+                        )
             else:
-                log.debug("create_visibility_from_ms: Reading channels %s " % (channum))
+                log.debug(
+                    "create_visibility_from_ms: Reading channels %s "
+                    % (channum)
+                )
                 channum = range(channels)
                 try:
                     ms_vis = ms.getcol(datacolumn)[:, channum, :]
@@ -494,7 +470,9 @@ def create_visibility_from_ms(
 
             if average_channels:
                 weight = ms_weight[:, numpy.newaxis, :] * (1.0 - ms_flags)
-                ms_vis = numpy.sum(weight * ms_vis, axis=-2)[..., numpy.newaxis, :]
+                ms_vis = numpy.sum(weight * ms_vis, axis=-2)[
+                    ..., numpy.newaxis, :
+                ]
                 sumwt = numpy.sum(weight, axis=-2)[..., numpy.newaxis, :]
                 ms_vis[sumwt > 0.0] = ms_vis[sumwt > 0] / sumwt[sumwt > 0.0]
                 ms_vis[sumwt <= 0.0] = 0.0 + 0.0j
@@ -514,18 +492,25 @@ def create_visibility_from_ms(
 
             log.debug(
                 "create_visibility_from_ms: Observation from %s to %s"
-                % (Time(start_time, format="mjd").iso, Time(end_time, format="mjd").iso)
+                % (
+                    Time(start_time, format="mjd").iso,
+                    Time(end_time, format="mjd").iso,
+                )
             )
 
             spwtab = table("%s/SPECTRAL_WINDOW" % msname, ack=False)
-            cfrequency = numpy.array(spwtab.getcol("CHAN_FREQ")[spwid][channum])
+            cfrequency = numpy.array(
+                spwtab.getcol("CHAN_FREQ")[spwid][channum]
+            )
             cchannel_bandwidth = numpy.array(
                 spwtab.getcol("CHAN_WIDTH")[spwid][channum]
             )
             nchan = cfrequency.shape[0]
             if average_channels:
                 cfrequency = numpy.array([numpy.average(cfrequency)])
-                cchannel_bandwidth = numpy.array([numpy.sum(cchannel_bandwidth)])
+                cchannel_bandwidth = numpy.array(
+                    [numpy.sum(cchannel_bandwidth)]
+                )
                 nchan = cfrequency.shape[0]
 
             # Get polarisation info
@@ -554,11 +539,15 @@ def create_visibility_from_ms(
             elif numpy.array_equal(corr_type, [9, 12]):
                 polarisation_frame = PolarisationFrame("linearnp")
                 npol = 2
-            elif numpy.array_equal(corr_type, [9]) or numpy.array_equal(corr_type, [1]):
+            elif numpy.array_equal(corr_type, [9]) or numpy.array_equal(
+                corr_type, [1]
+            ):
                 npol = 1
                 polarisation_frame = PolarisationFrame("stokesI")
             else:
-                raise KeyError("Polarisation not understood: %s" % str(corr_type))
+                raise KeyError(
+                    "Polarisation not understood: %s" % str(corr_type)
+                )
 
             # Get configuration
             anttab = table("%s/ANTENNA" % msname, ack=False)
@@ -573,7 +562,8 @@ def create_visibility_from_ms(
                     actual += 1
                 else:
                     ant_map.append(-1)
-            # assert actual > 0, "Dish/station names are all blank - cannot load"
+            # assert actual > 0, "Dish/station names are all blank
+            #   - cannot load"
             if actual == 0:
                 ant_map = list(range(len(names)))
                 names = numpy.repeat("No name", len(names))
@@ -618,7 +608,10 @@ def create_visibility_from_ms(
             pc = fieldtab.getcol("PHASE_DIR")[field, 0, :]
             source = fieldtab.getcol("NAME")[field]
             phasecentre = SkyCoord(
-                ra=pc[0] * u.rad, dec=pc[1] * u.rad, frame="icrs", equinox="J2000"
+                ra=pc[0] * u.rad,
+                dec=pc[1] * u.rad,
+                frame="icrs",
+                equinox="J2000",
             )
 
             time_index_row = numpy.zeros_like(time, dtype="int")
@@ -640,8 +633,12 @@ def create_visibility_from_ms(
             ), "Error in finding data times"
 
             bv_times = numpy.zeros([ntimes])
-            bv_vis = numpy.zeros([ntimes, nbaselines, nchan, npol]).astype("complex")
-            bv_flags = numpy.zeros([ntimes, nbaselines, nchan, npol]).astype("int")
+            bv_vis = numpy.zeros([ntimes, nbaselines, nchan, npol]).astype(
+                "complex"
+            )
+            bv_flags = numpy.zeros([ntimes, nbaselines, nchan, npol]).astype(
+                "int"
+            )
             bv_weight = numpy.zeros([ntimes, nbaselines, nchan, npol])
             bv_uvw = numpy.zeros([ntimes, nbaselines, 3])
             bv_integration_time = numpy.zeros([ntimes])
@@ -682,15 +679,19 @@ def create_visibility_from_ms(
     return vis_list
 
 
-def create_visibility_from_uvfits(fitsname, channum=None, ack=False, antnum=None):
+def create_visibility_from_uvfits(
+    fitsname, channum=None, ack=False, antnum=None
+):
     """Minimal UVFIT to Visibility converter
 
-    The UVFITS format is much more general than the RASCIL Visibility so we cut many corners.
+    The UVFITS format is much more general than the RASCIL Visibility
+    so we cut many corners.
 
     Creates a list of Visibility's, split by field and spectral window
 
     :param fitsname: File name of UVFITS
-    :param channum: range of channels e.g. range(17,32), default is None meaning all
+    :param channum: range of channels e.g. range(17,32), default is
+                    None meaning all
     :param antnum: the number of antenna
     :return:
     """
@@ -715,11 +716,11 @@ def create_visibility_from_uvfits(fitsname, channum=None, ack=False, antnum=None
         return time_slots
 
     def param_dict(hdul):
-        "Return the dictionary of the random parameters"
+        """Return the dictionary of the random parameters"
 
-        """
-        The keys of the dictionary are the parameter names uppercased for
-        consistency. The values are the column numbers.
+
+        The keys of the dictionary are the parameter names
+        uppercased for consistency. The values are the column numbers.
 
         If multiple parameters have the same name (e.g., DATE) their
         columns are entered as a list.
@@ -753,7 +754,10 @@ def create_visibility_from_uvfits(fitsname, channum=None, ack=False, antnum=None
         if_freq = hdul[sdhu].data["IF FREQ"].ravel()
         for i in range(nspw):
             temp = numpy.array(
-                [if_freq[i] + freq_ref + delt_freq * ff for ff in range(channels)]
+                [
+                    if_freq[i] + freq_ref + delt_freq * ff
+                    for ff in range(channels)
+                ]
             )
             freq[i, :] = temp[:]
         freq_delt = numpy.ones(channels) * delt_freq
@@ -762,7 +766,9 @@ def create_visibility_from_uvfits(fitsname, channum=None, ack=False, antnum=None
 
         # Read time. We are trying to find a discrete set of times to use in
         # Visibility.
-        bvtimes = Time(hdul[0].data["DATE"], hdul[0].data["_DATE"], format="jd")
+        bvtimes = Time(
+            hdul[0].data["DATE"], hdul[0].data["_DATE"], format="jd"
+        )
         bv_times = find_time_slots(bvtimes.jd)
 
         ntimes = len(bv_times)
@@ -872,8 +878,12 @@ def create_visibility_from_uvfits(fitsname, channum=None, ack=False, antnum=None
         nchan = len(channum)
         vis_list = list()
         for spw_index in range(nspw):
-            bv_vis = numpy.zeros([ntimes, nbaselines, nchan, npol]).astype("complex")
-            bv_flags = numpy.zeros([ntimes, nbaselines, nchan, npol]).astype("int")
+            bv_vis = numpy.zeros([ntimes, nbaselines, nchan, npol]).astype(
+                "complex"
+            )
+            bv_flags = numpy.zeros([ntimes, nbaselines, nchan, npol]).astype(
+                "int"
+            )
             bv_weight = numpy.zeros([ntimes, nbaselines, nchan, npol])
             bv_uvw = numpy.zeros([ntimes, nbaselines, 3])
             for time_index, time in enumerate(bv_times):
@@ -883,7 +893,10 @@ def create_visibility_from_uvfits(fitsname, channum=None, ack=False, antnum=None
                         for channel_no, channel_index in enumerate(channum):
                             for pol_index in range(npol):
                                 bv_vis[
-                                    time_index, ibaseline, channel_no, pol_index
+                                    time_index,
+                                    ibaseline,
+                                    channel_no,
+                                    pol_index,
                                 ] = complex(
                                     _vis[
                                         row,
@@ -905,13 +918,28 @@ def create_visibility_from_uvfits(fitsname, channum=None, ack=False, antnum=None
                                     ],
                                 )
                                 bv_weight[
-                                    time_index, ibaseline, channel_no, pol_index
+                                    time_index,
+                                    ibaseline,
+                                    channel_no,
+                                    pol_index,
                                 ] = _vis[
-                                    row, :, :, spw_index, channel_index, pol_index, 2
+                                    row,
+                                    :,
+                                    :,
+                                    spw_index,
+                                    channel_index,
+                                    pol_index,
+                                    2,
                                 ]
-                        bv_uvw[time_index, ibaseline, 0] = uu[row] * phyconst.c_m_s
-                        bv_uvw[time_index, ibaseline, 1] = vv[row] * phyconst.c_m_s
-                        bv_uvw[time_index, ibaseline, 2] = ww[row] * phyconst.c_m_s
+                        bv_uvw[time_index, ibaseline, 0] = (
+                            uu[row] * phyconst.c_m_s
+                        )
+                        bv_uvw[time_index, ibaseline, 1] = (
+                            vv[row] * phyconst.c_m_s
+                        )
+                        bv_uvw[time_index, ibaseline, 2] = (
+                            ww[row] * phyconst.c_m_s
+                        )
                         row += 1
 
             # Convert negative weights to flags

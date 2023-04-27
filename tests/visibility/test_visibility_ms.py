@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name, too-many-locals
 """ Unit tests for visibility operations
 
 
@@ -8,13 +9,16 @@ import sys
 import unittest
 
 import numpy
-from ska_sdp_datamodels.visibility.vis_model import Visibility
+from rascil.processing_components.parameters import (
+    rascil_data_path,
+    rascil_path,
+)
 
-from rascil.processing_components.parameters import rascil_path, rascil_data_path
 from ska_sdp_datamodels.visibility.base import (
     create_visibility_from_ms,
     export_visibility_to_ms,
 )
+from ska_sdp_datamodels.visibility.vis_model import Visibility
 
 log = logging.getLogger("rascil-logger")
 
@@ -25,11 +29,11 @@ log.addHandler(logging.StreamHandler(sys.stdout))
 class TestCreateMS(unittest.TestCase):
     def setUp(self):
         try:
-            from casacore.tables import table  # pylint: disable=import-error
+            # pylint: disable=import-error,import-outside-toplevel
+            from casacore.tables import table
 
             self.casacore_available = True
-        #            except ModuleNotFoundError:
-        except:
+        except ModuleNotFoundError:
             self.casacore_available = False
 
     def test_create_list(self):
@@ -123,7 +127,10 @@ class TestCreateMS(unittest.TestCase):
         for schan in range(0, nchan, nchan_ave):
             max_chan = min(nchan, schan + nchan_ave)
             v = create_visibility_from_ms(
-                msfile, start_chan=schan, end_chan=max_chan - 1, average_channels=True
+                msfile,
+                start_chan=schan,
+                end_chan=max_chan - 1,
+                average_channels=True,
             )
             nchannels = len(numpy.unique(v[0].frequency))
             assert nchannels == 1
@@ -134,7 +141,9 @@ class TestCreateMS(unittest.TestCase):
             assert v.vis.data.shape[-1] == 4
             assert v.visibility_acc.polarisation_frame.type == "linear"
             assert numpy.max(numpy.abs(v.vis)) > 0.0, ivis
-            assert numpy.max(numpy.abs(v.visibility_acc.flagged_vis)) > 0.0, ivis
+            assert (
+                numpy.max(numpy.abs(v.visibility_acc.flagged_vis)) > 0.0
+            ), ivis
             assert numpy.sum(v.weight) > 0.0, ivis
             assert numpy.sum(v.visibility_acc.flagged_weight) > 0.0, ivis
 
@@ -148,8 +157,10 @@ class TestCreateMS(unittest.TestCase):
         nchan_ave = 1
         nchan = 8
         for schan in range(0, nchan, nchan_ave):
-            max_chan = min(nchan, schan + nchan_ave)
-            v = create_visibility_from_ms(msfile, start_chan=schan, end_chan=schan)
+            # max_chan = min(nchan, schan + nchan_ave)
+            v = create_visibility_from_ms(
+                msfile, start_chan=schan, end_chan=schan
+            )
             vis_by_channel.append(v[0])
 
         assert len(vis_by_channel) == 8, len(vis_by_channel)
@@ -182,7 +193,11 @@ class TestCreateMS(unittest.TestCase):
             assert numpy.max(numpy.abs(v.visibility_acc.flagged_vis)) > 0.0
 
     def test_read_all(self):
-        ms_list = ["vis/3C277.1C.16channels.ms", "vis/ASKAP_example.ms", "vis/xcasa.ms"]
+        ms_list = [
+            "vis/3C277.1C.16channels.ms",
+            "vis/ASKAP_example.ms",
+            "vis/xcasa.ms",
+        ]
 
         for ms in ms_list:
             vis_list = create_visibility_from_ms(rascil_data_path(ms))
@@ -192,7 +207,7 @@ class TestCreateMS(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             ms = "vis/ASKAP_example.fits"
             vis_list = create_visibility_from_ms(rascil_data_path(ms))
-            # assert isinstance(vis_list[0], Visibility)
+            assert isinstance(vis_list[0], Visibility)
 
     def test_write_multi_bvis_ms(self):
         # read in an MS which produces multiple bvis
@@ -202,7 +217,8 @@ class TestCreateMS(unittest.TestCase):
         export_visibility_to_ms("out.ms", bvis_list)
         # verify data
         bvis_list_2 = create_visibility_from_ms("out.ms")
-        # there are 14 elements in the list and we test half to decrease the time it takes for the test to run
+        # there are 14 elements in the list and we test half to decrease the
+        # time it takes for the test to run
         for i in range(0, len(bvis_list), 2):
             assert bvis_list[i] == bvis_list_2[i]
         shutil.rmtree("./out.ms", ignore_errors=True)

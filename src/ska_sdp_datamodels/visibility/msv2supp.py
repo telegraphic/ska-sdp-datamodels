@@ -136,7 +136,14 @@ def cmp_to_total(cls):
     """
 
     names = ["__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"]
-    funcs = [_cmp_to_lt, _cmp_to_le, _cmp_to_gt, _cmp_to_ge, _cmp_to_eq, _cmp_to_ne]
+    funcs = [
+        _cmp_to_lt,
+        _cmp_to_le,
+        _cmp_to_gt,
+        _cmp_to_ge,
+        _cmp_to_eq,
+        _cmp_to_ne,
+    ]
 
     for name, func in zip(names, funcs):
         # Is it defined?

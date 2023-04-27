@@ -1,3 +1,4 @@
+# pylint=disable ignore-imports
 """ Unit tests for visibility operations
 
 
@@ -8,12 +9,16 @@ import unittest
 import astropy.units as u
 import numpy
 from astropy.coordinates import SkyCoord
-from ska_sdp_datamodels.configuration.config_create import create_named_configuration
-from ska_sdp_datamodels.science_data_model.polarisation_model import PolarisationFrame
-from ska_sdp_datamodels.sky_model.sky_model import SkyComponent
-from ska_sdp_datamodels.visibility import create_visibility
 from ska_sdp_func_python.imaging import dft_skycomponent_visibility
 
+from ska_sdp_datamodels.configuration.config_create import (
+    create_named_configuration,
+)
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
+    PolarisationFrame,
+)
+from ska_sdp_datamodels.sky_model.sky_model import SkyComponent
+from ska_sdp_datamodels.visibility import create_visibility
 from ska_sdp_datamodels.visibility.visibility_fitting import fit_visibility
 
 
@@ -34,8 +39,10 @@ class TestVisibilityFitting(unittest.TestCase):
         f = numpy.array([100.0])
         self.flux = numpy.array([f])
 
-        # The phase centre is absolute and the component is specified relative (for now).
-        # This means that the component should end up at the position phasecentre+compredirection
+        # The phase centre is absolute and the component is specified
+        # relative (for now).
+        # This means that the component should end up at the position
+        # phasecentre+compredirection
         self.phasecentre = SkyCoord(
             ra=+180.0 * u.deg, dec=-35.0 * u.deg, frame="icrs", equinox="J2000"
         )
@@ -53,8 +60,16 @@ class TestVisibilityFitting(unittest.TestCase):
         )
 
     def test_fit_visibility(self):
-        # Sum the visibilities in the correct_visibility direction. This is limited by numerical precision
-        methods = ["CG", "BFGS", "Powell", "trust-ncg", "trust-exact", "trust-krylov"]
+        # Sum the visibilities in the correct_visibility direction.
+        # This is limited by numerical precision
+        methods = [
+            "CG",
+            "BFGS",
+            "Powell",
+            "trust-ncg",
+            "trust-exact",
+            "trust-krylov",
+        ]
         for method in methods:
             self.actualSetup()
             self.vis = create_visibility(
@@ -83,6 +98,8 @@ class TestVisibilityFitting(unittest.TestCase):
                 verbose=False,
             )
             assert (
-                sc.direction.separation(self.comp_actual_direction).to("rad").value
+                sc.direction.separation(self.comp_actual_direction)
+                .to("rad")
+                .value
                 < 1e-5
             ), sc.direction.separation(self.comp_actual_direction).to("rad")

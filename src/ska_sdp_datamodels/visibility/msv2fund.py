@@ -8,10 +8,10 @@ from datetime import datetime
 
 import numpy
 
-from rascil.processing_components.visibility.msv2supp import (
-    cmp_to_total,
-    STOKES_CODES,
+from ska_sdp_datamodels.visibility.msv2supp import (
     NUMERIC_STOKES,
+    STOKES_CODES,
+    cmp_to_total,
     merge_baseline,
 )
 
@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 try:
-    from casacore.tables import table, tableutil
+    # from casacore.tables import table, tableutil
 
     @cmp_to_total
     class Stand(object):
@@ -393,8 +393,8 @@ try:
             )
 
             for i, (a1, a2) in enumerate(self.baselines):
-                # Go from a east, north, up coordinate system to a celestial equation,
-                # east, north celestial pole system
+                # Go from a east, north, up coordinate system to a
+                # celestial equation, east, north celestial pole system
                 xyzPrime = a1.stand - a2.stand
                 xyz = trans1 @ numpy.array(
                     [[xyzPrime[0]], [xyzPrime[1]], [xyzPrime[2]]]
@@ -412,7 +412,9 @@ try:
                 if mapper is None:
                     s1, s2 = a1.stand.id, a2.stand.id
                 else:
-                    s1, s2 = mapper.index(a1.stand.id), mapper.index(a2.stand.id)
+                    s1, s2 = mapper.index(a1.stand.id), mapper.index(
+                        a2.stand.id
+                    )
                 packed.append(merge_baseline(s1, s2, shift=shift))
             packed = numpy.array(packed, dtype=int)
 
@@ -420,8 +422,8 @@ try:
 
     class BaseData(object):
         """
-        Base Data class: For an observation of interferometer, we should have:
-        Antenna, Frequency, Visibility Funcation, UVW
+        Base Data class: For an observation of interferometer,
+        we should have: Antenna, Frequency, Visibility Funcation, UVW
         """
 
         _MAX_ANTS = 255
@@ -430,7 +432,8 @@ try:
 
         class _Antenna(object):
             """
-            Holds information describing the location and properties of an antenna.
+            Holds information describing the location and properties of
+            an antenna.
             """
 
             def __init__(self, id, x, y, z, bits=8, name=None):
@@ -453,12 +456,15 @@ try:
         @staticmethod
         def parse_time(ref_time):
             """
-            Given a time as either a integer, float, string, or datetime object,
-            convert it to a string in the formation 'YYYY-MM-DDTHH:MM:SS'.
+            Given a time as either a integer, float, string, or datetime
+            object, convert it to a string in the formation
+            'YYYY-MM-DDTHH:MM:SS'.
             """
 
             # Valid time string (modulo the 'T')
-            timeRE = re.compile(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d+)?")
+            timeRE = re.compile(
+                r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d+)?"
+            )
 
             if type(ref_time) in (int, float):
                 refDateTime = datetime.utcfromtimestamp(ref_time)
@@ -468,7 +474,9 @@ try:
             elif type(ref_time) == str:
                 # Make sure that the string times are of the correct format
                 if re.match(timeRE, ref_time) is None:
-                    raise RuntimeError("Malformed date/time provided: %s" % ref_time)
+                    raise RuntimeError(
+                        "Malformed date/time provided: %s" % ref_time
+                    )
                 else:
                     ref_time = ref_time.replace(" ", "T", 1)
             else:
@@ -477,7 +485,12 @@ try:
             return ref_time
 
         def __init__(
-            self, filename, ref_time=0.0, source_name=None, frame="ITRF", verbose=False
+            self,
+            filename,
+            ref_time=0.0,
+            source_name=None,
+            frame="ITRF",
+            verbose=False,
         ):
             # File-specific information
             self.filename = filename
@@ -513,7 +526,8 @@ try:
 
         def set_stokes(self, polList):
             """
-            Given a list of Stokes parameters, update the object's parameters.
+            Given a list of Stokes parameters, update the object's
+            parameters.
             """
 
             for pol in polList:
@@ -525,7 +539,8 @@ try:
                 if numericPol not in self.stokes:
                     self.stokes.append(numericPol)
 
-            # Sort into order of 'XX', 'YY', 'XY', and 'YX' or 'I', 'Q', 'U', and 'V'
+            # Sort into order of 'XX', 'YY', 'XY', and
+            # 'YX' or 'I', 'Q', 'U', and 'V'
             self.stokes.sort()
             if self.stokes[0] < 0:
                 self.stokes.reverse()
@@ -534,8 +549,8 @@ try:
 
         def set_frequency(self, freq, channel_width):
             """
-            Given a numpy array of frequencies, set the relevant common observation
-            parameters and add an entry to the self.freq list.
+            Given a numpy array of frequencies, set the relevant common
+            observation parameters and add an entry to the self.freq list.
             """
             if self.nchan == 0:
                 self.nchan = len(freq)
@@ -558,8 +573,9 @@ try:
 
         def set_geometry(self, *args, **kwds):
             """
-            Given a station and an array of stands, set the relevant common observation
-            parameters and add entries to the self.array list.
+            Given a station and an array of stands, set the relevant
+            common observation parameters and add entries to the
+            self.array list.
             """
 
             raise NotImplementedError
@@ -615,6 +631,8 @@ try:
 except ImportError:
     import warnings
 
-    warnings.warn("Cannot import casacore.tables, MS support disabled", ImportWarning)
+    warnings.warn(
+        "Cannot import casacore.tables, MS support disabled", ImportWarning
+    )
 
     raise RuntimeError("Cannot import casacore.tables, MS support disabled")
