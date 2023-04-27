@@ -23,7 +23,7 @@ from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.io import fits
 from astropy.time import Time
 from astropy.units import Quantity
-from rascil import phyconst
+from ska_sdp_datamodels.visibility import phyconst
 
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
