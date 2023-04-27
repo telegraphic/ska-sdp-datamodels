@@ -1,5 +1,5 @@
 # pylint: disable=too-many-ancestors,too-many-locals,invalid-name
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments，line-too-long
 
 """
 Image and FlagTable data models.
