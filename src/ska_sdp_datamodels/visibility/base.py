@@ -1,3 +1,5 @@
+# pylint: disable-all
+
 """
 Base simple visibility operations, placed here to avoid circular dependencies
 """

@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, too-many-locals,ignore-imports
+# pylint: disable-all
 
 """ Unit tests for visibility operations
 

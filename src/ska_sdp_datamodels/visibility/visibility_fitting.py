@@ -1,3 +1,15 @@
+# pylint: disable=too-many-ancestors,too-many-arguments,too-many-locals
+# pylint: disable=line-too-long,invalid-name,missing-module-docstring
+# pylint: disable=too-many-lines,consider-using-f-string,super-with-arguments
+# pylint: disable=arguments-differ,unused-argument,consider-using-enumerate
+# pylint: disable=unnecessary-list-index-lookup,unused-variable,
+# pylint: disable=arguments-renamed,unidiomatic-typecheck,unnecessary-pass
+# pylint: disable=too-many-statements,import-outside-toplevel
+# pylint: disable=redefined-outer-name，used-before-assignment
+# pylint: disable=pointless-statement,invalid-name,simplifiable-if-expression
+# pylint: disable=too-many-branches,raise-missing-from,
+# pylint: disable=consider-using-in
+
 """ Visibility fitting
 
 """

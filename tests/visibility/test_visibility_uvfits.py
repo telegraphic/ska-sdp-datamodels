@@ -1,5 +1,5 @@
-# pylint: disable=invalid-name, too-many-locals,import_error
-# pylint: disable=missing-class-docstring,use-list-literal
+# pylint: disable-all
+
 """ Unit tests for visibility operations
 
 

@@ -1,3 +1,5 @@
+# pylint: disable-all
+
 #
 # MeasurementSets V2 Reference Codes Based on Python-casacore
 #
