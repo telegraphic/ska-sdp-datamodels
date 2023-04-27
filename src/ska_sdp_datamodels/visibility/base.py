@@ -23,13 +23,13 @@ from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.io import fits
 from astropy.time import Time
 from astropy.units import Quantity
-from ska_sdp_datamodels.visibility import phyconst
 
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
     ReceptorFrame,
 )
+from ska_sdp_datamodels.visibility import phyconst
 from ska_sdp_datamodels.visibility.vis_model import Visibility
 
 log = logging.getLogger("rascil-logger")
