@@ -1,4 +1,6 @@
-# pylint: disable=invalid-name, too-many-locals
+# pylint: disable=invalid-name, too-many-locals,import_error
+# pylint: disable=missing-class-docstring,use-list-literal
+
 """ Unit tests for visibility operations
 
 
@@ -28,13 +30,7 @@ log.addHandler(logging.StreamHandler(sys.stdout))
 
 class TestCreateMS(unittest.TestCase):
     def setUp(self):
-        try:
-            # pylint: disable=import-error,import-outside-toplevel
-            from casacore.tables import table
-
-            self.casacore_available = True
-        except ModuleNotFoundError:
-            self.casacore_available = False
+        self.casacore_available = True
 
     def test_create_list(self):
         if not self.casacore_available:

@@ -1,4 +1,6 @@
-#
+# pylint: disable=invalid-name, too-many-locals,import_error
+# pylint: disable=missing-function-docstring,too-many-arguments
+
 # MeasurementSets V2 Reference Codes Based on Python-casacore
 #
 

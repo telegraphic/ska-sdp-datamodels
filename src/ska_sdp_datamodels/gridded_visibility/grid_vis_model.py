@@ -1,5 +1,5 @@
 # pylint: disable=too-many-ancestors,too-many-locals,invalid-name
-
+# pylint: disable=line-too-long,unknown-option-value
 """
 Gridded visibility models.
 """
