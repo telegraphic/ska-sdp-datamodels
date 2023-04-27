@@ -20,7 +20,6 @@ from .vis_io_and_convert import (
     import_visibility_from_hdf5,
 )
 from .vis_model import FlagTable, Visibility
-from .visibility_fitting import fit_visibility
 
 __all__ = [
     "Visibility",
@@ -41,5 +40,4 @@ __all__ = [
     "extend_visibility_to_ms",
     "list_ms",
     "generate_baselines",
-    "fit_visibility",
 ]
