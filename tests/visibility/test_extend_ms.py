@@ -29,14 +29,6 @@ from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
 
 class TestExtendMS(unittest.TestCase):
     def setUp(self):
-        try:
-            from casacore.tables import table  # pylint: disable=import-error
-
-            self.casacore_available = True
-            #            except ModuleNotFoundError:
-        except:
-            self.casacore_available = False
-
         numpy.seterr(all="ignore")
         self.testPath = tempfile.mkdtemp(prefix="test-ms-", suffix=".tmp")
         self.ms_file = os.path.join(self.testPath, "test.ms")
@@ -200,15 +192,6 @@ class TestExtendMS(unittest.TestCase):
             "STATE",
         ):
             self.assertTrue(os.path.exists(os.path.join(testFile, tbl)))
-        # self.lowcore = create_named_configuration('LOWBD2-CORE')
-        #
-        # self.times = numpy.linspace(-300.0, 300.0, 11) * numpy.pi / 43200.0
-        #
-        # self.frequency = numpy.linspace(1e8, 1.5e9, 7)
-        #
-        # self.channel_bandwidth = numpy.array(7 * [self.frequency[1] - self.frequency[0]])
-        #
-        # self.phasecentre = SkyCoord(ra=+15.0 * u.deg, dec=-35.0 * u.deg, frame='icrs', equinox='J2000')
 
     def test_extend_ms(self):
         # Reading

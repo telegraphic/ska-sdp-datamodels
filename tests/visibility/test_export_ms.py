@@ -10,6 +10,7 @@ import time
 import unittest
 
 import astropy.units as u
+import casacore
 import numpy
 from astropy import units
 from astropy.coordinates import EarthLocation
@@ -19,18 +20,8 @@ from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     ReceptorFrame,
 )
-
-try:
-    import casacore
-    from casacore.tables import table  # pylint: disable=import-error
-
-    from ska_sdp_datamodels.visibility import msv2
-    from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
-
-    run_ms_tests = True
-#            except ModuleNotFoundError:
-except:
-    run_ms_tests = False
+from ska_sdp_datamodels.visibility import msv2
+from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
 
 
 def lla_to_ecef(lat, lon, alt):
@@ -93,13 +84,14 @@ def ecef_to_enu(location, xyz):
 
 
 class measurementset_tests(unittest.TestCase):
-    """A unittest.TestCase collection of unit tests for the lsl.writer.measurementset.Ms
-    class."""
+    """A unittest.TestCase collection of unit tests for the
+    lsl.writer.measurementset.Ms class."""
 
     testPath = None
 
     def setUp(self):
-        """Turn off all numpy warnings and create the temporary file directory."""
+        """Turn off all numpy warnings and create the temporary
+        file directory."""
 
         numpy.seterr(all="ignore")
         self.testPath = tempfile.mkdtemp(
@@ -107,16 +99,15 @@ class measurementset_tests(unittest.TestCase):
         )
 
     def __initData_WGS84(self):
-        """Private function to generate a random set of data for writing a UVFITS
-        file.  The data is returned as a dictionary with keys:
+        """Private function to generate a random set of data for
+        writing a UVFITS file.  The data is returned as a dictionary
+        with keys:
          * freq - frequency array in Hz
          * site - Observatory object
          * stands - array of stand numbers
          * bl - list of baseline pairs in real stand numbers
          * vis - array of visibility data in baseline x freq format
         """
-        if run_ms_tests == False:
-            return
 
         # Frequency range
         freq = numpy.arange(0, 512) * 20e6 / 512 + 40e6
@@ -224,8 +215,6 @@ class measurementset_tests(unittest.TestCase):
          * bl - list of baseline pairs in real stand numbers
          * vis - array of visibility data in baseline x freq format
         """
-        if run_ms_tests == False:
-            return
 
         # Frequency range
         freq = numpy.arange(0, 512) * 20e6 / 512 + 40e6
@@ -324,8 +313,6 @@ class measurementset_tests(unittest.TestCase):
 
     def test_write_tables_ENU(self):
         """Test if the MeasurementSet writer writes all of the tables."""
-        if run_ms_tests == False:
-            return
 
         testTime = float(86400.0 * Time(time.time(), format="unix").mjd)
         testFile = os.path.join(self.testPath, "ms-test-W.ms")
@@ -376,8 +363,6 @@ class measurementset_tests(unittest.TestCase):
 
     def test_write_tables_WGS84(self):
         """Test if the MeasurementSet writer writes all of the tables."""
-        if run_ms_tests == False:
-            return
 
         testTime = float(86400.0 * Time(time.time(), format="unix").mjd)
         testFile = os.path.join(self.testPath, "ms-test-WGS.ms")
@@ -427,8 +412,6 @@ class measurementset_tests(unittest.TestCase):
 
     def test_main_table(self):
         """Test the primary data table."""
-        if run_ms_tests == False:
-            return
 
         testTime = float(86400.0 * Time(time.time(), format="unix").mjd)
         testFile = os.path.join(self.testPath, "ms-test-UV.ms")
@@ -480,8 +463,8 @@ class measurementset_tests(unittest.TestCase):
             visData = vis[row, :, 0]
             weightData = weights[row, :, 0]
 
-            # Find out which visibility set in the random data corresponds to the
-            # current visibility
+            # Find out which visibility set in the random data
+            # corresponds to the current visibility
             i = 0
             for a1, a2 in data["bl"]:
                 if (
@@ -505,8 +488,6 @@ class measurementset_tests(unittest.TestCase):
 
     def test_multi_if(self):
         """writing more than one spectral window to a MeasurementSet."""
-        if run_ms_tests == False:
-            return
         testTime = float(86400.0 * Time(time.time(), format="unix").mjd)
         testFile = os.path.join(self.testPath, "ms-test-MultiIF.ms")
 
@@ -563,8 +544,8 @@ class measurementset_tests(unittest.TestCase):
             descid = ddsc[row]
             visData = vis[row, :, 0]
 
-            # Find out which visibility set in the random data corresponds to the
-            # current visibility
+            # Find out which visibility set in the random data corresponds
+            # to the current visibility
             i = 0
             for a1, a2 in data["bl"]:
                 if (
