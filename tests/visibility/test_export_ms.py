@@ -11,24 +11,27 @@ import unittest
 
 import astropy.units as u
 import numpy
+from astropy import units
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
-from astropy import units
 
 from ska_sdp_datamodels.configuration.config_model import Configuration
-from ska_sdp_datamodels.science_data_model.polarisation_model import ReceptorFrame
-
+from ska_sdp_datamodels.science_data_model.polarisation_model import (
+    ReceptorFrame,
+)
 
 try:
     import casacore
     from casacore.tables import table  # pylint: disable=import-error
+
     from ska_sdp_datamodels.visibility import msv2
-    from ska_sdp_datamodels.visibility.msv2fund import Stand, Antenna
+    from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
 
     run_ms_tests = True
 #            except ModuleNotFoundError:
 except:
     run_ms_tests = False
+
 
 def lla_to_ecef(lat, lon, alt):
     """
@@ -50,6 +53,7 @@ def lla_to_ecef(lat, lon, alt):
     z = ((WGS84_b**2 / WGS84_a**2) * N + alt) * numpy.sin(lat)
 
     return x, y, z
+
 
 def ecef_to_enu(location, xyz):
     """
@@ -87,6 +91,7 @@ def ecef_to_enu(location, xyz):
 
     return numpy.hstack([e, n, u])
 
+
 class measurementset_tests(unittest.TestCase):
     """A unittest.TestCase collection of unit tests for the lsl.writer.measurementset.Ms
     class."""
@@ -97,7 +102,9 @@ class measurementset_tests(unittest.TestCase):
         """Turn off all numpy warnings and create the temporary file directory."""
 
         numpy.seterr(all="ignore")
-        self.testPath = tempfile.mkdtemp(prefix="test-measurementset-", suffix=".tmp")
+        self.testPath = tempfile.mkdtemp(
+            prefix="test-measurementset-", suffix=".tmp"
+        )
 
     def __initData_WGS84(self):
         """Private function to generate a random set of data for writing a UVFITS
@@ -327,7 +334,9 @@ class measurementset_tests(unittest.TestCase):
         data = self.__initData_ENU()
 
         # Start the table
-        tbl = msv2.Ms(testFile, ref_time=testTime, frame=data["site"].attrs["frame"])
+        tbl = msv2.Ms(
+            testFile, ref_time=testTime, frame=data["site"].attrs["frame"]
+        )
         tbl.set_stokes(["xx"])
         tbl.set_frequency(data["freq"], data["channel_width"])
         tbl.set_geometry(data["site"], data["antennas"])
@@ -377,7 +386,9 @@ class measurementset_tests(unittest.TestCase):
         data = self.__initData_WGS84()
 
         # Start the table
-        tbl = msv2.Ms(testFile, ref_time=testTime, frame=data["site"].attrs["frame"])
+        tbl = msv2.Ms(
+            testFile, ref_time=testTime, frame=data["site"].attrs["frame"]
+        )
         tbl.set_stokes(["xx"])
         tbl.set_frequency(data["freq"], data["channel_width"])
         tbl.set_geometry(data["site"], data["antennas"])
@@ -443,7 +454,9 @@ class measurementset_tests(unittest.TestCase):
         vis = ms.getcol("DATA")
         weights = ms.getcol("WEIGHT_SPECTRUM")
 
-        ms2 = casacore.tables.table(os.path.join(testFile, "ANTENNA"), ack=False)
+        ms2 = casacore.tables.table(
+            os.path.join(testFile, "ANTENNA"), ack=False
+        )
         mapper = ms2.getcol("NAME")
 
         # Correct number of visibilities
@@ -471,7 +484,10 @@ class measurementset_tests(unittest.TestCase):
             # current visibility
             i = 0
             for a1, a2 in data["bl"]:
-                if a1.stand.id == mapper[stand1] and a2.stand.id == mapper[stand2]:
+                if (
+                    a1.stand.id == mapper[stand1]
+                    and a2.stand.id == mapper[stand2]
+                ):
                     break
                 else:
                     i = i + 1
@@ -520,7 +536,9 @@ class measurementset_tests(unittest.TestCase):
         ddsc = ms.getcol("DATA_DESC_ID")
         vis = ms.getcol("DATA")
 
-        ms2 = casacore.tables.table(os.path.join(testFile, "ANTENNA"), ack=False)
+        ms2 = casacore.tables.table(
+            os.path.join(testFile, "ANTENNA"), ack=False
+        )
         mapper = ms2.getcol("NAME")
 
         ms3 = casacore.tables.table(
@@ -549,7 +567,10 @@ class measurementset_tests(unittest.TestCase):
             # current visibility
             i = 0
             for a1, a2 in data["bl"]:
-                if a1.stand.id == mapper[stand1] and a2.stand.id == mapper[stand2]:
+                if (
+                    a1.stand.id == mapper[stand1]
+                    and a2.stand.id == mapper[stand2]
+                ):
                     break
                 else:
                     i = i + 1

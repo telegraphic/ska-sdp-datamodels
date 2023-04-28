@@ -1,27 +1,29 @@
+# pylint: disable-all
 """ Unit tests for visibility scatter gather and extend MS file
 
 
 """
 
-import tempfile
 import os
+import shutil
+import tempfile
 import time
 import unittest
+
 import astropy.units as u
 import numpy
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
-import shutil
 
-from ska_sdp_datamodels.visibility.base import (
-    extend_visibility_to_ms,
-)
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     ReceptorFrame,
 )
 from ska_sdp_datamodels.visibility import msv2
-from ska_sdp_datamodels.visibility.base import create_visibility_from_ms
+from ska_sdp_datamodels.visibility.base import (
+    create_visibility_from_ms,
+    extend_visibility_to_ms,
+)
 from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
 
 
@@ -183,19 +185,19 @@ class TestExtendMS(unittest.TestCase):
         # Make sure everyone is there
         self.assertTrue(os.path.exists(testFile))
         for tbl in (
-                "ANTENNA",
-                "DATA_DESCRIPTION",
-                "FEED",
-                "FIELD",
-                "FLAG_CMD",
-                "HISTORY",
-                "OBSERVATION",
-                "POINTING",
-                "POLARIZATION",
-                "PROCESSOR",
-                "SOURCE",
-                "SPECTRAL_WINDOW",
-                "STATE",
+            "ANTENNA",
+            "DATA_DESCRIPTION",
+            "FEED",
+            "FIELD",
+            "FLAG_CMD",
+            "HISTORY",
+            "OBSERVATION",
+            "POINTING",
+            "POLARIZATION",
+            "PROCESSOR",
+            "SOURCE",
+            "SPECTRAL_WINDOW",
+            "STATE",
         ):
             self.assertTrue(os.path.exists(os.path.join(testFile, tbl)))
         # self.lowcore = create_named_configuration('LOWBD2-CORE')
@@ -225,6 +227,7 @@ class TestExtendMS(unittest.TestCase):
         """Remove the test path directory and its contents"""
 
         shutil.rmtree(self.testPath, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()
