@@ -316,7 +316,7 @@ def create_visibility_from_ms(
     log.info("Reading uni. fields %s, uni. data descs %s", fields, dds)
     vis_list = []
     for field in fields:
-        ftab = table(msname, ack=ack).query("FIELD_ID=={field}", style="")
+        ftab = table(msname, ack=ack).query(f"FIELD_ID=={field}", style="")
         if ftab.nrows() <= 0:
             raise ValueError(f"Empty selection for FIELD_ID={field}")
         for dd in dds:

@@ -744,7 +744,7 @@ try:
                             # format 'source' name based on local sidereal time
                             s1 = int(s)
                             s2 = int((s - int(s)) * 10.0)
-                            name = f"T{d:2d}{m:2d}{s1:2d}{s2:2d}"
+                            name = f"T{d:02}{m:02}{s1:02}{s2:02}"
                         else:
                             ra = dataSet.phasecentre.ra.value
                             dec = dataSet.phasecentre.dec.value
@@ -1478,7 +1478,7 @@ try:
                         # format 'source' name based on local sidereal time
                         s1 = int(s)
                         s2 = int((s - int(s)) * 10.0)
-                        name = f"T{d:2d}{m:2d}{s1:2d}{s2:2d}"
+                        name = f"T{d:02}{m:02}{s1:02}{s2:02}"
                     else:
                         # Real-live sources (ephem.Body instances)
                         name = dataSet.source

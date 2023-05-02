@@ -59,8 +59,7 @@ class measurementset_tests(unittest.TestCase):
             lon=116.76444824 * u.deg, lat=-26.824722084 * u.deg, height=300.0
         )
 
-        mount = numpy.empty(10)
-        mount.fill("equat")
+        mount = numpy.full(10, "equat")
 
         names = numpy.array(
             [
