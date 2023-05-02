@@ -137,7 +137,9 @@ class measurementset_tests(unittest.TestCase):
         }
 
     def __initData_ENU(self):
-        """Private function to generate a random set of data for writing a Measurements
+        """
+        Private function to generate a random
+        set of data for writing a Measurements
         file.  The data is returned as a dictionary with keys:
          * freq - frequency array in Hz
          * site - observatory object

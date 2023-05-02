@@ -1,6 +1,7 @@
 # pylint: disable=invalid-name, too-many-locals, duplicate-code
 """
 Unit tests for create Visibility
+Note we need to refactor these tests to have common setups.
 """
 import os
 import shutil
@@ -41,7 +42,9 @@ class TestCreateMS(unittest.TestCase):
         self.vis = None
 
     def __initData_WGS84(self):
-        """Private function to generate a random set of data for writing a UVFITS
+        """
+        Private function to generate
+        a random set of data for writing a UVFITS
         file.  The data is returned as a dictionary with keys:
          * freq - frequency array in Hz
          * site - Observatory object

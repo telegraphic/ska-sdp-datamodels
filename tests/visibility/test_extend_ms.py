@@ -42,7 +42,9 @@ class TestExtendMS(unittest.TestCase):
             self.__write_tables_WGS84()
 
     def __initData_WGS84(self):
-        """Private function to generate a random set of data for writing a UVFITS
+        """
+        Private function to generate a random
+        set of data for writing a UVFITS
         file.  The data is returned as a dictionary with keys:
          * freq - frequency array in Hz
          * site - Observatory object
