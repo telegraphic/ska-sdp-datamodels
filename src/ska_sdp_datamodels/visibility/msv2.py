@@ -196,7 +196,7 @@ try:
             """
 
             # Validate
-            if self.nStokes == 0:
+            if self.nstokes == 0:
                 raise RuntimeError("No polarization setups defined")
             if len(self.freq) == 0:
                 raise RuntimeError("No frequency setups defined")
@@ -384,7 +384,7 @@ try:
             # Polarization
 
             stks = numpy.array(self.stokes)
-            prds = numpy.zeros((2, self.nStokes), dtype=numpy.int32)
+            prds = numpy.zeros((2, self.nstokes), dtype=numpy.int32)
             for i, stk in enumerate(self.stokes):
                 stks[i] = stk
                 if stk > 4:
@@ -411,7 +411,7 @@ try:
             col3 = tableutil.makescacoldesc("FLAG_ROW", False, comment="flag")
             col4 = tableutil.makescacoldesc(
                 "NUM_CORR",
-                self.nStokes,
+                self.nstokes,
                 comment="Number of correlation products",
             )
 
@@ -423,7 +423,7 @@ try:
             tb.putcell("CORR_TYPE", 0, self.stokes)
             tb.putcell("CORR_PRODUCT", 0, prds.T)
             tb.putcell("FLAG_ROW", 0, False)
-            tb.putcell("NUM_CORR", 0, self.nStokes)
+            tb.putcell("NUM_CORR", 0, self.nstokes)
 
             tb.flush()
             tb.close()
@@ -744,7 +744,7 @@ try:
                             # format 'source' name based on local sidereal time
                             s1 = int(s)
                             s2 = int((s - int(s)) * 10.0)
-                            name = f"T{d}{m}{s1}{s2}"
+                            name = f"T{d:2d}{m:2d}{s1:2d}{s2:2d}"
                         else:
                             ra = dataSet.phasecentre.ra.value
                             dec = dataSet.phasecentre.dec.value
@@ -1173,7 +1173,7 @@ try:
                     i,
                     self.refVal
                     + freq.bandFreq
-                    + numpy.arange(self.nchan) * self.channelWidth,
+                    + numpy.arange(self.nchan) * self.channel_width,
                 )
                 tb.putcell("REF_FREQUENCY", i, self.refVal)
                 tb.putcell(
@@ -1217,7 +1217,7 @@ try:
 
             mapper = self.array[0]["mapper"]
 
-            ncorr = self.nStokes
+            ncorr = self.nstokes
             nchan = self.nchan
 
             col1 = tableutil.makearrcoldesc(
@@ -1478,7 +1478,7 @@ try:
                         # format 'source' name based on local sidereal time
                         s1 = int(s)
                         s2 = int((s - int(s)) * 10.0)
-                        name = f"T{d}{m}{s1}{s2}"
+                        name = f"T{d:2d}{m:2d}{s1:2d}{s2:2d}"
                     else:
                         # Real-live sources (ephem.Body instances)
                         name = dataSet.source
@@ -1541,17 +1541,17 @@ try:
                 try:
                     matrix.shape = (
                         len(order),
-                        self.nStokes,
+                        self.nstokes,
                         nBand * self.nchan,
                     )
                     flag_matrix.shape = (
                         len(order),
-                        self.nStokes,
+                        self.nstokes,
                         nBand * self.nchan,
                     )
                     weight_spectrum_matrix.shape = (
                         len(order),
-                        self.nStokes,
+                        self.nstokes,
                         nBand * self.nchan,
                     )
                     matrix *= 0.0
@@ -1559,15 +1559,15 @@ try:
                     weight_spectrum_matrix *= 1.0
                 except (NameError, RuntimeError):
                     matrix = numpy.zeros(
-                        (len(order), self.nStokes, self.nchan * nBand),
+                        (len(order), self.nstokes, self.nchan * nBand),
                         dtype=complex,
                     )
                     flag_matrix = numpy.zeros(
-                        (len(order), self.nStokes, self.nchan * nBand),
+                        (len(order), self.nstokes, self.nchan * nBand),
                         dtype=bool,
                     )
                     weight_spectrum_matrix = numpy.ones(
-                        (len(order), self.nStokes, self.nchan * nBand),
+                        (len(order), self.nstokes, self.nchan * nBand),
                         dtype=float,
                     )
 
@@ -1591,19 +1591,19 @@ try:
 
                     matrix.shape = (
                         len(order),
-                        self.nStokes,
+                        self.nstokes,
                         nBand,
                         self.nchan,
                     )
                     flag_matrix.shape = (
                         len(order),
-                        self.nStokes,
+                        self.nstokes,
                         nBand,
                         self.nchan,
                     )
                     weight_spectrum_matrix.shape = (
                         len(order),
-                        self.nStokes,
+                        self.nstokes,
                         nBand,
                         self.nchan,
                     )
@@ -1611,10 +1611,10 @@ try:
                     for j in range(nBand):
 
                         fc = numpy.zeros(
-                            (nBL, self.nStokes, self.nchan, 1), dtype=bool
+                            (nBL, self.nstokes, self.nchan, 1), dtype=bool
                         )
-                        wg = numpy.ones((nBL, self.nStokes))
-                        sg = numpy.ones((nBL, self.nStokes)) * 9999
+                        wg = numpy.ones((nBL, self.nstokes))
+                        sg = numpy.ones((nBL, self.nstokes)) * 9999
 
                         tb.putcol("UVW", uvwList, i, nBL)
 

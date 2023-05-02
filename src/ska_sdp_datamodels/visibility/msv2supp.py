@@ -1,8 +1,6 @@
-# pylint: disable-all
-
-#
-# MeasurementSets V2 Reference Codes Based on Python-casacore
-#
+"""
+MeasurementSets V2 Reference Codes Based on Python-casacore
+"""
 
 import numpy
 
@@ -47,16 +45,16 @@ def geo_to_ecef(lat, lon, elev):
     centered, earth-fixed coordinates.
     """
 
-    WGS84_a = 6378137.00000000
-    WGS84_b = 6356752.31424518
-    N = WGS84_a**2 / numpy.sqrt(
-        WGS84_a**2 * numpy.cos(lat) ** 2 + WGS84_b**2 * numpy.sin(lat) ** 2
+    wgs84_a = 6378137.00000000
+    wgs84_b = 6356752.31424518
+    north = wgs84_a**2 / numpy.sqrt(
+        wgs84_a**2 * numpy.cos(lat) ** 2 + wgs84_b**2 * numpy.sin(lat) ** 2
     )
-    x = (N + elev) * numpy.cos(lat) * numpy.cos(lon)
-    y = (N + elev) * numpy.cos(lat) * numpy.sin(lon)
-    z = ((WGS84_b**2 / WGS84_a**2) * N + elev) * numpy.sin(lat)
+    x_coord = (north + elev) * numpy.cos(lat) * numpy.cos(lon)
+    y_coord = (north + elev) * numpy.cos(lat) * numpy.sin(lon)
+    z_coord = ((wgs84_b**2 / wgs84_a**2) * north + elev) * numpy.sin(lat)
 
-    return (x, y, z)
+    return (x_coord, y_coord, z_coord)
 
 
 def get_eci_transform(lat, lon):
@@ -87,7 +85,7 @@ def _cmp_to_lt(self, other):
     Return a < b.  Compute by @cmp_to_total from __cmp__
     """
 
-    return True if self.__cmp__(other) < 0 else False
+    return self.__cmp__(other) < 0
 
 
 def _cmp_to_le(self, other):
@@ -95,7 +93,7 @@ def _cmp_to_le(self, other):
     Return a <= b.  Compute by @cmp_to_total from __cmp__
     """
 
-    return True if self.__cmp__(other) <= 0 else False
+    return self.__cmp__(other) <= 0
 
 
 def _cmp_to_gt(self, other):
@@ -103,7 +101,7 @@ def _cmp_to_gt(self, other):
     Return a > b.  Compute by @cmp_to_total from __cmp__
     """
 
-    return True if self.__cmp__(other) > 0 else False
+    return self.__cmp__(other) > 0
 
 
 def _cmp_to_ge(self, other):
@@ -111,7 +109,7 @@ def _cmp_to_ge(self, other):
     Return a >= b.  Compute by @cmp_to_total from __cmp__
     """
 
-    return True if self.__cmp__(other) >= 0 else False
+    return self.__cmp__(other) >= 0
 
 
 def _cmp_to_eq(self, other):
@@ -119,7 +117,7 @@ def _cmp_to_eq(self, other):
     Return a == b.  Compute by @cmp_to_total from __cmp__
     """
 
-    return True if self.__cmp__(other) == 0 else False
+    return self.__cmp__(other) == 0
 
 
 def _cmp_to_ne(self, other):
@@ -127,7 +125,7 @@ def _cmp_to_ne(self, other):
     Return a != b.  Compute by @cmp_to_total from __cmp__
     """
 
-    return True if self.__cmp__(other) != 0 else False
+    return self.__cmp__(other) != 0
 
 
 def cmp_to_total(cls):

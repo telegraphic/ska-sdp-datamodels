@@ -1,10 +1,13 @@
-# pylint: disable-all
-
-# MeasurementSets V2 Reference Codes Based on Python-casacore
-#
+# pylint: disable=invalid-name, too-few-public-methods, too-many-arguments
+# pylint: disable=too-many-instance-attributes, too-many-locals
+# pylint: disable=duplicate-code
+"""
+MeasurementSets V2 Reference Codes Based on Python-casacore
+"""
 
 import logging
 import re
+import warnings
 from datetime import datetime
 
 import numpy
@@ -30,10 +33,9 @@ __all__ = [
 ]
 
 try:
-    # from casacore.tables import table, tableutil
 
     @cmp_to_total
-    class Stand(object):
+    class Stand:
         """
         Object to store the information (location and ID) about a stand.
         Stores stand:
@@ -46,56 +48,39 @@ try:
          Stand[2] = z
         """
 
-        def __init__(self, id, x, y, z):
-            self.id = id
+        def __init__(self, stand_id, x, y, z):
+            self.id = stand_id
             self.x = float(x)
             self.y = float(y)
             self.z = float(z)
 
         def __lt__(self, y):
-            if self.id < y.id:
-                return True
-            else:
-                return False
+            return self.id < y.id
 
         def __le__(self, y):
-            if self.id <= y.id:
-                return True
-            else:
-                return False
+            return self.id <= y.id
 
         def __eq__(self, y):
-            if self.id == y.id:
-                return True
-            else:
-                return False
+            return self.id == y.id
 
         def __gt__(self, y):
-            if self.id > y.id:
-                return True
-            else:
-                return False
+            return self.id > y.id
 
         def __ge__(self, y):
-            if self.id >= y.id:
-                return True
-            else:
-                return False
+            return self.id >= y.id
 
         def __cmp__(self, y):
             if self.id > y.id:
                 return 1
-            elif self.id < y.id:
+            if self.id < y.id:
                 return -1
-            else:
-                return 0
+
+            return 0
 
         def __str__(self):
-            return "Stand %i:  x=%+.2f m, y=%+.2f m, z=%+.2f m" % (
-                self.id,
-                self.x,
-                self.y,
-                self.z,
+            return (
+                f"Stand {self.id}:  "
+                f"x={self.x:.2f} m, y={self.y:.2f}m, z={self.z:.2f}m"
             )
 
         def __reduce__(self):
@@ -104,22 +89,22 @@ try:
         def __getitem__(self, key):
             if key == 0:
                 return self.x
-            elif key == 1:
+            if key == 1:
                 return self.y
-            elif key == 2:
+            if key == 2:
                 return self.z
-            else:
-                raise ValueError("Subscript %i out of range" % key)
+
+            raise ValueError(f"Subscript {key} out of range")
 
         def __setitem__(self, key, value):
             if key == 0:
                 self.x = float(value)
-            elif key == 1:
+            if key == 1:
                 self.y = float(value)
-            elif key == 2:
+            if key == 2:
                 self.z = float(value)
-            else:
-                raise ValueError("Subscript %i out of range" % key)
+
+            raise ValueError(f"Subscript {key} out of range")
 
         def __add__(self, std):
             try:
@@ -147,14 +132,19 @@ try:
 
             return out
 
-    class Observatory(object):
+    class Observatory:
+        """
+        Observatory class.
+        Contains the location of the observatory.
+        """
+
         def __init__(self, name, lon, lat, alt):
             self.name = name
             self.lon = lon
             self.lat = lat
             self.alt = alt
 
-    class Antenna(object):
+    class Antenna:
         """
         Object to store the information about an antenna.  Stores antenna:
          * ID number (id)
@@ -172,7 +162,7 @@ try:
 
         def __init__(
             self,
-            id,
+            ant_id,
             stand=None,
             pol=0,
             theta=0.0,
@@ -181,7 +171,7 @@ try:
             feePort=1,
             cable=None,
         ):
-            self.id = int(id)
+            self.id = int(ant_id)
 
             if stand is None:
                 self.stand = Stand(0, 0, 0, 0)
@@ -198,10 +188,9 @@ try:
             self.cable = cable
 
         def __str__(self):
-            return "Antenna %i: stand=%i, polarization=%i; " % (
-                self.id,
-                self.stand.id,
-                self.pol,
+            return (
+                f"Antenna {self.id}: "
+                f"stand={self.stand.id}, polarization={self.pol}; "
             )
 
         def __reduce__(self):
@@ -220,42 +209,27 @@ try:
             )
 
         def __lt__(self, y):
-            if self.id < y.id:
-                return True
-            else:
-                return False
+            return self.id < y.id
 
         def __le__(self, y):
-            if self.id <= y.id:
-                return True
-            else:
-                return False
+            return self.id <= y.id
 
         def __eq__(self, y):
-            if self.id == y.id:
-                return True
-            else:
-                return False
+            return self.id == y.id
 
         def __gt__(self, y):
-            if self.id > y.id:
-                return True
-            else:
-                return False
+            return self.id > y.id
 
         def __ge__(self, y):
-            if self.id >= y.id:
-                return True
-            else:
-                return False
+            return self.id >= y.id
 
         def __cmp__(self, y):
             if self.id > y.id:
                 return 1
-            elif self.id < y.id:
+            if self.id < y.id:
                 return -1
-            else:
-                return 0
+
+            return 0
 
     class Frequency:
         """
@@ -271,7 +245,7 @@ try:
             self.baseBand = 0
 
     @cmp_to_total
-    class MS_UVData(object):
+    class MS_UVData:
         """
         UV visibility data set for a given observation time.
         """
@@ -303,42 +277,27 @@ try:
         def __lt__(self, y):
             sID = (self.obstime, abs(self.pol))
             yID = (y.obstime, abs(y.pol))
-            if sID > yID:
-                return False
-            else:
-                return True
+            return sID > yID
 
         def __le__(self, y):
             sID = (self.obstime, abs(self.pol))
             yID = (y.obstime, abs(y.pol))
-            if sID <= yID:
-                return True
-            else:
-                return False
+            return sID <= yID
 
         def __ge__(self, y):
             sID = (self.obstime, abs(self.pol))
             yID = (y.obstime, abs(y.pol))
-            if sID >= yID:
-                return True
-            else:
-                return False
+            return sID >= yID
 
         def __gt__(self, y):
             sID = (self.obstime, abs(self.pol))
             yID = (y.obstime, abs(y.pol))
-            if sID < yID:
-                return False
-            else:
-                return True
+            return sID < yID
 
         def __eq__(self, y):
             sID = (self.obstime, abs(self.pol))
             yID = (y.obstime, abs(y.pol))
-            if sID == yID:
-                return True
-            else:
-                return False
+            return sID == yID
 
         def __cmp__(self, y):
             """
@@ -351,15 +310,21 @@ try:
 
             if sID > yID:
                 return 1
-            elif sID < yID:
+            if sID < yID:
                 return -1
-            else:
-                return 0
+
+            return 0
 
         def time(self):
+            """
+            Observation time
+            """
             return self.obstime
 
         def get_uvw(self, HA, dec, obs):
+            """
+            Get UVW information.
+            """
             Nbase = len(self.baselines)
             uvw = numpy.zeros((Nbase, 3), dtype=float)
 
@@ -403,11 +368,14 @@ try:
 
                 # Go from CE, east, NCP to u, v, w
                 temp = trans2 @ xyz
-                uvw[i, :] = numpy.squeeze(temp)  # / speed_of_light
+                uvw[i, :] = numpy.squeeze(temp)
 
             return uvw
 
         def argsort(self, mapper=None, shift=16):
+            """
+            Sort by ID
+            """
             packed = []
             for a1, a2 in self.baselines:
                 if mapper is None:
@@ -421,7 +389,7 @@ try:
 
             return numpy.argsort(packed)
 
-    class BaseData(object):
+    class BaseData:
         """
         Base Data class: For an observation of interferometer,
         we should have: Antenna, Frequency, Visibility Funcation, UVW
@@ -431,14 +399,14 @@ try:
         _PACKING_BIT_SHIFT = 8
         _STOKES_CODES = STOKES_CODES
 
-        class _Antenna(object):
+        class _Antenna:
             """
             Holds information describing the location and properties of
             an antenna.
             """
 
-            def __init__(self, id, x, y, z, bits=8, name=None):
-                self.id = id
+            def __init__(self, ant_id, x, y, z, bits=8, name=None):
+                self.id = ant_id
                 self.x = x
                 self.y = y
                 self.z = z
@@ -446,13 +414,16 @@ try:
                 self.name = name
 
             def getName(self):
+                """
+                Get the names of antennas.
+                """
                 if self.name is None:
                     if isinstance(self.id, str):
                         return self.id
-                    else:
-                        return "AT%03i" % self.id
-                else:
-                    return self.name
+
+                    return f"AT{self.id:3d}"
+
+                return self.name
 
         @staticmethod
         def parse_time(ref_time):
@@ -470,16 +441,17 @@ try:
             if type(ref_time) in (int, float):
                 refDateTime = datetime.utcfromtimestamp(ref_time)
                 ref_time = refDateTime.strftime("%Y-%m-%dT%H:%M:%S")
-            elif type(ref_time) == datetime:
+            elif isinstance(ref_time, datetime):
                 ref_time = ref_time.strftime("%Y-%m-%dT%H:%M:%S")
-            elif type(ref_time) == str:
+            elif isinstance(ref_time, str):
                 # Make sure that the string times are of the correct format
                 if re.match(timeRE, ref_time) is None:
                     raise RuntimeError(
-                        "Malformed date/time provided: %s" % ref_time
+                        f"Malformed date/time provided: {ref_time}"
                     )
-                else:
-                    ref_time = ref_time.replace(" ", "T", 1)
+
+                ref_time = ref_time.replace(" ", "T", 1)
+
             else:
                 raise RuntimeError("Unknown time format provided.")
 
@@ -521,7 +493,7 @@ try:
         def __enter__(self):
             return self
 
-        def __exit__(self, type, value, tb):
+        def __exit__(self, tp, value, traceback):
             self.write()
             self.close()
 
@@ -532,7 +504,7 @@ try:
             """
 
             for pol in polList:
-                if type(pol) == str:
+                if isinstance(pol, str):
                     numericPol = self._STOKES_CODES[pol.upper()]
                 else:
                     numericPol = pol
@@ -546,7 +518,7 @@ try:
             if self.stokes[0] < 0:
                 self.stokes.reverse()
 
-            self.nStokes = len(self.stokes)
+            self.nstokes = len(self.stokes)
 
         def set_frequency(self, freq, channel_width):
             """
@@ -557,19 +529,19 @@ try:
                 self.nchan = len(freq)
                 self.refVal = freq[0]
                 self.refPix = 1
-                self.channelWidth = channel_width[0]
+                self.channel_width = channel_width[0]
                 offset = 0.0
             else:
                 assert len(freq) == self.nchan
                 offset = freq[0] - self.refVal
-                self.channelWidth = channel_width[0]
+                self.channel_width = channel_width[0]
 
             if self.nchan == 1:
                 totalWidth = self.channel_width
             else:
                 totalWidth = numpy.abs(freq[-1] - freq[0])
 
-            freqSetup = Frequency(offset, self.channelWidth, totalWidth)
+            freqSetup = Frequency(offset, self.channel_width, totalWidth)
             self.freq.append(freqSetup)
 
         def add_data_set(
@@ -588,7 +560,7 @@ try:
 
             """
 
-            if type(pol) == str:
+            if isinstance(pol, str):
                 numericPol = self._STOKES_CODES[pol.upper()]
             else:
                 numericPol = pol
@@ -617,14 +589,14 @@ try:
             """
             Close out the file.
             """
+            self.close()
 
-            raise NotImplementedError
-
-except ImportError:
-    import warnings
+except ImportError as error:
 
     warnings.warn(
         "Cannot import casacore.tables, MS support disabled", ImportWarning
     )
 
-    raise RuntimeError("Cannot import casacore.tables, MS support disabled")
+    raise RuntimeError(
+        "Cannot import casacore.tables, MS support disabled"
+    ) from error
