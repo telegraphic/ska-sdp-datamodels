@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,too-many-arguments,line-too-long
+# pylint: disable=invalid-name,too-many-arguments
 
 """
 Sky-related data models

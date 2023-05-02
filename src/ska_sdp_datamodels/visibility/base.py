@@ -1,19 +1,10 @@
-# pylint: disable-all
-# pylint: disable=import-outside-toplevel,too-many-locals
+# pylint: disable=too-many-locals, too-many-arguments
 # pylint: disable=too-many-nested-blocks,too-many-branches
 # pylint: disable=too-many-statements,unused-argument
+# pylint: disable=invalid-name, no-member
 """
 Base simple visibility operations, placed here to avoid circular dependencies
 """
-
-__all__ = [
-    "create_visibility_from_ms",
-    "create_visibility_from_uvfits",
-    "export_visibility_to_ms",
-    "extend_visibility_to_ms",
-    "list_ms",
-    "generate_baselines",
-]
 
 import logging
 import os
@@ -28,79 +19,27 @@ from astropy.time import Time
 from astropy.units import Quantity
 
 from ska_sdp_datamodels.configuration.config_model import Configuration
+from ska_sdp_datamodels.physical_constants import C_M_S
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     PolarisationFrame,
     ReceptorFrame,
 )
-from ska_sdp_datamodels.visibility import phyconst
 from ska_sdp_datamodels.visibility.vis_model import Visibility
+from ska_sdp_datamodels.visibility.vis_utils import generate_baselines
 
 log = logging.getLogger("rascil-logger")
 
 
-# This convention agrees with that in the MS reader
-# Note that ant2 > ant1
-
-
-def generate_baselines(nant):
-    """Generate mapping from antennas to baselines
-
-    Note that we need to include autocorrelations since some input
-    measurement sets may contain autocorrelations
-
-    :param nant:
-    :return:
-    """
-    for ant1 in range(0, nant):
-        for ant2 in range(ant1, nant):
-            yield ant1, ant2
-
-
 def extend_visibility_to_ms(msname, bvis):
     """
-    Extending visibility to a MS file
+    Visibility to MS converter
+    If MS doesn't exist, use export;
+    while if MS already exists, use extend by row.
 
-    :param msname: input msfile name
-    :bvis: visibility
-    :return
+    :param msname: File name of MS
+    :param bvis: Visibility
+    :return:
     """
-    # try:
-    # import casacore.tables.tableutil as pt
-    # from casacore.tables import (
-    #     addDerivedMSCal,
-    #     addImagingColumns,
-    #     default_ms,
-    #     default_ms_subtable,
-    #     makearrcoldesc,
-    #     makecoldesc,
-    #     makedminfo,
-    #     makescacoldesc,
-    #     maketabdesc,
-    #     msconcat,
-    #     removeDerivedMSCal,
-    #     removeImagingColumns,
-    #     required_ms_desc,
-    #     table,
-    #     tablecolumn,
-    #     tablecopy,
-    #     tabledefinehypercolumn,
-    #     tabledelete,
-    #     tableexists,
-    #     tablefromascii,
-    #     tableinfo,
-    #     tableiswritable,
-    #     tablerename,
-    #     taql,
-    # )
-    # from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
-    # except ModuleNotFoundError:
-    #     raise ModuleNotFoundError("casacore is not installed")
-
-    # try:
-    #     from ska_sdp_datamodels.visibility import msv2
-    # except ModuleNotFoundError:
-    #     raise ModuleNotFoundError("cannot import msv2")
-
     # Determine if file exists
 
     if not os.path.exists(msname):
@@ -125,19 +64,12 @@ def extend_visibility_ms_row(msname, vis):
     :param vis_list: list of Visibility
     :return:
     """
-
+    # pylint: disable=import-outside-toplevel
     try:
-        # import casacore.tables.tableutil as pt
         from casacore.tables import table
 
-        # from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
     except ModuleNotFoundError as exc:
         raise ModuleNotFoundError("casacore is not installed") from exc
-
-    # try:
-    #     from ska_sdp_datamodels.visibility import msv2
-    # except ModuleNotFoundError:
-    #     raise ModuleNotFoundError("cannot import msv2")
 
     ms_temp = msname + "____"
     export_visibility_to_ms(ms_temp, [vis], source_name=None)
@@ -185,7 +117,6 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
     except ModuleNotFoundError as exc:
         raise ModuleNotFoundError("cannot import msv2") from exc
 
-    # log.debug("create_visibility_from_ms: %s" % str(tab.info()))
     # Start the table
     tbl = msv2.Ms(
         msname,
@@ -198,8 +129,7 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
         if source_name is None:
             source_name = vis.source
         # Check polarisation
-        # npol = vis.visibility_acc.npol
-        # nchan = vis.visibility_acc.nchan
+
         if vis.visibility_acc.polarisation_frame.type == "linear":
             polarization = ["XX", "XY", "YX", "YY"]
         elif vis.visibility_acc.polarisation_frame.type == "linearnp":
@@ -239,10 +169,6 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
 
         antennas2 = antennas
 
-        # for ant1 in range(0, nant):
-        #     for ant2 in range(ant1, nant):
-        #         yield ant1, ant2
-
         for a_1 in range(0, n_ant):
             for a_2 in range(a_1, n_ant):
                 bl_list.append((antennas[a_1], antennas2[a_2]))
@@ -253,7 +179,6 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
         assert vis["integration_time"].data.shape == vis["time"].data.shape
 
         # Now easier since the Visibility is baseline oriented
-
         for ntime, time in enumerate(vis["time"]):
             for ipol, pol in enumerate(polarization):
                 if int_time[ntime] is not None:
@@ -299,10 +224,6 @@ def list_ms(msname, ack=False):
         from casacore.tables import table  # pylint: disable=import-error
     except ModuleNotFoundError as exc:
         raise ModuleNotFoundError("casacore is not installed") from exc
-    # try:
-    #     from ska_sdp_datamodels.visibility import msv2
-    # except ModuleNotFoundError:
-    #     raise ModuleNotFoundError("cannot import msv2")
 
     tab = table(msname, ack=ack)
     log.debug(f"list_ms: {str(tab.info())}")
@@ -368,10 +289,6 @@ def create_visibility_from_ms(
         from casacore.tables import table  # pylint: disable=import-error
     except ModuleNotFoundError:
         raise ModuleNotFoundError("casacore is not installed")
-    # try:
-    #     from ska_sdp_datamodels.visibility import msv2
-    # except ModuleNotFoundError:
-    #     raise ModuleNotFoundError("cannot import msv2")
 
     tab = table(msname, ack=ack)
     log.debug(f"create_visibility_from_ms: {str(tab.info())}")
@@ -562,8 +479,7 @@ def create_visibility_from_ms(
                     actual += 1
                 else:
                     ant_map.append(-1)
-            # assert actual > 0, "Dish/station names are all blank
-            #   - cannot load"
+
             if actual == 0:
                 ant_map = list(range(len(names)))
                 names = numpy.repeat("No name", len(names))
@@ -932,15 +848,9 @@ def create_visibility_from_uvfits(fitsname, channum=None, antnum=None):
                                     pol_index,
                                     2,
                                 ]
-                        bv_uvw[time_index, ibaseline, 0] = (
-                            uu[row] * phyconst.c_m_s
-                        )
-                        bv_uvw[time_index, ibaseline, 1] = (
-                            vv[row] * phyconst.c_m_s
-                        )
-                        bv_uvw[time_index, ibaseline, 2] = (
-                            ww[row] * phyconst.c_m_s
-                        )
+                        bv_uvw[time_index, ibaseline, 0] = uu[row] * C_M_S
+                        bv_uvw[time_index, ibaseline, 1] = vv[row] * C_M_S
+                        bv_uvw[time_index, ibaseline, 2] = ww[row] * C_M_S
                         row += 1
 
             # Convert negative weights to flags
@@ -971,7 +881,7 @@ def calculate_visibility_uvw_lambda(vis):
     :param vis: Visibility
     :return: Visibility with updated uvw_lambda
     """
-    k = vis.frequency.data / phyconst.c_m_s
+    k = vis.frequency.data / C_M_S
     uvw_lambda = numpy.einsum("tbs,k->tbks", vis.uvw.data, k)
     vis.visibility_acc.uvw_lambda = uvw_lambda
     return vis

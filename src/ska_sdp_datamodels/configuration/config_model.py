@@ -1,5 +1,4 @@
 # pylint: disable=too-many-ancestors,too-many-arguments,too-many-locals
-# pylint: disable=line-too-long
 
 """
 Telescope configuration model.

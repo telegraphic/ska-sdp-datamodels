@@ -1,5 +1,5 @@
 # pylint: disable=too-many-ancestors,too-many-arguments,too-many-locals
-# pylint: disable=invalid-name, line-too-long
+# pylint: disable=invalid-name
 
 """
 Calibration-related data models.
