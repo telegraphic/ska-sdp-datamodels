@@ -1,13 +1,5 @@
 # pylint: disable=missing-module-docstring
 
-from .base import (
-    create_visibility_from_ms,
-    create_visibility_from_uvfits,
-    export_visibility_to_ms,
-    extend_visibility_to_ms,
-    generate_baselines,
-    list_ms,
-)
 from .vis_create import create_flagtable_from_visibility, create_visibility
 from .vis_io_and_convert import (
     convert_flagtable_to_hdf,
@@ -18,6 +10,14 @@ from .vis_io_and_convert import (
     export_visibility_to_hdf5,
     import_flagtable_from_hdf5,
     import_visibility_from_hdf5,
+)
+from .vis_io_ms import (
+    create_visibility_from_ms,
+    create_visibility_from_uvfits,
+    export_visibility_to_ms,
+    extend_visibility_to_ms,
+    generate_baselines,
+    list_ms,
 )
 from .vis_model import FlagTable, Visibility
 

@@ -19,8 +19,8 @@ from ska_sdp_datamodels.science_data_model.polarisation_model import (
     ReceptorFrame,
 )
 from ska_sdp_datamodels.visibility import msv2
-from ska_sdp_datamodels.visibility.base import create_visibility_from_ms
 from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
+from ska_sdp_datamodels.visibility.vis_io_ms import create_visibility_from_ms
 
 
 class TestCreateMS(unittest.TestCase):

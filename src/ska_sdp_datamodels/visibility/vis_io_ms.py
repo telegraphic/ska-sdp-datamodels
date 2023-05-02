@@ -1,9 +1,11 @@
-# pylint: disable=too-many-locals, too-many-arguments
+# pylint: disable=too-many-locals, too-many-arguments, too-many-statements
 # pylint: disable=too-many-nested-blocks,too-many-branches
-# pylint: disable=too-many-statements,unused-argument
-# pylint: disable=invalid-name, no-member
+# pylint: disable=invalid-name, no-member, duplicate-code
 """
-Base simple visibility operations, placed here to avoid circular dependencies
+Base functions to create and export Visibility
+from/into Measurement Set files.
+They take definitions of columns from msv2.py
+and interact with Casacore.
 """
 
 import logging
@@ -76,11 +78,11 @@ def extend_visibility_ms_row(msname, vis):
 
     try:
         tab = table(msname, readonly=False, ack=False)
-        log.debug(f"Open ms table: {str(tab.info())}")
+        log.debug("Open ms table: %s", tab.info())
         tmp = table(ms_temp, readonly=True, ack=False)
-        log.debug(f"Open ms table: {str(tmp.info())}")
+        log.debug("Open ms table: %s", tmp.info())
         tmp.copyrows(tab)
-        log.debug("Merge  data")
+        log.debug("Merge data")
         tmp.close()
         tab.flush()
         tab.close()
@@ -107,6 +109,7 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
     :param ack: Ask casacore to acknowledge each table operation
     :return:
     """
+    # pylint: disable=import-outside-toplevel
     try:
         from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
     except ModuleNotFoundError as exc:
@@ -148,8 +151,8 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
             polarization = ["I", "V"]
         else:
             raise ValueError(
-                "Unknown visibility polarisation %s",
-                (vis.visibility_acc.polarisation_frame.type),
+                f"Unknown visibility polarisation"
+                f" {vis.visibility_acc.polarisation_frame.type}"
             )
 
         tbl.set_stokes(polarization)
@@ -159,14 +162,13 @@ def export_visibility_to_ms(msname, vis_list, source_name=None):
         antennas = []
         names = vis.configuration.names.data
         xyz = vis.configuration.xyz.data
-        for i, _ in enumerate(names):
+        for i, name in enumerate(names):
             antennas.append(
-                Antenna(i, Stand(names[i], xyz[i, 0], xyz[i, 1], xyz[i, 2]))
+                Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2]))
             )
 
         # Set baselines and data
         bl_list = []
-
         antennas2 = antennas
 
         for a_1 in range(0, n_ant):
@@ -220,13 +222,14 @@ def list_ms(msname, ack=False):
         (['1302+5748', '0319+415', '1407+284', '1252+5634', '1331+305'],
           [0, 1, 2, 3])
     """
+    # pylint: disable=import-outside-toplevel
     try:
-        from casacore.tables import table  # pylint: disable=import-error
+        from casacore.tables import table
     except ModuleNotFoundError as exc:
         raise ModuleNotFoundError("casacore is not installed") from exc
 
     tab = table(msname, ack=ack)
-    log.debug(f"list_ms: {str(tab.info())}")
+    log.debug("list_ms: %s", tab.info())
 
     fieldtab = table(f"{msname}/FIELD", ack=False)
     sources = fieldtab.getcol("NAME")
@@ -285,20 +288,21 @@ def create_visibility_from_ms(
         ['1252+5634' '1302+5748']
 
     """
+    # pylint: disable=import-outside-toplevel
     try:
-        from casacore.tables import table  # pylint: disable=import-error
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError("casacore is not installed")
+        from casacore.tables import table
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError("casacore is not installed") from exc
 
     tab = table(msname, ack=ack)
-    log.debug(f"create_visibility_from_ms: {str(tab.info())}")
+    log.debug("create_visibility_from_ms: %s", tab.info())
 
     if selected_sources is None:
         fields = numpy.unique(tab.getcol("FIELD_ID"))
     else:
         fieldtab = table(f"{msname}/FIELD", ack=False)
         sources = fieldtab.getcol("NAME")
-        fields = list()
+        fields = []
         for field, source in enumerate(sources):
             if source in selected_sources:
                 fields.append(field)
@@ -309,11 +313,12 @@ def create_visibility_from_ms(
     else:
         dds = selected_dds
 
-    log.info(f"Reading uni. fields {fields}, uni. data descs {dds}")
-    vis_list = list()
+    log.info("Reading uni. fields %s, uni. data descs %s", fields, dds)
+    vis_list = []
     for field in fields:
         ftab = table(msname, ack=ack).query("FIELD_ID=={field}", style="")
-        assert ftab.nrows() > 0, "Empty selection for FIELD_ID=%d" % (field)
+        if ftab.nrows() <= 0:
+            raise ValueError(f"Empty selection for FIELD_ID={field}")
         for dd in dds:
             # Now get info from the subtables
             ddtab = table(f"{msname}/DATA_DESCRIPTION", ack=False)
@@ -322,14 +327,13 @@ def create_visibility_from_ms(
             ddtab.close()
 
             meta = {"MSV2": {"FIELD_ID": field, "DATA_DESC_ID": dd}}
-            ms = ftab.query("DATA_DESC_ID==%d" % dd, style="")
-            assert (
-                ms.nrows() > 0
-            ), "Empty selection for FIELD_ID={}%d and DATA_DESC_ID=%d" % (
-                field,
-                dd,
-            )
-            log.debug(f"create_visibility_from_ms: Found {ms.nrows()} rows")
+            ms = ftab.query(f"DATA_DESC_ID=={dd}", style="")
+            if ms.nrows() <= 0:
+                raise ValueError(
+                    f"Empty selection for FIELD_ID= {field} "
+                    f"and DATA_DESC_ID={dd}"
+                )
+            log.debug("create_visibility_from_ms: Found %s rows", ms.nrows())
             # The TIME column has descriptor:
             # {'valueType': 'double', 'dataManagerType': 'IncrementalStMan',
             #   'dataManagerGroup': 'TIME',
@@ -340,12 +344,14 @@ def create_visibility_from_ms(
             datacol = ms.getcol(datacolumn, nrow=1)
             datacol_shape = list(datacol.shape)
             channels = datacol.shape[-2]
-            log.debug(f"create_visibility_from_ms: Found {channels} channels")
+            log.debug("create_visibility_from_ms: Found %s channels", channels)
             if channum is None:
                 if start_chan is not None and end_chan is not None:
                     try:
                         log.debug(
-                            f"Reading channs from {start_chan} to {end_chan}"
+                            "Reading channs from %s to %s",
+                            start_chan,
+                            end_chan,
                         )
                         blc = [start_chan, 0]
                         trc = [end_chan, datacol_shape[-1] - 1]
@@ -354,26 +360,26 @@ def create_visibility_from_ms(
                         ms_flags = ms.getcolslice("FLAG", blc=blc, trc=trc)
                         ms_weight = ms.getcol("WEIGHT")
 
-                    except IndexError:
+                    except IndexError as exc:
                         raise IndexError(
                             "channel number exceeds max. within ms"
-                        )
+                        ) from exc
 
                 else:
-                    log.debug(f"c_v_f_ms: Reading all {channels} channels")
+                    log.debug("c_v_f_ms: Reading all %s channels", channels)
                     try:
                         channum = range(channels)
                         ms_vis = ms.getcol(datacolumn)[:, channum, :]
                         ms_weight = ms.getcol("WEIGHT")
                         ms_flags = ms.getcol("FLAG")[:, channum, :]
                         channum = range(channels)
-                    except IndexError:
+                    except IndexError as exc:
                         raise IndexError(
                             "channel number exceeds max. within ms"
-                        )
+                        ) from exc
             else:
                 log.debug(
-                    f"create_visibility_from_ms: Reading channels {channum}"
+                    "create_visibility_from_ms: Reading channels %s", channum
                 )
                 channum = range(channels)
                 try:
@@ -408,11 +414,9 @@ def create_visibility_from_ms(
             end_time = numpy.max(time) / 86400.0
 
             log.debug(
-                "create_visibility_from_ms: Observation from %s to %s"
-                % (
-                    Time(start_time, format="mjd").iso,
-                    Time(end_time, format="mjd").iso,
-                )
+                "create_visibility_from_ms: Observation from %s to %s",
+                Time(start_time, format="mjd").iso,
+                Time(end_time, format="mjd").iso,
             )
 
             spwtab = table(f"{msname}/SPECTRAL_WINDOW", ack=False)
@@ -470,10 +474,11 @@ def create_visibility_from_ms(
             anttab = table(f"{msname}/ANTENNA", ack=False)
             names = numpy.array(anttab.getcol("NAME"))
 
-            ant_map = list()
+            # pylint: disable=cell-var-from-loop
+            ant_map = []
             actual = 0
             # This assumes that the names are actually filled in!
-            for i, name in enumerate(names):
+            for name in names:
                 if name != "":
                     ant_map.append(actual)
                     actual += 1
@@ -607,8 +612,6 @@ def create_visibility_from_uvfits(fitsname, channum=None, antnum=None):
     :param channum: range of channels e.g. range(17,32), default is
                     None meaning all
     :param antnum: the number of antenna
-    :param ack:
-    :param antnum:
 
     :return:
     """
@@ -622,7 +625,7 @@ def create_visibility_from_uvfits(fitsname, channum=None, antnum=None):
         intervals = times[1:] - times[0:-1]
         integration_time = numpy.median(intervals[intervals > 0.0])
         last_time = times[0]
-        time_slots = list()
+        time_slots = []
         for t in times:
             if t > last_time + integration_time:
                 last_time = t
@@ -655,7 +658,6 @@ def create_visibility_from_uvfits(fitsname, channum=None, antnum=None):
                     res[vu] = int(m.group("i"))
         return res
 
-    # Open the file
     with fits.open(fitsname) as hdul:
         # Read Spectral Window
         nspw = hdul[0].header["NAXIS5"]
@@ -690,8 +692,7 @@ def create_visibility_from_uvfits(fitsname, channum=None, antnum=None):
 
         ntimes = len(bv_times)
 
-        # # Get Antenna
-        # blin = hdul[0].data['BASELINE']
+        # Get Antenna
         antennahdulname = "AIPS AN"
         adhu = hdul.index_of(antennahdulname)
         try:
@@ -873,15 +874,3 @@ def create_visibility_from_uvfits(fitsname, channum=None, antnum=None):
                 )
             )
     return vis_list
-
-
-def calculate_visibility_uvw_lambda(vis):
-    """Recalculate the uvw_lambda values
-
-    :param vis: Visibility
-    :return: Visibility with updated uvw_lambda
-    """
-    k = vis.frequency.data / C_M_S
-    uvw_lambda = numpy.einsum("tbs,k->tbks", vis.uvw.data, k)
-    vis.visibility_acc.uvw_lambda = uvw_lambda
-    return vis

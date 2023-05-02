@@ -2,10 +2,13 @@
 Geometry support functions.
 """
 
+import numpy
 from astroplan import Observer
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
 from astropy.units import Quantity
+
+from ska_sdp_datamodels.physical_constants import C_M_S
 
 
 def generate_baselines(nant):
@@ -73,3 +76,15 @@ def calculate_visibility_hourangles(vis, time=None):
     site = Observer(location=location)
     hour_angles = site.target_hour_angle(utc_time, direction).wrap_at("180d")
     return hour_angles
+
+
+def calculate_visibility_uvw_lambda(vis):
+    """Recalculate the uvw_lambda values
+
+    :param vis: Visibility
+    :return: Visibility with updated uvw_lambda
+    """
+    k = vis.frequency.data / C_M_S
+    uvw_lambda = numpy.einsum("tbs,k->tbks", vis.uvw.data, k)
+    vis.visibility_acc.uvw_lambda = uvw_lambda
+    return vis
