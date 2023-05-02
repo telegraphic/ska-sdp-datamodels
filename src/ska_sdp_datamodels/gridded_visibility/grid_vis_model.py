@@ -23,11 +23,14 @@ class GridData(xarray.Dataset):
 
     - Has four or more coordinates: [chan, pol, z, y, x]
     where x can be u, l; y can be v, m; z can be w, n.
-    Note: current implementation only uses 4 coordinates: [nchan, npol, v, u]
+    Note: current implementation only uses 4 coordinates:
+    [nchan, npol, v, u]
 
     The conventions for indexing in WCS and numpy are opposite.
-    - In astropy.wcs, the order is (longitude, latitude, polarisation, frequency);
-    - in numpy, the order is (frequency, polarisation, depth, latitude, longitude).
+    - In astropy.wcs, the order is
+        (longitude, latitude, polarisation, frequency);
+    - in numpy, the order is
+        (frequency, polarisation, depth, latitude, longitude).
 
     .. warning::
         The polarisation_frame is kept in two places, the
@@ -41,10 +44,11 @@ class GridData(xarray.Dataset):
         Coordinates:
           * frequency     (frequency) float64 1e+08 1.01e+08 1.02e+08
           * polarisation  (polarisation) <U1 'I' 'Q' 'U' 'V'
-          * v             (v) float64 -3.333e+04 -3.307e+04 ... 3.281e+04 3.307e+04
-          * u             (u) float64 3.333e+04 3.307e+04 ... -3.281e+04 -3.307e+04
+          * v             (v) float64 -3.333e+04 -3.307e+04 ...  3.307e+04
+          * u             (u) float64 3.333e+04 3.307e+04 ...  -3.307e+04
         Data variables:
-            pixels        (frequency, polarisation, v, u) complex128 0j 0j 0j ... 0j 0j
+            pixels        (frequency, polarisation, v, u)
+                            complex128 0j 0j 0j ... 0j 0j
         Attributes:
             data_model:           GridData
             _polarisation_frame:  stokesIQUV
@@ -203,21 +207,27 @@ class ConvolutionFunction(xarray.Dataset):
     Here is an example::
 
         <xarray.ConvolutionFunction>
-        Dimensions:       (du: 8, dv: 8, frequency: 1, polarisation: 1, u: 16, v: 16, w: 1)
+        Dimensions:       (du: 8, dv: 8, frequency: 1,
+                            polarisation: 1, u: 16, v: 16, w: 1)
         Coordinates:
           * frequency     (frequency) float64 1e+08
           * polarisation  (polarisation) <U1 'I'
           * w             (w) float64 0.0
-          * dv            (dv) float64 -1.031e+05 -7.735e+04 ... 5.157e+04 7.735e+04
-          * du            (du) float64 -1.031e+05 -7.735e+04 ... 5.157e+04 7.735e+04
-          * v             (v) float64 -1.65e+06 -1.444e+06 ... 1.238e+06 1.444e+06
-          * u             (u) float64 -1.65e+06 -1.444e+06 ... 1.238e+06 1.444e+06
+          * dv            (dv) float64 -1.031e+05 -7.735e+04 ... 7.735e+04
+          * du            (du) float64 -1.031e+05 -7.735e+04 ... 7.735e+04
+          * v             (v) float64 -1.65e+06 -1.444e+06 ... 1.444e+06
+          * u             (u) float64 -1.65e+06 -1.444e+06 ... 1.444e+06
         Data variables:
-            pixels        (frequency, polarisation, w, dv, du, v, u) complex128 0j .....
+            pixels        (frequency, polarisation, w, dv, du, v, u)
+                           complex128 0j ......
         Attributes:
             data_model:   ConvolutionFunction
-            grid_wcs:            WCS Keywords Number of WCS axes: 7 CTYPE : 'UU' ...
-            projection_wcs:      WCS Keywords Number of WCS axes: 4 CTYPE : 'RA--...
+            grid_wcs:            WCS Keywords
+                                 Number of WCS axes: 7
+                                 CTYPE : 'UU' ...
+            projection_wcs:      WCS Keywords
+                                 Number of WCS axes: 4
+                                 CTYPE : 'RA--...
             polarisation_frame:  stokesI
     """  # noqa:E501
 

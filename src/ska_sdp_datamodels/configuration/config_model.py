@@ -20,21 +20,21 @@ class Configuration(xarray.Dataset):
         <xarray.Configuration>
         Dimensions:   (id: 115, spatial: 3)
         Coordinates:
-          * id        (id) int64 0 1 2 3 4 5 6 7 8 ... 107 108 109 110 111 112 113 114
+          * id        (id) int64 0 1 2 3 4 5 6 7 8 ...  113 114
           * spatial   (spatial) <U1 'X' 'Y' 'Z'
         Data variables:
-            names     (id) <U6 'M000' 'M001' 'M002' ... 'SKA102' 'SKA103' 'SKA104'
+            names     (id) <U6 'M000' 'M001' 'M002' ... 'SKA103' 'SKA104'
             xyz       (id, spatial) float64 -0.0 9e-05 1.053e+03 ... -810.3 1.053e+03
-            diameter  (id) float64 13.5 13.5 13.5 13.5 13.5 ... 15.0 15.0 15.0 15.0 15.0
-            mount     (id) <U4 'azel' 'azel' 'azel' 'azel' ... 'azel' 'azel' 'azel'
-            vp_type   (id) <U7 'MEERKAT' 'MEERKAT' 'MEERKAT' ... 'MID' 'MID' 'MID'
-            offset    (id, spatial) float64 0.0 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0 0.0
-            stations  (id) <U3 '0' '1' '2' '3' '4' '5' ... '110' '111' '112' '113' '114'
+            diameter  (id) float64 13.5 13.5 13.5 13.5 13.5 ...  15.0 15.0
+            mount     (id) <U4 'azel' 'azel' 'azel' 'azel' ...  'azel'
+            vp_type   (id) <U7 'MEERKAT' 'MEERKAT' 'MEERKAT' ...  'MID'
+            offset    (id, spatial) float64 0.0 0.0 0.0 0.0 0.0 ...  0.0 0.0
+            stations  (id) <U3 '0' '1' '2' '3' '4' '5' ...  '112' '113' '114'
         Attributes:
             data_model:  Configuration
             name:               MID
-            location:           (5109237.71471275, 2006795.66194638, -3239109.1838011...
-            receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
+            location:           (5109237.71471275, 2006795.66194638, -3239109.1838011..
+            receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame...
             frame:
     """  # noqa: E501
 

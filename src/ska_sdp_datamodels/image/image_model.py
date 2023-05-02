@@ -25,14 +25,20 @@ log = logging.getLogger("data-models-logger")
 
 class Image(xarray.Dataset):
     """
-    Image class with pixels as an xarray.DataArray and the AstroPy`implementation of
-    a World Coordinate System <http://docs.astropy.org/en/stable/wcs>`_
+    Image class with pixels as an
+    xarray.DataArray and the AstroPy`implementation of
+    a World Coordinate System
+    <http://docs.astropy.org/en/stable/wcs>`_
 
-    The actual image values are kept in a data_var of the xarray.Dataset called "pixels".
+    The actual image values are kept in a data_var
+    of the xarray.Dataset called "pixels".
 
-    Many operations can be done conveniently using xarray processing_components on Image or on
-    numpy operations on Image["pixels"].data. If the "pixels" data variable is chunked then
-    Dask is automatically used wherever possible to distribute processing.
+    Many operations can be done conveniently using
+    xarray processing_components on Image or on
+    numpy operations on Image["pixels"].data.
+    If the "pixels" data variable is chunked then
+    Dask is automatically used wherever
+    possible to distribute processing.
 
     Here is an example::
 
