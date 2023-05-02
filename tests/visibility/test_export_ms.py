@@ -1,6 +1,4 @@
-# pylint: disable-all
-# -*- coding: utf-8 -*-
-
+# pylint: disable=invalid-name, too-many-locals
 """Unit test for the measurementset module."""
 
 import os
@@ -12,75 +10,18 @@ import unittest
 import astropy.units as u
 import casacore
 import numpy
-from astropy import units
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
 
+from ska_sdp_datamodels.configuration.config_coordinate_support import (
+    ecef_to_enu,
+)
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model.polarisation_model import (
     ReceptorFrame,
 )
 from ska_sdp_datamodels.visibility import msv2
 from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
-
-
-def lla_to_ecef(lat, lon, alt):
-    """
-    Convert WGS84 spherical coordinates to ECEF cartesian coordinates.
-
-    :param lat: Latitude in radians
-    :param lon: Longitude in radians
-    :param alt: Altitude in radians
-    :result ECEF: Cartesian coordinates (x, y, z)
-    """
-    WGS84_a = 6378137.00000000
-    WGS84_b = 6356752.31424518
-    N = WGS84_a**2 / numpy.sqrt(
-        WGS84_a**2 * numpy.cos(lat) ** 2 + WGS84_b**2 * numpy.sin(lat) ** 2
-    )
-
-    x = (N + alt) * numpy.cos(lat) * numpy.cos(lon)
-    y = (N + alt) * numpy.cos(lat) * numpy.sin(lon)
-    z = ((WGS84_b**2 / WGS84_a**2) * N + alt) * numpy.sin(lat)
-
-    return x, y, z
-
-
-def ecef_to_enu(location, xyz):
-    """
-    Convert ECEF coordinates to ENU coordinates relative to reference location.
-
-    :param location: Current WGS84 coordinate
-    :param xyz: ECEF coordinate
-    :result: ENU Local xyz coordinate
-    """
-    # ECEF coordinates of reference point
-    lon = location.geodetic[0].to(units.rad).value
-    lat = location.geodetic[1].to(units.rad).value
-    alt = location.geodetic[2].to(units.m).value
-
-    # pylint: disable=unbalanced-tuple-unpacking
-    x, y, z = numpy.hsplit(xyz, 3)
-
-    center_x, center_y, center_z = lla_to_ecef(lat, lon, alt)
-
-    delta_x, delta_y, delta_z = x - center_x, y - center_y, z - center_z
-    sin_lat, cos_lat = numpy.sin(lat), numpy.cos(lat)
-    sin_lon, cos_lon = numpy.sin(lon), numpy.cos(lon)
-
-    e = -sin_lon * delta_x + cos_lon * delta_y
-    n = (
-        -sin_lat * cos_lon * delta_x
-        - sin_lat * sin_lon * delta_y
-        + cos_lat * delta_z
-    )
-    u = (
-        cos_lat * cos_lon * delta_x
-        + cos_lat * sin_lon * delta_y
-        + sin_lat * delta_z
-    )
-
-    return numpy.hstack([e, n, u])
 
 
 class measurementset_tests(unittest.TestCase):
@@ -118,20 +59,9 @@ class measurementset_tests(unittest.TestCase):
             lon=116.76444824 * u.deg, lat=-26.824722084 * u.deg, height=300.0
         )
 
-        mount = numpy.array(
-            [
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-            ]
-        )
+        mount = numpy.empty(10)
+        mount.fill("equat")
+
         names = numpy.array(
             [
                 "ak02",
@@ -175,9 +105,9 @@ class measurementset_tests(unittest.TestCase):
             diameter=diameter,
         )
         antennas = []
-        for i in range(len(names)):
+        for i, name in enumerate(names):
             antennas.append(
-                Antenna(i, Stand(names[i], xyz[i, 0], xyz[i, 1], xyz[i, 2]))
+                Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2]))
             )
 
         # Set baselines and data
@@ -225,7 +155,7 @@ class measurementset_tests(unittest.TestCase):
             lon=+116.6356824 * u.deg, lat=-26.70130064 * u.deg, height=377.0
         )
 
-        names = numpy.array(["A%02d" % i for i in range(36)])
+        names = numpy.array([f"A{i:2d}" for i in range(36)])
         mount = numpy.array(["equat" for i in range(36)])
         diameter = numpy.array([12 for i in range(36)])
         xyz = numpy.array(
@@ -280,9 +210,9 @@ class measurementset_tests(unittest.TestCase):
             diameter=diameter,
         )
         antennas = []
-        for i in range(len(names)):
+        for i, name in enumerate(names):
             antennas.append(
-                Antenna(i, Stand(names[i], xyz[i, 0], xyz[i, 1], xyz[i, 2]))
+                Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2]))
             )
 
         # Set baselines and data
@@ -472,8 +402,8 @@ class measurementset_tests(unittest.TestCase):
                     and a2.stand.id == mapper[stand2]
                 ):
                     break
-                else:
-                    i = i + 1
+
+                i = i + 1
 
             # Run the comparison
             for vd, sd, wd, wsd in zip(
@@ -525,7 +455,7 @@ class measurementset_tests(unittest.TestCase):
         ms3 = casacore.tables.table(
             os.path.join(testFile, "DATA_DESCRIPTION"), ack=False
         )
-        spw = [i for i in ms3.getcol("SPECTRAL_WINDOW_ID")]
+        spw = list(ms3.getcol("SPECTRAL_WINDOW_ID"))
 
         # Correct number of visibilities
         self.assertEqual(uvw.shape[0], 2 * data["vis"].shape[0])
@@ -553,8 +483,8 @@ class measurementset_tests(unittest.TestCase):
                     and a2.stand.id == mapper[stand2]
                 ):
                     break
-                else:
-                    i = i + 1
+
+                i = i + 1
 
             # Find out which spectral window this corresponds to
             if spw[descid] == 0:

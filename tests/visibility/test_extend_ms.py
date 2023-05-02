@@ -1,6 +1,6 @@
-# pylint: disable-all
-""" Unit tests for visibility scatter gather and extend MS file
-
+# pylint: disable=invalid-name, too-many-locals, duplicate-code
+"""
+Unit tests for visibility scatter gather and extend MS file
 
 """
 
@@ -28,6 +28,10 @@ from ska_sdp_datamodels.visibility.vis_io_ms import (
 
 
 class TestExtendMS(unittest.TestCase):
+    """
+    Unit tests for extend_ms
+    """
+
     def setUp(self):
         numpy.seterr(all="ignore")
         self.testPath = tempfile.mkdtemp(prefix="test-ms-", suffix=".tmp")
@@ -56,20 +60,8 @@ class TestExtendMS(unittest.TestCase):
             lon=116.76444824 * u.deg, lat=-26.824722084 * u.deg, height=300.0
         )
 
-        mount = numpy.array(
-            [
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-            ]
-        )
+        mount = numpy.empty(10)
+        mount.fill("equat")
         names = numpy.array(
             [
                 "ak02",
@@ -113,9 +105,9 @@ class TestExtendMS(unittest.TestCase):
             diameter=diameter,
         )
         antennas = []
-        for i in range(len(names)):
+        for i, name in enumerate(names):
             antennas.append(
-                Antenna(i, Stand(names[i], xyz[i, 0], xyz[i, 1], xyz[i, 2]))
+                Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2]))
             )
 
         # Set baselines and data
@@ -194,6 +186,9 @@ class TestExtendMS(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(testFile, tbl)))
 
     def test_extend_ms(self):
+        """
+        Test for extend_visibility_to_ms function
+        """
         # Reading
         msfile = self.ms_file
         msoutfile = self.out_ms_file

@@ -1,4 +1,3 @@
-# pylint: disable=duplicate-code
 """
 Unit tests for the Sky Model
 """

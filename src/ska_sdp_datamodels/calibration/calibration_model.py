@@ -146,9 +146,9 @@ class GainTable(xarray.Dataset):
                        2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
             data_model:  GainTable
-            receptor_frame1:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame...
-            receptor_frame2:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame...
-            phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg (180., -35.)>
+            receptor_frame1:     ReceptorFrame object
+            receptor_frame2:     ReceptorFrame object
+            phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg>
             configuration:      <xarray.Configuration>
                                 Dimensions: (id: 115 etc.)
             jones_type:  B
@@ -416,9 +416,9 @@ class PointingTable(xarray.Dataset):
                         2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
             data_model:  PointingTable
-            receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame...
+            receptor_frame:     ReceptorFrame object
             pointing_frame:     azel
-            pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg (180., -35.)>
+            pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg>
             configuration:      <xarray.Configuration>
                                 Dimensions:   (id: 115 etc.)
     """  # noqa: E501

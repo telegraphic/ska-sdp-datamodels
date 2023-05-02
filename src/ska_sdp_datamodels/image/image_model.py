@@ -47,13 +47,13 @@ class Image(xarray.Dataset):
         Coordinates:
             frequency     (chan) float64 1e+08 1.01e+08 1.02e+08
             polarisation  (pol) <U1 'I' 'Q' 'U' 'V'
-          * y             (y) float64 -35.11 -35.11 -35.11 ... -34.89 -34.89 -34.89
-          * x             (x) float64 179.9 179.9 179.9 179.9 ... 180.1 180.1 180.1
-            ra            (x, y) float64 180.1 180.1 180.1 180.1 ... 179.9 179.9 179.9
-            dec           (x, y) float64 -35.11 -35.11 -35.11 ... -34.89 -34.89 -34.89
+          * y             (y) float64 -35.11 -35.11  ... -34.89 -34.89
+          * x             (x) float64 179.9 179.9  ... 180.1 180.1
+            ra            (x, y) float64 180.1 180.1  ... 179.9 179.9
+            dec           (x, y) float64 -35.11 -35.11  ... -34.89 -34.89
         Dimensions without coordinates: chan, pol
         Data variables:
-            pixels        (chan, pol, y, x) float64 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0
+            pixels        (chan, pol, y, x) float64 0.0 0.0  ... 0.0 0.0
         Attributes:
             data_model:     Image
             frame:          icrs

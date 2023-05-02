@@ -1,7 +1,6 @@
-# pylint: disable-all
-""" Unit tests for visibility operations
-
-
+# pylint: disable=invalid-name, too-many-locals, duplicate-code
+"""
+Unit tests for create Visibility
 """
 import os
 import shutil
@@ -24,6 +23,10 @@ from ska_sdp_datamodels.visibility.vis_io_ms import create_visibility_from_ms
 
 
 class TestCreateMS(unittest.TestCase):
+    """
+    Test Setup
+    """
+
     def setUp(self):
 
         self.casacore_available = True
@@ -34,6 +37,8 @@ class TestCreateMS(unittest.TestCase):
         # Generate a temp MS file
         if not os.path.exists(self.ms_file):
             self.__write_tables_WGS84()
+
+        self.vis = None
 
     def __initData_WGS84(self):
         """Private function to generate a random set of data for writing a UVFITS
@@ -54,20 +59,9 @@ class TestCreateMS(unittest.TestCase):
             lon=116.76444824 * u.deg, lat=-26.824722084 * u.deg, height=300.0
         )
 
-        mount = numpy.array(
-            [
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-                "equat",
-            ]
-        )
+        mount = numpy.empty(10)
+        mount.fill("equat")
+
         names = numpy.array(
             [
                 "ak02",
@@ -111,9 +105,9 @@ class TestCreateMS(unittest.TestCase):
             diameter=diameter,
         )
         antennas = []
-        for i in range(len(names)):
+        for i, name in enumerate(names):
             antennas.append(
-                Antenna(i, Stand(names[i], xyz[i, 0], xyz[i, 1], xyz[i, 2]))
+                Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2]))
             )
 
         # Set baselines and data
@@ -192,6 +186,10 @@ class TestCreateMS(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(testFile, tbl)))
 
     def test_create_list(self):
+        """
+        Test for basic create_visibility function,
+            from a list of Visibilities.
+        """
         if not self.casacore_available:
             return
 
@@ -203,12 +201,15 @@ class TestCreateMS(unittest.TestCase):
             assert v.visibility_acc.polarisation_frame.type == "stokesI"
 
     def test_create_list_spectral(self):
+        """
+        Test with spectral information.
+        """
         if not self.casacore_available:
             return
 
         msfile = self.ms_file
 
-        vis_by_channel = list()
+        vis_by_channel = []
         nchan_ave = 16
         nchan = 192
         for schan in range(0, nchan, nchan_ave):
@@ -222,12 +223,15 @@ class TestCreateMS(unittest.TestCase):
             assert v.visibility_acc.polarisation_frame.type == "stokesI"
 
     def test_create_list_slice(self):
+        """
+        Test using slicing
+        """
         if not self.casacore_available:
             return
 
         msfile = self.ms_file
 
-        vis_by_channel = list()
+        vis_by_channel = []
         nchan_ave = 16
         nchan = 192
         for schan in range(0, nchan, nchan_ave):
@@ -244,12 +248,15 @@ class TestCreateMS(unittest.TestCase):
             assert v.visibility_acc.polarisation_frame.type == "stokesI"
 
     def test_create_list_slice_visibility(self):
+        """
+        Test using slicing with multiple channels
+        """
         if not self.casacore_available:
             return
 
         msfile = self.ms_file
 
-        vis_by_channel = list()
+        vis_by_channel = []
         nchan_ave = 16
         nchan = 192
         for schan in range(0, nchan, nchan_ave):
@@ -271,12 +278,16 @@ class TestCreateMS(unittest.TestCase):
             assert numpy.sum(v.visibility_acc.flagged_weight) > 0.0
 
     def test_create_list_average_slice_visibility(self):
+        """
+        Test using slicing averaging over channels
+        """
+
         if not self.casacore_available:
             return
 
         msfile = self.ms_file
 
-        vis_by_channel = list()
+        vis_by_channel = []
         nchan_ave = 16
         nchan = 192
         for schan in range(0, nchan, nchan_ave):
@@ -303,16 +314,19 @@ class TestCreateMS(unittest.TestCase):
             assert numpy.sum(v.visibility_acc.flagged_weight) > 0.0, ivis
 
     def test_create_list_single(self):
+        """
+        Test for a single Visibility
+        """
         if not self.casacore_available:
             return
 
         msfile = self.ms_file
 
-        vis_by_channel = list()
+        vis_by_channel = []
         nchan_ave = 1
         nchan = 8
         for schan in range(0, nchan, nchan_ave):
-            # max_chan = min(nchan, schan + nchan_ave)
+
             v = create_visibility_from_ms(
                 msfile, start_chan=schan, end_chan=schan
             )
@@ -324,12 +338,15 @@ class TestCreateMS(unittest.TestCase):
             assert v.visibility_acc.polarisation_frame.type == "stokesI"
 
     def test_create_list_spectral_average(self):
+        """
+        Test when averaging over spectral channels
+        """
         if not self.casacore_available:
             return
 
         msfile = self.ms_file
 
-        vis_by_channel = list()
+        vis_by_channel = []
         nchan_ave = 16
         nchan = 192
         for schan in range(0, nchan, nchan_ave):
