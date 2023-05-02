@@ -572,22 +572,13 @@ try:
             freqSetup = Frequency(offset, self.channelWidth, totalWidth)
             self.freq.append(freqSetup)
 
-        def set_geometry(self, *args, **kwds):
-            """
-            Given a station and an array of stands, set the relevant
-            common observation parameters and add entries to the
-            self.array list.
-            """
-
-            raise NotImplementedError
-
         def add_data_set(
             self,
             obstime,
             inttime,
             baselines,
             visibilities,
-            flags,
+            flags=None,
             weights=None,
             pol="XX",
             source=None,

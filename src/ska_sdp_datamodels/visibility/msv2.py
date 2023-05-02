@@ -1,17 +1,20 @@
-# pylint: disable-all
-
-#
-# MeasurementSets V2 Codes Based on Python-casacore For RASCIL
-# Ver 0.1
-#
+# pylint: disable=too-many-lines, too-many-arguments, too-many-locals
+# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=invalid-name
+"""
+MeasurementSets V2 Codes Based on Python-casacore For ska-sdp-datamodels
+Ver 0.1
+"""
 
 import gc
 import glob
 import logging
 import os
 import shutil
+import warnings
 
 import numpy
+from astropy.coordinates import Angle
 from astropy.time import Time
 
 from ska_sdp_datamodels.visibility.msv2fund import BaseData, MS_UVData
@@ -42,7 +45,6 @@ try:
             source_name=None,
             frame="ITRF",
             verbose=False,
-            memmap=None,
             if_delete=False,
         ):
             """
@@ -55,7 +57,6 @@ try:
             :param ref_time: Observational date & time
             :param frame: Antenna's frame (ITRF or WGS84)
             :param verbose: verbose
-            :param memmap: Preserved
             :param if_delete: delete original filename
 
             """
@@ -65,11 +66,11 @@ try:
                 if if_delete:
                     shutil.rmtree(filename, ignore_errors=False)
                 else:
-                    raise IOError("File '%s' already exists" % filename)
+                    raise IOError(f"File {filename} already exists")
             self.basename = filename
 
             # File-specific information
-            super(WriteMs, self).__init__(
+            super().__init__(
                 filename,
                 ref_time=ref_time,
                 source_name=source_name,
@@ -115,30 +116,30 @@ try:
             ants = []
             if (self.frame).upper() not in ["WGS84", "ITRF"]:
                 topo2eci = get_eci_transform(latitude, longitude)
-                for i in range(len(stands)):
+                for i, ant_name in enumerate(stands):
                     eci = numpy.dot(topo2eci, xyz[i, :])
                     ants.append(
                         self._Antenna(
-                            stands[i],
+                            ant_name,
                             eci[0] + arrayX,
                             eci[1] + arrayY,
                             eci[2] + arrayZ,
                             bits=bits,
                         )
                     )
-                    mapper.append(stands[i])
+                    mapper.append(ant_name)
             else:
                 for i, ant_name in enumerate(stands):
                     ants.append(
                         self._Antenna(
-                            stands[i],
+                            ant_name,
                             xyz[i, 0],
                             xyz[i, 1],
                             xyz[i, 2],
                             bits=bits,
                         )
                     )
-                    mapper.append(stands[i])
+                    mapper.append(ant_name)
 
             self.nant = len(ants)
             self.array.append(
@@ -149,8 +150,6 @@ try:
                     "inputAnts": antennas,
                 }
             )
-            # {'center': [0., 0., 0.], 'ants': ants, 'mapper': mapper,
-            # 'inputAnts': antennas})
 
         def add_data_set(
             self,
@@ -158,8 +157,8 @@ try:
             inttime,
             baselines,
             visibilities,
-            weights=None,
             flags=None,
+            weights=None,
             pol="XX",
             source=None,
             phasecentre=None,
@@ -169,7 +168,7 @@ try:
             Create a UVData object to store a collection of visibilities.
             """
 
-            if type(pol) == str:
+            if isinstance(pol, str):
                 numericPol = self._STOKES_CODES[pol.upper()]
             else:
                 numericPol = pol
@@ -182,7 +181,7 @@ try:
                     inttime,
                     baselines,
                     visibilities,
-                    flags,
+                    flags=flags,
                     weights=weights,
                     pol=numericPol,
                     source=source,
@@ -219,7 +218,7 @@ try:
             self._write_misc_required_tables()
 
             # Fixup the info and keywords for the main table
-            tb = table("%s" % self.basename, readonly=False, ack=False)
+            tb = table(f"{self.basename}", readonly=False, ack=False)
             tb.putinfo(
                 {
                     "type": "Measurement Set",
@@ -228,10 +227,10 @@ try:
                 }
             )
             tb.putkeyword("MS_VERSION", numpy.float32(2.0))
-            for filename in sorted(glob.glob("%s/*" % self.basename)):
+            for filename in sorted(glob.glob(f"{self.basename}/*")):
                 if os.path.isdir(filename):
                     tname = os.path.basename(filename)
-                    stb = table("%s/%s" % (self.basename, tname), ack=False)
+                    stb = table(f"{self.basename}/{tname}", ack=False)
                     tb.putkeyword(tname, stb)
                     stb.close()
             tb.flush()
@@ -245,8 +244,7 @@ try:
             """
             Close out the file.
             """
-
-            pass
+            self.close()
 
         def _write_antenna_table(self):
             """
@@ -307,7 +305,7 @@ try:
                 [col1, col2, col3, col4, col5, col6, col7, col8]
             )
             tb = table(
-                "%s/ANTENNA" % self.basename, desc, nrow=self.nant, ack=False
+                f"{self.basename}/ANTENNA", desc, nrow=self.nant, ack=False
             )
 
             tb.putcol("OFFSET", numpy.zeros((self.nant, 3)), 0, self.nant)
@@ -419,7 +417,7 @@ try:
 
             desc = tableutil.maketabdesc([col1, col2, col3, col4])
             tb = table(
-                "%s/POLARIZATION" % self.basename, desc, nrow=1, ack=False
+                f"{self.basename}/POLARIZATION", desc, nrow=1, ack=False
             )
 
             tb.putcell("CORR_TYPE", 0, self.stokes)
@@ -536,7 +534,7 @@ try:
                 ]
             )
             tb = table(
-                "%s/FEED" % self.basename, desc, nrow=self.nant, ack=False
+                f"{self.basename}/FEED", desc, nrow=self.nant, ack=False
             )
 
             presp = numpy.zeros((self.nant, 2, 2), dtype=complex)
@@ -684,15 +682,8 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7, col8, col9]
             )
-            tb = table(
-                "%s/OBSERVATION" % self.basename, desc, nrow=1, ack=False
-            )
+            tb = table(f"{self.basename}/OBSERVATION", desc, nrow=1, ack=False)
 
-            # from astropy.time import Time
-            # utcStart = Time(self.data[0].obstime, format='mjd',scale='utc')
-            # tStart = utcStart.mjd
-            # utcStop = Time(self.data[-1].obstime, format='mjd', scale='utc')
-            # tStop = utcStop.mjd
             tStart = float(self.data[0].obstime)
             tStop = float(self.data[-1].obstime)
 
@@ -724,8 +715,6 @@ try:
             sourceID = 0
             for dataSet in self.data:
                 if dataSet.pol == self.stokes[0]:
-                    # utc0 = Time(dataSet.obstime, format="mjd", scale="utc")
-                    # utc = utc0.jd
 
                     currSourceName = dataSet.source
 
@@ -736,7 +725,6 @@ try:
                         sourceID += 1
 
                         if dataSet.source is None:
-                            # currSourceName = dataSet.source.name
 
                             # Zenith pointings
                             sidereal = Time(
@@ -750,19 +738,13 @@ try:
                             ).value
                             ra = sidereal_time * 15
                             dec = latitude
-                            # equ = astro.equ_posn(obs.sidereal_time() * 180 /
-                            # numpy.pi, obs.lat * 180 / numpy.pi)
-                            from astropy.coordinates import Angle
 
                             raHms = Angle(sidereal_time, "hour")
                             d, m, s = raHms.dms
                             # format 'source' name based on local sidereal time
-                            name = "T%02d%02d%02d%01d" % (
-                                d,
-                                m,
-                                int(s),
-                                int((s - int(s)) * 10.0),
-                            )
+                            s1 = int(s)
+                            s2 = int((s - int(s)) * 10.0)
+                            name = f"T{d}{m}{s1}{s2}"
                         else:
                             ra = dataSet.phasecentre.ra.value
                             dec = dataSet.phasecentre.dec.value
@@ -779,6 +761,7 @@ try:
             nSource = len(nameList)
 
             # Save these for later since we might need them
+            # pylint:disable=attribute-defined-outside-init
             self._sourceTable = nameList
 
             col1 = tableutil.makearrcoldesc(
@@ -898,7 +881,7 @@ try:
                 ]
             )
             tb = table(
-                "%s/SOURCE" % self.basename, desc, nrow=nSource, ack=False
+                f"{self.basename}/SOURCE", desc, nrow=nSource, ack=False
             )
 
             for i in range(nSource):
@@ -912,9 +895,6 @@ try:
                 tb.putcell("SOURCE_ID", i, i)
                 tb.putcell("SPECTRAL_WINDOW_ID", i, -1)
                 tb.putcell("TIME", i, (tStart + tStop) / 2 * 86400)
-                # tb.putcell('TRANSITION', i, [])
-                # tb.putcell('REST_FREQUENCY', i, [])
-                # tb.putcell('SYSVEL', i, [])
 
             tb.flush()
             tb.close()
@@ -986,9 +966,7 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7, col8, col9]
             )
-            tb = table(
-                "%s/FIELD" % self.basename, desc, nrow=nSource, ack=False
-            )
+            tb = table(f"{self.basename}/FIELD", desc, nrow=nSource, ack=False)
 
             for i in range(nSource):
                 tb.putcell(
@@ -1141,7 +1119,7 @@ try:
             )
             col11 = tableutil.makescacoldesc(
                 "NAME",
-                "%i channels" % self.nchan,
+                f"{self.nchan} channels",
                 comment="Spectral window name",
             )
             col12 = tableutil.makescacoldesc(
@@ -1180,7 +1158,7 @@ try:
                 ]
             )
             tb = table(
-                "%s/SPECTRAL_WINDOW" % self.basename,
+                f"{self.basename}/SPECTRAL_WINDOW",
                 desc,
                 nrow=nBand,
                 ack=False,
@@ -1209,11 +1187,9 @@ try:
                 )
                 tb.putcell("FLAG_ROW", i, False)
                 tb.putcell("FREQ_GROUP", i, i + 1)
-                tb.putcell("FREQ_GROUP_NAME", i, "group%i" % (i + 1))
+                tb.putcell("FREQ_GROUP_NAME", i, f"group{i+1}")
                 tb.putcell("IF_CONV_CHAIN", i, i)
-                tb.putcell(
-                    "NAME", i, "IF %i, %i channels" % (i + 1, self.nchan)
-                )
+                tb.putcell("NAME", i, f"IF {(i+1)}, {self.nchan} channels")
                 tb.putcell("NET_SIDEBAND", i, 0)
                 tb.putcell("NUM_CHAN", i, self.nchan)
                 tb.putcell("TOTAL_BANDWIDTH", i, freq.totalBW)
@@ -1468,13 +1444,14 @@ try:
                     col22,
                 ]
             )
-            tb = table("%s" % self.basename, desc, nrow=0, ack=False)
+            tb = table(f"{self.basename}", desc, nrow=0, ack=False)
 
             i = 0
             s = 1
             _sourceTable = []
             for dataSet in self.data:
                 # Sort the data by packed baseline
+                # pylint: disable=used-before-assignment
                 try:
                     order
                 except (NameError, UnboundLocalError):
@@ -1482,13 +1459,8 @@ try:
 
                 # Deal with defininig the values of the new data set
                 if dataSet.pol == self.stokes[0]:
+
                     # Figure out the new date/time for the observation
-
-                    # from astropy.time import Time
-
-                    # utc = Time(dataSet.obstime, format="mjd", scale="utc")
-                    # utc0 = utc.mjd
-
                     if dataSet.source is None:
                         # Zenith pointings
                         sidereal = Time(
@@ -1500,23 +1472,15 @@ try:
                         sidereal_time = sidereal.sidereal_time(
                             "apparent"
                         ).value
-                        # equ = astro.equ_posn(obs.sidereal_time() * 180
-                        # / numpy.pi, obs.lat * 180 / numpy.pi)
-                        from astropy.coordinates import Angle
 
                         raHms = Angle(sidereal_time, "hour")
                         d, m, s = raHms.dms
                         # format 'source' name based on local sidereal time
-                        name = "T%02d%02d%02d%01d" % (
-                            d,
-                            m,
-                            int(s),
-                            int((s - int(s)) * 10.0),
-                        )
+                        s1 = int(s)
+                        s2 = int((s - int(s)) * 10.0)
+                        name = f"T{d}{m}{s1}{s2}"
                     else:
                         # Real-live sources (ephem.Body instances)
-                        # ra = dataSet.phasecentre.ra.value
-                        # dec = dataSet.phasecentre.dec.value
                         name = dataSet.source
 
                     # Update the source ID
@@ -1533,8 +1497,6 @@ try:
                     else:
                         HA = dataSet.phasecentre.ra.value / 15
                         dec = dataSet.phasecentre.dec.value
-                        # HA = (sidereal- dataSet.source.ra) * 12 / numpy.pi
-                        # dec = dataSet.source.dec * 180 / numpy.pi
 
                     # Just for testing
                     if dataSet.uvw is None:
@@ -1542,9 +1504,11 @@ try:
                     else:
                         uvwCoords = dataSet.uvw
 
-                    # Populate the metadata
-                    # Add in the baselines
+                    # Populate the metadata, add in the baselines
+                    # pylint: disable=used-before-assignment
+                    # pylint: disable=pointless-statement
                     try:
+
                         ant1List
                         ant2List
                     except NameError:
@@ -1569,11 +1533,6 @@ try:
                         float(dataSet.obstime + dataSet.inttime / 2.0)
                         for bl in dataSet.baselines
                     ]
-
-                    # timeList_Centroid = [
-                    #     dataSet.obstime + dataSet.inttime
-                    #     for bl in dataSet.baselines
-                    # ]
 
                     # Add in the new new source ID and name
                     sourceList = [sourceID for bl in dataSet.baselines]
@@ -1650,9 +1609,7 @@ try:
                     )
 
                     for j in range(nBand):
-                        # fg = numpy.zeros(
-                        #     (nBL, self.nStokes, self.nchan), dtype=bool
-                        # )
+
                         fc = numpy.zeros(
                             (nBL, self.nStokes, self.nchan, 1), dtype=bool
                         )
@@ -1660,7 +1617,7 @@ try:
                         sg = numpy.ones((nBL, self.nStokes)) * 9999
 
                         tb.putcol("UVW", uvwList, i, nBL)
-                        # tb.putcol('FLAG', fg.transpose(0, 2, 1), i, nBL)
+
                         tb.putcol(
                             "FLAG",
                             flag_matrix[..., j, :].transpose(0, 2, 1),
@@ -1796,7 +1753,7 @@ try:
 
             desc = tableutil.maketabdesc([col1, col2, col3])
             tb = table(
-                "%s/DATA_DESCRIPTION" % self.basename,
+                f"{self.basename}/DATA_DESCRIPTION",
                 desc,
                 nrow=nBand,
                 ack=False,
@@ -1863,7 +1820,7 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7, col8]
             )
-            tb = table("%s/FLAG_CMD" % self.basename, desc, nrow=0, ack=False)
+            tb = table(f"{self.basename}/FLAG_CMD", desc, nrow=0, ack=False)
 
             tb.flush()
             tb.close()
@@ -1913,7 +1870,7 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7, col8, col9]
             )
-            tb = table("%s/HISTORY" % self.basename, desc, nrow=0, ack=False)
+            tb = table(f"{self.basename}/HISTORY", desc, nrow=0, ack=False)
 
             tb.flush()
             tb.close()
@@ -1988,7 +1945,7 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7, col8, col9]
             )
-            tb = table("%s/POINTING" % self.basename, desc, nrow=0, ack=False)
+            tb = table(f"{self.basename}/POINTING", desc, nrow=0, ack=False)
 
             tb.flush()
             tb.close()
@@ -2010,7 +1967,7 @@ try:
             col5 = tableutil.makescacoldesc("FLAG_ROW", False, comment="flag")
 
             desc = tableutil.maketabdesc([col1, col2, col3, col4, col5])
-            tb = table("%s/PROCESSOR" % self.basename, desc, nrow=0, ack=False)
+            tb = table(f"{self.basename}/PROCESSOR", desc, nrow=0, ack=False)
 
             tb.flush()
             tb.close()
@@ -2060,7 +2017,7 @@ try:
             desc = tableutil.maketabdesc(
                 [col1, col2, col3, col4, col5, col6, col7]
             )
-            tb = table("%s/STATE" % self.basename, desc, nrow=0, ack=False)
+            tb = table(f"{self.basename}/STATE", desc, nrow=0, ack=False)
 
             tb.flush()
             tb.close()
@@ -2090,7 +2047,7 @@ try:
             'YYYY-MM-DDTHH:MM:SS'.
 
             """
-            super(Ms, self).__init__(
+            super().__init__(
                 filename,
                 ref_time,
                 source_name,
@@ -2099,11 +2056,12 @@ try:
                 if_delete=if_delete,
             )
 
-except ImportError:
-    import warnings
+except ImportError as error:
 
     warnings.warn(
         "Cannot import casacore.tables, MS support disabled", ImportWarning
     )
 
-    raise RuntimeError("Cannot import casacore.tables, MS support disabled")
+    raise RuntimeError(
+        "Cannot import casacore.tables, MS support disabled"
+    ) from error
