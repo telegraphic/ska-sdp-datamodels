@@ -29,7 +29,7 @@ from ska_sdp_datamodels.science_data_model.polarisation_model import (
 from ska_sdp_datamodels.visibility.vis_model import Visibility
 from ska_sdp_datamodels.visibility.vis_utils import generate_baselines
 
-log = logging.getLogger("rascil-logger")
+log = logging.getLogger("data-models-logger")
 
 
 def extend_visibility_to_ms(msname, bvis):

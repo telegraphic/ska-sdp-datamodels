@@ -19,7 +19,7 @@ from ska_sdp_datamodels.visibility.msv2supp import (
     merge_baseline,
 )
 
-log = logging.getLogger("rascil-logger")
+log = logging.getLogger("data-models-logger")
 
 __version__ = "0.1"
 __revision__ = "$Rev$"

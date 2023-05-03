@@ -24,7 +24,7 @@ from ska_sdp_datamodels.visibility.msv2supp import (
     get_eci_transform,
 )
 
-log = logging.getLogger("rascil-logger")
+log = logging.getLogger("data-models-logger")
 
 try:
     from casacore.tables import table, tableutil
