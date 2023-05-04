@@ -53,7 +53,7 @@ class GridData(xarray.Dataset):
             data_model:           GridData
             _polarisation_frame:  stokesIQUV
 
-    """  # noqa: E501
+    """
 
     __slots__ = ()
 

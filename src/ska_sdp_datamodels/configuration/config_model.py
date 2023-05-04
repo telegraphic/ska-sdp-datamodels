@@ -36,7 +36,7 @@ class Configuration(xarray.Dataset):
             location:           (x,y,z)
             receptor_frame:     ReceptorFrame object
             frame:
-    """  # noqa: E501
+    """
 
     __slots__ = ()
 

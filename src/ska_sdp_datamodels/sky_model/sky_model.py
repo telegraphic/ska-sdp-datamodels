@@ -32,7 +32,7 @@ class SkyComponent:
         bm = create_low_test_beam(model=model)
         sc = apply_beam_to_skycomponent(sc, bm)
         vis = dft_skycomponent_visibility(vis, sc)
-    """  # noqa: E501
+    """
 
     def __init__(
         self,

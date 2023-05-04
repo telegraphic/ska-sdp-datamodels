@@ -3,7 +3,6 @@
 # pylint: disable=invalid-name
 """
 MeasurementSets V2 Codes Based on Python-casacore For ska-sdp-datamodels
-Ver 0.1
 """
 
 import gc

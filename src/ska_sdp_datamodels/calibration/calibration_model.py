@@ -152,7 +152,7 @@ class GainTable(xarray.Dataset):
             configuration:      <xarray.Configuration>
                                 Dimensions: (id: 115 etc.)
             jones_type:  B
-    """  # noqa: E501
+    """
 
     __slots__ = ()
 
@@ -421,7 +421,7 @@ class PointingTable(xarray.Dataset):
             pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg>
             configuration:      <xarray.Configuration>
                                 Dimensions:   (id: 115 etc.)
-    """  # noqa: E501
+    """
 
     __slots__ = ()
 

@@ -76,8 +76,8 @@ def test_sky_component_copy(sky_component):
     Test copying SkyComponent
     """
     new_sc = sky_component.copy()
+    assert new_sc.polarisation_frame == sky_component.polarisation_frame
+    assert new_sc.params == sky_component.params
     assert new_sc.direction == sky_component.direction
     assert new_sc.frequency.all() == sky_component.frequency.all()
     assert new_sc.flux.all() == sky_component.flux.all()
-    assert new_sc.params == sky_component.params
-    assert new_sc.polarisation_frame == sky_component.polarisation_frame

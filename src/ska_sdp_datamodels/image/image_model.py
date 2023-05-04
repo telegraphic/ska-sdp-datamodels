@@ -57,7 +57,7 @@ class Image(xarray.Dataset):
         Attributes:
             data_model:     Image
             frame:          icrs
-    """  # noqa: E501
+    """
 
     __slots__ = ()
 
