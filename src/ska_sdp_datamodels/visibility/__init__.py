@@ -13,7 +13,6 @@ from .vis_io_and_convert import (
 )
 from .vis_io_ms import (
     create_visibility_from_ms,
-    create_visibility_from_uvfits,
     export_visibility_to_ms,
     extend_visibility_to_ms,
     generate_baselines,
@@ -35,7 +34,6 @@ __all__ = [
     "create_visibility",
     "create_flagtable_from_visibility",
     "create_visibility_from_ms",
-    "create_visibility_from_uvfits",
     "export_visibility_to_ms",
     "extend_visibility_to_ms",
     "list_ms",
