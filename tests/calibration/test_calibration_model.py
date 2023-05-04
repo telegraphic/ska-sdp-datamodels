@@ -78,6 +78,7 @@ def test_gain_table_constructor_coords(result_gain_table):
     """
     Constructor correctly generates coordinates
     """
+    # pylint: disable=duplicate-code
     expected_coords_keys = [
         "time",
         "antenna",
