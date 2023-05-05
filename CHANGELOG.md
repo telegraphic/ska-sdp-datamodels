@@ -1,5 +1,6 @@
 # Changelog
-main
+
+0.2.1
 ----
 * Migrate Measurement set related functions ([MR33](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/33)) 
 * Updated SKA LOW station coordinates to revision 4 and config_create functions ([MR31](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/31))
