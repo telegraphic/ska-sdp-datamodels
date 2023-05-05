@@ -22,29 +22,35 @@ from ska_sdp_datamodels.xarray_accessor import XarrayAccessorMixin
 
 class GainTable(xarray.Dataset):
     """
-    Container for calibration solutions; a GainTable instance implicitly
-    corresponds to a Visibility instance being calibrated. GainTable wraps a
-    collection of either:
+    Container for calibration solutions;
+    a GainTable instance implicitly
+    corresponds to a Visibility instance being calibrated.
+    GainTable wraps a collection of either:
 
-    - complex-valued scalar gains, if dealing with pure Stokes I visibilities.
+    - complex-valued scalar gains, if dealing with
+      pure Stokes I visibilities.
 
     - 2x2 complex-valued Jones matrices otherwise.
 
-    GainTable currently serves calibration processing functions that rely on
-    the concept of model visibilities, which are related to observed
+    GainTable currently serves calibration processing
+    functions that rely on the concept of model visibilities,
+    which are related to observed
     visibilities and Jones matrices as follows:
 
     :math:`V^{\\mathrm{obs}}_{pq} = J_p V^{\\mathrm{model}}_{pq} J_q^H`
 
-    where p, q are antenna indices, :math:`J_k` denotes the Jones matrix for
-    antenna k, and the H superscript is Hermitian transpose.
-    For scalar visibilities and gains :math:`g_k`, this can be rewritten as
+    where p, q are antenna indices, :math:`J_k` denotes
+    the Jones matrix for antenna k,
+    and the H superscript is Hermitian transpose.
+    For scalar visibilities and gains :math:`g_k`,
+    this can be rewritten as
 
     :math:`V^{\\mathrm{obs}}_{pq} = g_p g_q^* V^{\\mathrm{model}}_{pq}`
 
     **Coordinates**
 
-    - time: time centroids of solutions, in seconds elapsed (on the UTC scale)
+    - time: time centroids of solutions,
+      in seconds elapsed (on the UTC scale)
       since the MJD reference epoch, ``[ntimes]``.
 
     - antenna: integer antenna indices starting at 0, ``[nants]``
@@ -120,27 +126,33 @@ class GainTable(xarray.Dataset):
     Here is an example::
 
         <xarray.GainTable>
-        Dimensions:    (antenna: 115, frequency: 3, receptor1: 2, receptor2: 2, time: 3)
+        Dimensions:    (antenna: 115, frequency: 3,
+                        receptor1: 2, receptor2: 2, time: 3)
         Coordinates:
           * time       (time) float64 5.085e+09 5.085e+09 5.085e+09
-          * antenna    (antenna) int64 0 1 2 3 4 5 6 7 ... 108 109 110 111 112 113 114
+          * antenna    (antenna) int64 0 1 2 3 4 5 6 7 ... 113 114
           * frequency  (frequency) float64 1e+08 1.05e+08 1.1e+08
           * receptor1  (receptor1) <U1 'X' 'Y'
           * receptor2  (receptor2) <U1 'X' 'Y'
         Data variables:
-            gain       (time, antenna, frequency, receptor1, receptor2) complex128 (0...
-            weight     (time, antenna, frequency, receptor1, receptor2) float64 1.0 ....
-            residual   (time, frequency, receptor1, receptor2) float64 0.0 0.0 ... 0.0
+            gain       (time, antenna, frequency, receptor1, receptor2)
+                       complex128 (0...
+            weight     (time, antenna, frequency, receptor1, receptor2)
+                       float64 1.0 ....
+            residual   (time, frequency, receptor1, receptor2)
+                       float64 0.0 0.0 ... 0.0
             interval   (time) float32 99.72697 99.72697 99.72697
-            datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
+            datetime   (time) datetime64[ns]
+                       2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
             data_model:  GainTable
-            receptor_frame1:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
-            receptor_frame2:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
-            phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
-            configuration:      <xarray.Configuration> Dimensions:   (id: 115, spati...
+            receptor_frame1:     ReceptorFrame object
+            receptor_frame2:     ReceptorFrame object
+            phasecentre:        <SkyCoord (ICRS): (ra, dec) in deg>
+            configuration:      <xarray.Configuration>
+                                Dimensions: (id: 115 etc.)
             jones_type:  B
-    """  # noqa: E501
+    """
 
     __slots__ = ()
 
@@ -198,7 +210,7 @@ class GainTable(xarray.Dataset):
             receptor2. If ReceptorFrame instance, use it for both receptor1
             and receptor2. If two-element sequence, interpret as
             [receptor1, receptor2]. See also:
-            https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
+        https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
 
         :type receptor_frame: ReceptorFrame or sequence of two ReceptorFrames
             or None, optional
@@ -382,27 +394,34 @@ class PointingTable(xarray.Dataset):
     Here is an example::
 
         <xarray.PointingTable>
-        Dimensions:    (angle: 2, antenna: 115, frequency: 3, receptor: 2, time: 3)
+        Dimensions:    (angle: 2, antenna: 115,
+                        frequency: 3, receptor: 2, time: 3)
         Coordinates:
           * time       (time) float64 5.085e+09 5.085e+09 5.085e+09
-          * antenna    (antenna) int64 0 1 2 3 4 5 6 7 ... 108 109 110 111 112 113 114
+          * antenna    (antenna) int64 0 1 2 3 4 5 6 7 ...  113 114
           * frequency  (frequency) float64 1e+08 1.05e+08 1.1e+08
           * receptor   (receptor) <U1 'X' 'Y'
           * angle      (angle) <U2 'az' 'el'
         Data variables:
-            pointing   (time, antenna, frequency, receptor, angle) float64 -0.0002627...
-            nominal    (time, antenna, frequency, receptor, angle) float64 -3.142 ......
-            weight     (time, antenna, frequency, receptor, angle) float64 1.0 ... 1.0
-            residual   (time, frequency, receptor, angle) float64 0.0 0.0 ... 0.0 0.0
+            pointing   (time, antenna, frequency, receptor, angle)
+                        float64 -0.0002627...
+            nominal    (time, antenna, frequency, receptor, angle)
+                        float64 -3.142 ......
+            weight     (time, antenna, frequency, receptor, angle)
+                        float64 1.0 ... 1.0
+            residual   (time, frequency, receptor, angle)
+                        float64 0.0 0.0 ... 0.0 0.0
             interval   (time) float64 99.73 99.73 99.73
-            datetime   (time) datetime64[ns] 2000-01-01T03:54:07.843184299 ... 2000-0...
+            datetime   (time) datetime64[ns]
+                        2000-01-01T03:54:07.843184299 ... 2000-0...
         Attributes:
             data_model:  PointingTable
-            receptor_frame:     <src.ska_sdp_datamodels.polarisation.ReceptorFrame object...
+            receptor_frame:     ReceptorFrame object
             pointing_frame:     azel
-            pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
-            configuration:      <xarray.Configuration> Dimensions:   (id: 115, spati...
-    """  # noqa: E501
+            pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg>
+            configuration:      <xarray.Configuration>
+                                Dimensions:   (id: 115 etc.)
+    """
 
     __slots__ = ()
 

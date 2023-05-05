@@ -25,14 +25,20 @@ log = logging.getLogger("data-models-logger")
 
 class Image(xarray.Dataset):
     """
-    Image class with pixels as an xarray.DataArray and the AstroPy`implementation of
-    a World Coordinate System <http://docs.astropy.org/en/stable/wcs>`_
+    Image class with pixels as an
+    xarray.DataArray and the AstroPy`implementation of
+    a World Coordinate System
+    <http://docs.astropy.org/en/stable/wcs>`_
 
-    The actual image values are kept in a data_var of the xarray.Dataset called "pixels".
+    The actual image values are kept in a data_var
+    of the xarray.Dataset called "pixels".
 
-    Many operations can be done conveniently using xarray processing_components on Image or on
-    numpy operations on Image["pixels"].data. If the "pixels" data variable is chunked then
-    Dask is automatically used wherever possible to distribute processing.
+    Many operations can be done conveniently using
+    xarray processing_components on Image or on
+    numpy operations on Image["pixels"].data.
+    If the "pixels" data variable is chunked then
+    Dask is automatically used wherever
+    possible to distribute processing.
 
     Here is an example::
 
@@ -41,17 +47,17 @@ class Image(xarray.Dataset):
         Coordinates:
             frequency     (chan) float64 1e+08 1.01e+08 1.02e+08
             polarisation  (pol) <U1 'I' 'Q' 'U' 'V'
-          * y             (y) float64 -35.11 -35.11 -35.11 ... -34.89 -34.89 -34.89
-          * x             (x) float64 179.9 179.9 179.9 179.9 ... 180.1 180.1 180.1
-            ra            (x, y) float64 180.1 180.1 180.1 180.1 ... 179.9 179.9 179.9
-            dec           (x, y) float64 -35.11 -35.11 -35.11 ... -34.89 -34.89 -34.89
+          * y             (y) float64 -35.11 -35.11  ... -34.89 -34.89
+          * x             (x) float64 179.9 179.9  ... 180.1 180.1
+            ra            (x, y) float64 180.1 180.1  ... 179.9 179.9
+            dec           (x, y) float64 -35.11 -35.11  ... -34.89 -34.89
         Dimensions without coordinates: chan, pol
         Data variables:
-            pixels        (chan, pol, y, x) float64 0.0 0.0 0.0 0.0 ... 0.0 0.0 0.0 0.0
+            pixels        (chan, pol, y, x) float64 0.0 0.0  ... 0.0 0.0
         Attributes:
             data_model:     Image
             frame:          icrs
-    """  # noqa: E501
+    """
 
     __slots__ = ()
 

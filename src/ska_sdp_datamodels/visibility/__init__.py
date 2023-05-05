@@ -11,6 +11,13 @@ from .vis_io_and_convert import (
     import_flagtable_from_hdf5,
     import_visibility_from_hdf5,
 )
+from .vis_io_ms import (
+    create_visibility_from_ms,
+    export_visibility_to_ms,
+    extend_visibility_to_ms,
+    generate_baselines,
+    list_ms,
+)
 from .vis_model import FlagTable, Visibility
 
 __all__ = [
@@ -26,4 +33,9 @@ __all__ = [
     "convert_hdf_to_flagtable",
     "create_visibility",
     "create_flagtable_from_visibility",
+    "create_visibility_from_ms",
+    "export_visibility_to_ms",
+    "extend_visibility_to_ms",
+    "list_ms",
+    "generate_baselines",
 ]

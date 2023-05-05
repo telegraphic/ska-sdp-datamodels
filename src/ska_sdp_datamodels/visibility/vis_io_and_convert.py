@@ -2,6 +2,8 @@
 
 """
 Functions working with Visibility and FlagData models.
+Note that they read and write them into HDF files.
+For IO functions between Visibility and MS files, refer to vis_io_ms.py
 """
 
 import ast

@@ -21,17 +21,18 @@ class SkyComponent:
     drawn from the GLEAM catalog::
 
         sc = create_low_test_skycomponents_from_gleam(flux_limit=1.0,
-                                            polarisation_frame=PolarisationFrame("stokesIQUV"),
-                                            frequency=frequency, kind='cubic',
-                                            phasecentre=phasecentre,
-                                            radius=0.1)
-        model = create_image_from_visibility(vis, cellsize=0.001, npixel=512, frequency=frequency,
-                                            polarisation_frame=PolarisationFrame('stokesIQUV'))
+                 polarisation_frame=PolarisationFrame("stokesIQUV"),
+                 frequency=frequency, kind='cubic',
+                 phasecentre=phasecentre,
+                 radius=0.1)
+        model = create_image_from_visibility(vis,
+                    cellsize=0.001, npixel=512, frequency=frequency,
+                    polarisation_frame=PolarisationFrame('stokesIQUV'))
 
         bm = create_low_test_beam(model=model)
         sc = apply_beam_to_skycomponent(sc, bm)
         vis = dft_skycomponent_visibility(vis, sc)
-    """  # noqa: E501
+    """
 
     def __init__(
         self,
@@ -128,7 +129,8 @@ class SkyModel:
         mask=None,
         fixed=False,
     ):
-        """A model of the sky as an image, components, gaintable and a mask
+        """A model of the sky as an image, components,
+        gaintable and a mask
 
         Use copy_skymodel to make a proper copy of skymodel
         :param image: Image
