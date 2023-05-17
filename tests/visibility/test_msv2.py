@@ -24,7 +24,7 @@ from ska_sdp_datamodels.visibility.msv2fund import Antenna, Stand
 casacore = pytest.importorskip("casacore")
 
 
-def __initData_WGS84():
+def initData_WGS84():
     """
     Private function to generate a random set of data for
     writing a UVFITS file.  The data is returned as a dictionary
@@ -118,7 +118,7 @@ def __initData_WGS84():
     }
 
 
-def __initData_ENU():
+def initData_ENU():
     """
     Private function to generate a random
     set of data for writing a Measurements
@@ -224,6 +224,62 @@ def __initData_ENU():
     }
 
 
+def write_tables_WGS84(filename):
+    """
+    Utility function for writing WGS84 tables.
+    """
+    testTime = float(86400.0 * Time(time.time(), format="unix").mjd)
+    # Get some data
+    data = initData_WGS84()
+
+    # Start the table
+    tbl = msv2.Ms(filename, ref_time=testTime, frame=data["site"].attrs["frame"])
+    tbl.set_stokes(["xx"])
+    tbl.set_frequency(data["freq"], data["channel_width"])
+    tbl.set_geometry(data["site"], data["antennas"])
+    tbl.add_data_set(testTime, 2.0, data["bl"], data["vis"])
+
+    # Judge if the tbl's antenna is correctly positioned
+    antxyz_ecef = numpy.zeros((len(data["antennas"]), 3))
+    for i, ant in enumerate(tbl.array[0]["ants"]):
+        antxyz_ecef[i][0] = ant.x
+        antxyz_ecef[i][1] = ant.y
+        antxyz_ecef[i][2] = ant.z
+
+    # the antxyz in table should be same as data['xyz']
+    assert numpy.allclose(antxyz_ecef, data["xyz"])
+
+    tbl.write()
+
+
+def test_write_tables_WGS84():
+    """Test if the MeasurementSet writer writes
+    all of the tables."""
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        testFile = os.path.join(temp_dir, "ms-test-WGS.ms")
+        write_tables_WGS84(testFile)
+
+        # Make sure everyone is there
+        assert os.path.exists(testFile)
+        for tbl in (
+            "ANTENNA",
+            "DATA_DESCRIPTION",
+            "FEED",
+            "FIELD",
+            "FLAG_CMD",
+            "HISTORY",
+            "OBSERVATION",
+            "POINTING",
+            "POLARIZATION",
+            "PROCESSOR",
+            "SOURCE",
+            "SPECTRAL_WINDOW",
+            "STATE",
+        ):
+            assert os.path.exists(os.path.join(testFile, tbl))
+
+
 def test_write_tables_ENU():
     """Test if the MeasurementSet writer writes all of the tables."""
 
@@ -232,7 +288,7 @@ def test_write_tables_ENU():
         testFile = os.path.join(temp_dir, "ms-test-msv2.ms")
 
         # Get some data
-        data = __initData_ENU()
+        data = initData_ENU()
 
         # Start the table
         tbl = msv2.Ms(testFile, ref_time=testTime, frame=data["site"].attrs["frame"])
@@ -274,55 +330,6 @@ def test_write_tables_ENU():
             assert os.path.exists(os.path.join(testFile, tbl))
 
 
-def test_write_tables_WGS84():
-    """Test if the MeasurementSet writer writes all of the tables."""
-
-    testTime = float(86400.0 * Time(time.time(), format="unix").mjd)
-    with tempfile.TemporaryDirectory() as temp_dir:
-        testFile = os.path.join(temp_dir, "ms-test-WGS.ms")
-
-        # Get some data
-        data = __initData_WGS84()
-
-        # Start the table
-        tbl = msv2.Ms(testFile, ref_time=testTime, frame=data["site"].attrs["frame"])
-        tbl.set_stokes(["xx"])
-        tbl.set_frequency(data["freq"], data["channel_width"])
-        tbl.set_geometry(data["site"], data["antennas"])
-        tbl.add_data_set(testTime, 2.0, data["bl"], data["vis"])
-
-        # Judge if the tbl's antenna is correctly positioned
-        antxyz_ecef = numpy.zeros((len(data["antennas"]), 3))
-        for i, ant in enumerate(tbl.array[0]["ants"]):
-            antxyz_ecef[i][0] = ant.x
-            antxyz_ecef[i][1] = ant.y
-            antxyz_ecef[i][2] = ant.z
-
-        # the antxyz in table should be same as data['xyz']
-        assert numpy.allclose(antxyz_ecef, data["xyz"])
-
-        tbl.write()
-
-        # Make sure everyone is there
-        assert os.path.exists(testFile)
-        for tbl in (
-            "ANTENNA",
-            "DATA_DESCRIPTION",
-            "FEED",
-            "FIELD",
-            "FLAG_CMD",
-            "HISTORY",
-            "OBSERVATION",
-            "POINTING",
-            "POLARIZATION",
-            "PROCESSOR",
-            "SOURCE",
-            "SPECTRAL_WINDOW",
-            "STATE",
-        ):
-            assert os.path.exists(os.path.join(testFile, tbl))
-
-
 def test_main_table():
     """Test the primary data table."""
 
@@ -331,7 +338,7 @@ def test_main_table():
         testFile = os.path.join(temp_dir, "ms-test-UV.ms")
 
         # Get some data
-        data = __initData_WGS84()
+        data = initData_WGS84()
 
         # Start the file
         fits = msv2.Ms(testFile, ref_time=testTime)
@@ -403,7 +410,7 @@ def test_multi_if():
         testFile = os.path.join(temp_dir, "ms-test-MultiIF.ms")
 
         # Get some data
-        data = __initData_WGS84()
+        data = initData_WGS84()
 
         # Start the file
         fits = msv2.Ms(testFile, ref_time=testTime)
