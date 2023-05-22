@@ -46,7 +46,7 @@ def test_extend_visibility_to_ms():
     """
     # Set up
     test_path = tempfile.mkdtemp(prefix="test-ms-", suffix=".tmp")
-    ms_file = os.path.join(testPath, "test.ms")
+    ms_file = os.path.join(test_path, "test.ms")
     out_ms_file = os.path.join(test_path, "out.ms")
 
     # Generate a temp MS file
