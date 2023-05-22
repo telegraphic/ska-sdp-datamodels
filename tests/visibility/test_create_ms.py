@@ -157,7 +157,9 @@ class TestCreateMS(unittest.TestCase):
             assert v.vis.data.shape[-1] == 1
             assert v.visibility_acc.polarisation_frame.type == "stokesI"
             assert numpy.max(numpy.abs(v.vis)) > 0.0, ivis
-            assert numpy.max(numpy.abs(v.visibility_acc.flagged_vis)) > 0.0, ivis
+            assert (
+                numpy.max(numpy.abs(v.visibility_acc.flagged_vis)) > 0.0
+            ), ivis
             assert numpy.sum(v.weight) > 0.0, ivis
             assert numpy.sum(v.visibility_acc.flagged_weight) > 0.0, ivis
 
@@ -174,7 +176,9 @@ class TestCreateMS(unittest.TestCase):
         nchan_ave = 1
         nchan = 8
         for schan in range(0, nchan, nchan_ave):
-            v = create_visibility_from_ms(msfile, start_chan=schan, end_chan=schan)
+            v = create_visibility_from_ms(
+                msfile, start_chan=schan, end_chan=schan
+            )
             vis_by_channel.append(v[0])
 
         assert len(vis_by_channel) == 8, len(vis_by_channel)

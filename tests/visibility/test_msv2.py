@@ -4,10 +4,10 @@
 import os
 import tempfile
 import time
-import pytest
 
 import astropy.units as u
 import numpy
+import pytest
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
 
@@ -61,7 +61,9 @@ def initData_WGS84():
             "ak30",
         ]
     )
-    diameter = numpy.array([12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0])
+    diameter = numpy.array(
+        [12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0]
+    )
     xyz = numpy.array(
         [
             [-2556109.98244348, 5097388.70050131, -2848440.1332423],
@@ -89,7 +91,9 @@ def initData_WGS84():
     )
     antennas = []
     for i, name in enumerate(names):
-        antennas.append(Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2])))
+        antennas.append(
+            Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2]))
+        )
 
     # Set baselines and data
     blList = []
@@ -195,7 +199,9 @@ def initData_ENU():
     )
     antennas = []
     for i, name in enumerate(names):
-        antennas.append(Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2])))
+        antennas.append(
+            Antenna(i, Stand(name, xyz[i, 0], xyz[i, 1], xyz[i, 2]))
+        )
 
     # Set baselines and data
     blList = []
@@ -233,7 +239,9 @@ def write_tables_WGS84(filename):
     data = initData_WGS84()
 
     # Start the table
-    tbl = msv2.Ms(filename, ref_time=testTime, frame=data["site"].attrs["frame"])
+    tbl = msv2.Ms(
+        filename, ref_time=testTime, frame=data["site"].attrs["frame"]
+    )
     tbl.set_stokes(["xx"])
     tbl.set_frequency(data["freq"], data["channel_width"])
     tbl.set_geometry(data["site"], data["antennas"])
@@ -291,7 +299,9 @@ def test_write_tables_ENU():
         data = initData_ENU()
 
         # Start the table
-        tbl = msv2.Ms(testFile, ref_time=testTime, frame=data["site"].attrs["frame"])
+        tbl = msv2.Ms(
+            testFile, ref_time=testTime, frame=data["site"].attrs["frame"]
+        )
         tbl.set_stokes(["xx"])
         tbl.set_frequency(data["freq"], data["channel_width"])
         tbl.set_geometry(data["site"], data["antennas"])
@@ -358,7 +368,9 @@ def test_main_table():
         vis = ms.getcol("DATA")
         weights = ms.getcol("WEIGHT_SPECTRUM")
 
-        ms2 = casacore.tables.table(os.path.join(testFile, "ANTENNA"), ack=False)
+        ms2 = casacore.tables.table(
+            os.path.join(testFile, "ANTENNA"), ack=False
+        )
         mapper = ms2.getcol("NAME")
 
         # Correct number of visibilities
@@ -386,7 +398,10 @@ def test_main_table():
             # corresponds to the current visibility
             i = 0
             for a1, a2 in data["bl"]:
-                if a1.stand.id == mapper[stand1] and a2.stand.id == mapper[stand2]:
+                if (
+                    a1.stand.id == mapper[stand1]
+                    and a2.stand.id == mapper[stand2]
+                ):
                     break
 
                 i = i + 1
@@ -435,7 +450,9 @@ def test_multi_if():
         ddsc = ms.getcol("DATA_DESC_ID")
         vis = ms.getcol("DATA")
 
-        ms2 = casacore.tables.table(os.path.join(testFile, "ANTENNA"), ack=False)
+        ms2 = casacore.tables.table(
+            os.path.join(testFile, "ANTENNA"), ack=False
+        )
         mapper = ms2.getcol("NAME")
 
         ms3 = casacore.tables.table(
@@ -464,7 +481,10 @@ def test_multi_if():
             # to the current visibility
             i = 0
             for a1, a2 in data["bl"]:
-                if a1.stand.id == mapper[stand1] and a2.stand.id == mapper[stand2]:
+                if (
+                    a1.stand.id == mapper[stand1]
+                    and a2.stand.id == mapper[stand2]
+                ):
                     break
 
                 i = i + 1
