@@ -35,9 +35,9 @@ def test_create_visibility_from_ms():
 
     vis = create_visibility_from_ms(ms_file)
 
-    for v in vis:
-        assert v.vis.data.shape[-1] == 1
-        assert v.visibility_acc.polarisation_frame.type == "stokesI"
+    for value in vis:
+        assert value.vis.data.shape[-1] == 1
+        assert value.visibility_acc.polarisation_frame.type == "stokesI"
 
 
 def test_extend_visibility_to_ms():
@@ -65,9 +65,9 @@ def test_extend_visibility_to_ms():
 
     vis = create_visibility_from_ms(out_ms_file)
 
-    for v in vis:
-        assert v.vis.data.shape[-1] == 1
-        assert v.visibility_acc.polarisation_frame.type == "stokesI"
+    for value in vis:
+        assert value.vis.data.shape[-1] == 1
+        assert value.visibility_acc.polarisation_frame.type == "stokesI"
 
 
 def test_list_ms():
