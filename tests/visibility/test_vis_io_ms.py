@@ -36,7 +36,9 @@ def fixture_ms():
     if not os.path.exists(ms_file):
         write_tables_WGS84(ms_file)
 
-    return ms_file
+    yield ms_file
+
+    shutil.rmtree(ms_file)
 
 
 def test_create_visibility_from_ms(msfile):
@@ -62,6 +64,7 @@ def test_extend_visibility_to_ms(msfile):
 
     # Create vis and extend
     bvis = create_visibility_from_ms(msfile)[0]
+
     bvis_list = [bv[1] for bv in bvis.groupby("time", squeeze=False)]
     for bvis in bvis_list:
         extend_visibility_to_ms(outmsfile, bvis)
@@ -79,7 +82,7 @@ def test_list_ms(msfile):
     """
     ms_list = list_ms(msfile)
 
-    assert len(ms_list) > 0
+    assert len(ms_list) == 2
 
 
 def test_export_visibility_to_ms(msfile):
