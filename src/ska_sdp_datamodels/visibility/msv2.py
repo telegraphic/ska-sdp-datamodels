@@ -28,7 +28,6 @@ log = logging.getLogger("data-models-logger")
 try:
     from casacore.tables import table, tableutil
 except ImportError as error:
-
     warnings.warn(
         "Cannot import casacore.tables, MS support disabled", ImportWarning
     )
@@ -708,14 +707,12 @@ class WriteMs(BaseData):
         sourceID = 0
         for dataSet in self.data:
             if dataSet.pol == self.stokes[0]:
-
                 currSourceName = dataSet.source
 
                 if currSourceName is None or currSourceName not in nameList:
                     sourceID += 1
 
                     if dataSet.source is None:
-
                         # Zenith pointings
                         sidereal = Time(
                             dataSet.obstime / 86400.0,
@@ -1433,7 +1430,6 @@ class WriteMs(BaseData):
 
             # Deal with defininig the values of the new data set
             if dataSet.pol == self.stokes[0]:
-
                 # Figure out the new date/time for the observation
                 if dataSet.source is None:
                     # Zenith pointings
@@ -1480,7 +1476,6 @@ class WriteMs(BaseData):
                 # pylint: disable=used-before-assignment
                 # pylint: disable=pointless-statement
                 try:
-
                     ant1List
                     ant2List
                 except NameError:
@@ -1581,7 +1576,6 @@ class WriteMs(BaseData):
                 )
 
                 for j in range(nBand):
-
                     fc = numpy.zeros(
                         (nBL, self.nstokes, self.nchan, 1), dtype=bool
                     )

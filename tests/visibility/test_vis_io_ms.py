@@ -10,6 +10,7 @@ import tempfile
 
 import numpy
 import pytest
+from casacore.tables import table
 
 from ska_sdp_datamodels.visibility.vis_io_ms import (
     create_visibility_from_ms,
@@ -20,6 +21,7 @@ from ska_sdp_datamodels.visibility.vis_io_ms import (
 from tests.visibility.test_msv2 import write_tables_WGS84
 
 casacore = pytest.importorskip("casacore")
+
 
 NCHAN_AVE = 16
 NCHAN = 192
@@ -69,11 +71,20 @@ def test_extend_visibility_to_ms(msfile):
     for bvis in bvis_list:
         extend_visibility_to_ms(outmsfile, bvis)
 
+    # confirm visibility created from outmsfile is the correct shape and type
     vis = create_visibility_from_ms(outmsfile)
 
     for value in vis:
         assert value.vis.data.shape[-1] == 1
         assert value.visibility_acc.polarisation_frame.type == "stokesI"
+
+    # confirm the outmsfile has been extended
+    msfile_table = table(msfile, readonly=True)
+    outmsfile_table = table(outmsfile, readonly=True)
+    msfile_data_col = msfile_table.getcol("DATA")
+    outmsfile_data_col = outmsfile_table.getcol("DATA")
+
+    assert msfile_data_col.shape != outmsfile_data_col.shape
 
 
 def test_list_ms(msfile):
