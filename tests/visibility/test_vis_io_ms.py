@@ -50,6 +50,7 @@ def test_create_visibility_from_ms(msfile):
 
     vis = create_visibility_from_ms(msfile)
 
+    # Confirm created visibility is the correct shape and type
     for value in vis:
         assert value.vis.data.shape[-1] == 1
         assert value.visibility_acc.polarisation_frame.type == "stokesI"
@@ -66,8 +67,8 @@ def test_extend_visibility_to_ms(msfile):
 
     # Create vis and extend
     bvis = create_visibility_from_ms(msfile)[0]
-
     bvis_list = [bv[1] for bv in bvis.groupby("time", squeeze=False)]
+
     for bvis in bvis_list:
         extend_visibility_to_ms(outmsfile, bvis)
 
@@ -119,56 +120,19 @@ def test_export_visibility_to_ms(msfile):
         assert value.visibility_acc.polarisation_frame.type == "stokesI"
 
 
-def test_create_ms_spectral(msfile):
+def test_create_ms_slice_visibility(msfile):
     """
-    Specifc scenario of create_visibility_from_ms:
-    Test with spectral information.
+    Test the specifc scenario of create_visibility_from_ms where the
+    visibility is sliced over groups of channels and read by slice
     """
+
     vis_by_channel = []
-    for schan in range(0, NCHAN, NCHAN_AVE):
-        max_chan = min(NCHAN, schan + NCHAN_AVE)
-        vis = create_visibility_from_ms(msfile, range(schan, max_chan))
-        vis_by_channel.append(vis[0])
-
-    assert len(vis_by_channel) == 12
-    for vis in vis_by_channel:
-        assert vis.vis.data.shape[-1] == 1
-        assert vis.visibility_acc.polarisation_frame.type == "stokesI"
-
-
-def test_create_ms_slice(msfile):
-    """
-    Specifc scenario of create_visibility_from_ms
-    Test using slicing
-    """
-    vis_by_channel = []
-
     for schan in range(0, NCHAN, NCHAN_AVE):
         max_chan = min(NCHAN, schan + NCHAN_AVE)
         vis = create_visibility_from_ms(
             msfile, start_chan=schan, end_chan=max_chan - 1
         )
         assert vis[0].vis.shape[-2] == NCHAN_AVE
-        vis_by_channel.append(vis[0])
-
-    assert len(vis_by_channel) == 12
-    for vis in vis_by_channel:
-        assert vis.vis.data.shape[-1] == 1
-        assert vis.visibility_acc.polarisation_frame.type == "stokesI"
-
-
-def test_create_ms_slice_visibility(msfile):
-    """
-    Specifc scenario of create_visibility_from_ms:
-    Test using slicing with multiple channels
-    """
-
-    vis_by_channel = []
-    for schan in range(0, NCHAN, NCHAN_AVE):
-        max_chan = min(NCHAN, schan + NCHAN_AVE)
-        vis = create_visibility_from_ms(
-            msfile, start_chan=schan, end_chan=max_chan - 1
-        )
         nchannels = len(numpy.unique(vis[0].frequency))
         assert nchannels == NCHAN_AVE
         vis_by_channel.append(vis[0])
@@ -177,6 +141,33 @@ def test_create_ms_slice_visibility(msfile):
     for vis in vis_by_channel:
         assert vis.vis.data.shape[-1] == 1
         assert vis.visibility_acc.polarisation_frame.type == "stokesI"
+        # check the relevant quantities are not zero
+        assert numpy.max(numpy.abs(vis.vis)) > 0.0
+        assert numpy.max(numpy.abs(vis.visibility_acc.flagged_vis)) > 0.0
+        assert numpy.sum(vis.weight) > 0.0
+        assert numpy.sum(vis.visibility_acc.flagged_weight) > 0.0
+
+
+def test_create_ms_single(msfile):
+    """
+    Specifc scenario of create_visibility_from_ms:
+    Test that creates a single visibility per channel
+    """
+
+    vis_by_channel = []
+    nchan_ave = 1
+    nchan = 8
+    for schan in range(0, nchan, nchan_ave):
+        vis = create_visibility_from_ms(
+            msfile, start_chan=schan, end_chan=schan
+        )
+        vis_by_channel.append(vis[0])
+
+    assert len(vis_by_channel) == 8
+    for vis in vis_by_channel:
+        assert vis.vis.data.shape[-1] == 1
+        assert vis.visibility_acc.polarisation_frame.type == "stokesI"
+        # check the relevant quantities are not zero
         assert numpy.max(numpy.abs(vis.vis)) > 0.0
         assert numpy.max(numpy.abs(vis.visibility_acc.flagged_vis)) > 0.0
         assert numpy.sum(vis.weight) > 0.0
@@ -186,7 +177,8 @@ def test_create_ms_slice_visibility(msfile):
 def test_create_ms_average_slice_visibility(msfile):
     """
     Specifc scenario of create_visibility_from_ms:
-    Test using slicing averaging over channels
+    Similar to test_create_ms_slice_visibility but we
+    average the frequency channels per slice
     """
 
     vis_by_channel = []
@@ -203,55 +195,12 @@ def test_create_ms_average_slice_visibility(msfile):
         vis_by_channel.append(vis[0])
 
     assert len(vis_by_channel) == 12
-    for ivis, vis in enumerate(vis_by_channel):
-        assert vis.vis.data.shape[-1] == 1
-        assert vis.visibility_acc.polarisation_frame.type == "stokesI"
-        assert numpy.max(numpy.abs(vis.vis)) > 0.0, ivis
-        assert numpy.max(numpy.abs(vis.visibility_acc.flagged_vis)) > 0.0, ivis
-        assert numpy.sum(vis.weight) > 0.0, ivis
-        assert numpy.sum(vis.visibility_acc.flagged_weight) > 0.0, ivis
-
-
-def test_create_ms_spectral_average(msfile):
-    """
-    Specifc scenario of create_visibility_from_ms:
-    Test when averaging over spectral channels
-    """
-
-    vis_by_channel = []
-
-    for schan in range(0, NCHAN, NCHAN_AVE):
-        max_chan = min(NCHAN, schan + NCHAN_AVE)
-        vis = create_visibility_from_ms(
-            msfile, range(schan, max_chan), average_channels=True
-        )
-        vis_by_channel.append(vis[0])
-
-    assert len(vis_by_channel) == 12
     for vis in vis_by_channel:
         assert vis.vis.data.shape[-1] == 1
         assert vis.vis.data.shape[-2] == 1
         assert vis.visibility_acc.polarisation_frame.type == "stokesI"
+        # check the relevant quantities are not zero
         assert numpy.max(numpy.abs(vis.vis)) > 0.0
         assert numpy.max(numpy.abs(vis.visibility_acc.flagged_vis)) > 0.0
-
-
-def test_create_ms_single(msfile):
-    """
-    Specifc scenario of create_visibility_from_ms:
-    Test for a single Visibility
-    """
-
-    vis_by_channel = []
-    nchan_ave = 1
-    nchan = 8
-    for schan in range(0, nchan, nchan_ave):
-        vis = create_visibility_from_ms(
-            msfile, start_chan=schan, end_chan=schan
-        )
-        vis_by_channel.append(vis[0])
-
-    assert len(vis_by_channel) == 8, len(vis_by_channel)
-    for vis in vis_by_channel:
-        assert vis.vis.data.shape[-1] == 1
-        assert vis.visibility_acc.polarisation_frame.type == "stokesI"
+        assert numpy.sum(vis.weight) > 0.0
+        assert numpy.sum(vis.visibility_acc.flagged_weight) > 0.0
