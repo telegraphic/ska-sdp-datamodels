@@ -66,16 +66,16 @@ def test_extend_visibility_to_ms(msfile):
         shutil.rmtree(outmsfile, ignore_errors=False)
 
     # Create vis and extend
-    bvis = create_visibility_from_ms(msfile)[0]
-    bvis_list = [bv[1] for bv in bvis.groupby("time", squeeze=False)]
+    vis = create_visibility_from_ms(msfile)[0]
+    vis_list = [vis_item[1] for vis_item in vis.groupby("time", squeeze=False)]
 
-    for bvis in bvis_list:
-        extend_visibility_to_ms(outmsfile, bvis)
+    for vis in vis_list:
+        extend_visibility_to_ms(outmsfile, vis)
 
     # confirm visibility created from outmsfile is the correct shape and type
-    vis = create_visibility_from_ms(outmsfile)
+    vis_out = create_visibility_from_ms(outmsfile)
 
-    for value in vis:
+    for value in vis_out:
         assert value.vis.data.shape[-1] == 1
         assert value.visibility_acc.polarisation_frame.type == "stokesI"
 
