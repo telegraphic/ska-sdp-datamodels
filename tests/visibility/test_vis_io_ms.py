@@ -94,7 +94,17 @@ def test_list_ms(msfile):
     """
     ms_list = list_ms(msfile)
 
+    # check that it returns a tuple
     assert len(ms_list) == 2
+    assert isinstance(ms_list, tuple)
+
+    # check that the first element is a list of strings
+    assert isinstance(ms_list[0], list)
+    assert all(isinstance(source, str) for source in ms_list[0])
+
+    # check that the second element is a list of ints
+    assert isinstance(ms_list[1], list)
+    assert all(isinstance(dds, int) for dds in ms_list[1])
 
 
 def test_export_visibility_to_ms(msfile):
