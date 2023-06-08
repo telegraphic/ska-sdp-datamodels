@@ -234,7 +234,6 @@ def create_visibility(
     # Do each time filling in the actual values
     itime = 0
     for _, time in enumerate(times):
-
         if times_are_ha:
             ha = time
         else:

@@ -63,7 +63,6 @@ class Configuration(xarray.Dataset):
         stations="%s",
         vp_type=None,
     ):
-
         """
         Configuration object describing data for processing
 
