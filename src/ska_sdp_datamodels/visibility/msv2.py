@@ -187,7 +187,7 @@ class WriteMs(BaseData):
                 inttime,
                 baselines,
                 visibilities,
-                flags=flags,
+                flags,
                 weights=weights,
                 pol=numericPol,
                 source=source,

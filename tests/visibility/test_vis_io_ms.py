@@ -52,6 +52,7 @@ def test_create_visibility_from_ms(msfile):
 
     # Confirm created visibility is the correct shape and type
     for value in vis:
+        assert value.vis.data.shape[0] == 5
         assert value.vis.data.shape[-1] == 1
         assert value.visibility_acc.polarisation_frame.type == "stokesI"
 
@@ -76,6 +77,8 @@ def test_extend_visibility_to_ms(msfile):
     vis_out = create_visibility_from_ms(outmsfile)
 
     for value in vis_out:
+        # assert all times are written
+        assert value.vis.data.shape[0] == 5
         assert value.vis.data.shape[-1] == 1
         assert value.visibility_acc.polarisation_frame.type == "stokesI"
 
@@ -126,6 +129,8 @@ def test_export_visibility_to_ms(msfile):
     vis = create_visibility_from_ms(outmsfile)
 
     for value in vis:
+        # assert all times are written
+        assert value.vis.data.shape[0] == 5
         assert value.vis.data.shape[-1] == 1
         assert value.visibility_acc.polarisation_frame.type == "stokesI"
 

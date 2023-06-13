@@ -234,18 +234,21 @@ def write_tables_WGS84(filename):
     """
     Utility function for writing WGS84 tables.
     """
-    testTime = float(86400.0 * Time(time.time(), format="unix").mjd)
+    init_time = float(86400.0 * Time(time.time(), format="unix").mjd)
     # Get some data
     data = initData_WGS84()
 
     # Start the table
     tbl = msv2.Ms(
-        filename, ref_time=testTime, frame=data["site"].attrs["frame"]
+        filename, ref_time=init_time, frame=data["site"].attrs["frame"]
     )
     tbl.set_stokes(["xx"])
     tbl.set_frequency(data["freq"], data["channel_width"])
     tbl.set_geometry(data["site"], data["antennas"])
-    tbl.add_data_set(testTime, 2.0, data["bl"], data["vis"])
+    # Use 5 time samples
+    for i in range(5):
+        testTime = init_time + i * 1.0e7
+        tbl.add_data_set(testTime, 2.0, data["bl"], data["vis"])
 
     # Judge if the tbl's antenna is correctly positioned
     antxyz_ecef = numpy.zeros((len(data["antennas"]), 3))
@@ -262,7 +265,9 @@ def write_tables_WGS84(filename):
 
 def test_write_tables_WGS84():
     """Test if the MeasurementSet writer writes
-    all of the tables."""
+    all of the tables.
+    This test doesn't assert any values.
+    """
 
     with tempfile.TemporaryDirectory() as temp_dir:
         testFile = os.path.join(temp_dir, "ms-test-WGS.ms")
