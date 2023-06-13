@@ -109,6 +109,15 @@ def initData_WGS84():
     visData = visData.astype(numpy.complex64)
 
     weights = numpy.random.rand(len(blList), len(freq))
+
+    # Use 5 time samples
+    init_time = float(86400.0 * Time(time.time(), format="unix").mjd)
+    integration_time = numpy.array([1.0e7, 1.0e7, 1.0e7, 1.0e7, 1.0e7])
+
+    times = numpy.zeros(5)
+    for i, inttime in enumerate(integration_time):
+        times[i] = init_time + i * inttime
+
     return {
         "freq": freq,
         "channel_width": channel_width,
@@ -119,6 +128,8 @@ def initData_WGS84():
         "weights": weights,
         "xyz": xyz,
         "obs": obs,
+        "time": times,
+        "integration_time": integration_time,
     }
 
 
@@ -234,21 +245,21 @@ def write_tables_WGS84(filename):
     """
     Utility function for writing WGS84 tables.
     """
-    init_time = float(86400.0 * Time(time.time(), format="unix").mjd)
+
     # Get some data
     data = initData_WGS84()
 
     # Start the table
-    tbl = msv2.Ms(
-        filename, ref_time=init_time, frame=data["site"].attrs["frame"]
-    )
+    tbl = msv2.Ms(filename, ref_time=0, frame=data["site"].attrs["frame"])
     tbl.set_stokes(["xx"])
     tbl.set_frequency(data["freq"], data["channel_width"])
     tbl.set_geometry(data["site"], data["antennas"])
-    # Use 5 time samples
-    for i in range(5):
-        testTime = init_time + i * 1.0e7
-        tbl.add_data_set(testTime, 2.0, data["bl"], data["vis"])
+
+    int_time = data["integration_time"]
+    for ntime, test_time in enumerate(data["time"]):
+        tbl.add_data_set(
+            test_time, int_time[ntime].data, data["bl"], data["vis"]
+        )
 
     # Judge if the tbl's antenna is correctly positioned
     antxyz_ecef = numpy.zeros((len(data["antennas"]), 3))
@@ -348,7 +359,6 @@ def test_write_tables_ENU():
 def test_main_table():
     """Test the primary data table."""
 
-    testTime = float(86400.0 * Time(time.time(), format="unix").mjd)
     with tempfile.TemporaryDirectory() as temp_dir:
         testFile = os.path.join(temp_dir, "ms-test-UV.ms")
 
@@ -356,13 +366,20 @@ def test_main_table():
         data = initData_WGS84()
 
         # Start the file
-        fits = msv2.Ms(testFile, ref_time=testTime)
+        fits = msv2.Ms(testFile, ref_time=0)
         fits.set_stokes(["xx"])
         fits.set_frequency(data["freq"], data["channel_width"])
         fits.set_geometry(data["site"], data["antennas"])
-        fits.add_data_set(
-            testTime, 6.0, data["bl"], data["vis"], weights=data["weights"]
-        )
+        int_time = data["integration_time"]
+        for ntime, test_time in enumerate(data["time"]):
+            fits.add_data_set(
+                test_time,
+                int_time[ntime].data,
+                data["bl"],
+                data["vis"],
+                weights=data["weights"],
+            )
+
         fits.write()
 
         # Open the table and examine
@@ -379,8 +396,8 @@ def test_main_table():
         mapper = ms2.getcol("NAME")
 
         # Correct number of visibilities
-        assert uvw.shape[0] == data["vis"].shape[0]
-        assert vis.shape[0] == data["vis"].shape[0]
+        assert uvw.shape[0] == data["vis"].shape[0] * 5
+        assert vis.shape[0] == data["vis"].shape[0] * 5
 
         # Correct number of uvw coordinates
         assert uvw.shape[1] == 3
@@ -389,11 +406,11 @@ def test_main_table():
         assert vis.shape[1] == data["freq"].size
 
         # Correct number of weights
-        assert weights.shape[0] == data["weights"].shape[0]
+        assert weights.shape[0] == data["weights"].shape[0] * 5
         assert weights.shape[1] == data["freq"].size
 
         # Correct values
-        for row in range(uvw.shape[0]):
+        for row in range(int(uvw.shape[0] / 5)):
             stand1 = ant1[row]
             stand2 = ant2[row]
             visData = vis[row, :, 0]

@@ -49,7 +49,6 @@ def test_create_visibility_from_ms(msfile):
     """
 
     vis = create_visibility_from_ms(msfile)
-
     # Confirm created visibility is the correct shape and type
     for value in vis:
         assert value.vis.data.shape[0] == 5

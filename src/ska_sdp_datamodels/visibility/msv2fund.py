@@ -246,8 +246,9 @@ class Frequency:
         self.baseBand = 0
 
 
+# pylint:disable=useless-object-inheritance
 @cmp_to_total
-class MS_UVData:
+class MS_UVData(object):
     """
     UV visibility data set for a given observation time.
     """
