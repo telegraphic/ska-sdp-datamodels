@@ -990,7 +990,6 @@ class WriteMs(BaseData):
         # Spectral Window
 
         nBand = len(self.freq)
-
         col1 = tableutil.makescacoldesc(
             "MEAS_FREQ_REF", 0, comment="Frequency Measure reference"
         )

@@ -118,17 +118,17 @@ def test_export_visibility_to_ms(msfile):
     if os.path.exists(outmsfile):
         shutil.rmtree(outmsfile, ignore_errors=False)
 
-    # Generate visibility list from MS file
-    bvis = create_visibility_from_ms(msfile)[0]
-    bvis_list = [bv[1] for bv in bvis.groupby("time", squeeze=False)]
+    # This splits vis into 5 different Visibilities
+    vis = create_visibility_from_ms(msfile)[0]
+    vis_list = [vis_item[1] for vis_item in vis.groupby("time", squeeze=False)]
+    assert len(vis_list) == 5
 
     # Generate MS file from these visibilities
-    export_visibility_to_ms(outmsfile, bvis_list, source_name=None)
+    export_visibility_to_ms(outmsfile, vis_list)
 
     vis = create_visibility_from_ms(outmsfile)
 
     for value in vis:
-        # assert all times are written
         assert value.vis.data.shape[0] == 5
         assert value.vis.data.shape[-1] == 1
         assert value.visibility_acc.polarisation_frame.type == "stokesI"

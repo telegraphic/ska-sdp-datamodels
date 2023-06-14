@@ -525,6 +525,7 @@ class BaseData:
         Given a numpy array of frequencies, set the relevant common
         observation parameters and add an entry to the self.freq list.
         """
+        self.freq = []
         if self.nchan == 0:
             self.nchan = len(freq)
             self.refVal = freq[0]
