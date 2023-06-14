@@ -246,6 +246,7 @@ class Frequency:
         self.baseBand = 0
 
 
+# We need the callable object be there so cmp_to_total works
 # pylint:disable=useless-object-inheritance
 @cmp_to_total
 class MS_UVData(object):
