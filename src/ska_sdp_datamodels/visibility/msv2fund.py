@@ -248,7 +248,7 @@ class Frequency:
 
 
 # Note: In Python 3 __cmp__method is deprecated.
-# We do not do any cmparison here anymore.
+# We do not actively do any comparison here anymore.
 # Still keeping the methods in case we want to call them directly.
 @total_ordering
 class MS_UVData:
@@ -525,6 +525,7 @@ class BaseData:
         Given a numpy array of frequencies, set the relevant common
         observation parameters and add an entry to the self.freq list.
         """
+        # Clear up the list
         self.freq = []
         if self.nchan == 0:
             self.nchan = len(freq)
