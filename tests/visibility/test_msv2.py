@@ -8,7 +8,7 @@ import time
 import astropy.units as u
 import numpy
 import pytest
-from astropy.coordinates import EarthLocation
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 
 from ska_sdp_datamodels.configuration.config_coordinate_support import (
@@ -286,6 +286,9 @@ def initData_WGS84():
     for i, inttime in enumerate(integration_time):
         times[i] = init_time + i * inttime
 
+    phasecentre = SkyCoord(
+        ra=+180.0 * u.deg, dec=-60.0 * u.deg, frame="icrs", equinox="J2000"
+    )
     return {
         "freq": freq,
         "channel_width": channel_width,
@@ -298,6 +301,7 @@ def initData_WGS84():
         "obs": obs,
         "time": times,
         "integration_time": integration_time,
+        "phase_centre": phasecentre,
     }
 
 
@@ -318,7 +322,12 @@ def write_tables_WGS84(filename):
     int_time = data["integration_time"].data
     for i, test_time in enumerate(data["time"]):
         tbl.add_data_set(
-            test_time, int_time[i], data["bl"], data["vis"][i, ...]
+            test_time,
+            int_time[i],
+            data["bl"],
+            data["vis"][i, ...],
+            source="unknown",
+            phasecentre=data["phase_centre"],
         )
 
     # Judge if the tbl's antenna is correctly positioned
