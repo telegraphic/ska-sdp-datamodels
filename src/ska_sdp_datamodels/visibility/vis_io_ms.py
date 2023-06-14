@@ -310,7 +310,7 @@ def create_visibility_from_ms(
     else:
         dds = selected_dds
 
-    log.info("Reading uni. fields %s, uni. data descs %s", fields, dds)
+    log.debug("Reading uni. fields %s, uni. data descs %s", fields, dds)
     vis_list = []
     for field in fields:
         ftab = table(msname, ack=ack).query(f"FIELD_ID=={field}", style="")
@@ -533,6 +533,7 @@ def create_visibility_from_ms(
             )
 
             time_index_row = numpy.zeros_like(time, dtype="int")
+            # print(time)
             time_last = time[0]
             time_index = 0
             for row, _ in enumerate(time):

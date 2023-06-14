@@ -319,7 +319,7 @@ def write_tables_WGS84(filename):
     tbl.set_frequency(data["freq"], data["channel_width"])
     tbl.set_geometry(data["site"], data["antennas"])
 
-    int_time = data["integration_time"].data
+    int_time = data["integration_time"]
     for i, test_time in enumerate(data["time"]):
         tbl.add_data_set(
             test_time,
@@ -391,7 +391,7 @@ def test_main_table():
         fits.set_stokes(["xx"])
         fits.set_frequency(data["freq"], data["channel_width"])
         fits.set_geometry(data["site"], data["antennas"])
-        int_time = data["integration_time"].data
+        int_time = data["integration_time"]
         for i, test_time in enumerate(data["time"]):
             fits.add_data_set(
                 test_time,
@@ -486,7 +486,7 @@ def test_multi_if():
         fits.set_frequency(data["freq"] + 10e6, data["channel_width"])
 
         fits.set_geometry(data["site"], data["antennas"])
-        int_time = data["integration_time"].data
+        int_time = data["integration_time"]
         for i, test_time in enumerate(data["time"]):
             fits.add_data_set(
                 test_time,

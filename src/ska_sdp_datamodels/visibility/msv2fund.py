@@ -8,13 +8,13 @@ MeasurementSets V2 Reference Codes Based on Python-casacore
 import logging
 import re
 from datetime import datetime
+from functools import total_ordering
 
 import numpy
 
 from ska_sdp_datamodels.visibility.msv2supp import (
     NUMERIC_STOKES,
     STOKES_CODES,
-    cmp_to_total,
     merge_baseline,
 )
 
@@ -32,7 +32,8 @@ __all__ = [
 ]
 
 
-@cmp_to_total
+# Note: Python 3 cmp has changed to total_ordering
+@total_ordering
 class Stand:
     """
     Object to store the information (location and ID) about a stand.
@@ -246,10 +247,11 @@ class Frequency:
         self.baseBand = 0
 
 
-# We need the callable object be there so cmp_to_total works
-# pylint:disable=useless-object-inheritance
-@cmp_to_total
-class MS_UVData(object):
+# Note: In Python 3 __cmp__method is deprecated.
+# We do not do any cmparison here anymore.
+# Still keeping the methods in case we want to call them directly.
+@total_ordering
+class MS_UVData:
     """
     UV visibility data set for a given observation time.
     """
@@ -311,7 +313,6 @@ class MS_UVData(object):
 
         sID = (self.obstime, abs(self.pol))
         yID = (y.obstime, abs(y.pol))
-
         if sID > yID:
             return 1
         if sID < yID:
