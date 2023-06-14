@@ -246,8 +246,14 @@ class Frequency:
         self.sideBand = 1
         self.baseBand = 0
 
+    def __eq__(self, y):
+        sID = (self.bandFreq, self.chWidth, self.totalBW)
+        yID = (y.bandFreq, y.chWidth, y.totalBW)
+        return sID == yID
 
-# Note: In Python 3 __cmp__method is deprecated.
+    # Note: In Python 3 __cmp__method is deprecated.
+
+
 # We do not actively do any comparison here anymore.
 # Still keeping the methods in case we want to call them directly.
 @total_ordering
@@ -520,13 +526,13 @@ class BaseData:
 
         self.nstokes = len(self.stokes)
 
+    # pylint:disable=expression-not-assigned
     def set_frequency(self, freq, channel_width):
         """
         Given a numpy array of frequencies, set the relevant common
         observation parameters and add an entry to the self.freq list.
         """
-        # Clear up the list
-        self.freq = []
+
         if self.nchan == 0:
             self.nchan = len(freq)
             self.refVal = freq[0]
@@ -543,8 +549,11 @@ class BaseData:
         else:
             totalWidth = numpy.abs(freq[-1] - freq[0])
 
+        # only append if the setup didn't exist
         freqSetup = Frequency(offset, self.channel_width, totalWidth)
-        self.freq.append(freqSetup)
+        self.freq.append(
+            freqSetup
+        ) if freqSetup not in self.freq else self.freq
 
     def add_data_set(
         self,
