@@ -8,13 +8,13 @@ MeasurementSets V2 Reference Codes Based on Python-casacore
 import logging
 import re
 from datetime import datetime
+from functools import total_ordering
 
 import numpy
 
 from ska_sdp_datamodels.visibility.msv2supp import (
     NUMERIC_STOKES,
     STOKES_CODES,
-    cmp_to_total,
     merge_baseline,
 )
 
@@ -32,7 +32,8 @@ __all__ = [
 ]
 
 
-@cmp_to_total
+# Note: Python 3 cmp has changed to total_ordering
+@total_ordering
 class Stand:
     """
     Object to store the information (location and ID) about a stand.
@@ -245,8 +246,17 @@ class Frequency:
         self.sideBand = 1
         self.baseBand = 0
 
+    def __eq__(self, y):
+        sID = (self.bandFreq, self.chWidth, self.totalBW)
+        yID = (y.bandFreq, y.chWidth, y.totalBW)
+        return sID == yID
 
-@cmp_to_total
+    # Note: In Python 3 __cmp__method is deprecated.
+
+
+# We do not actively do any comparison here anymore.
+# Still keeping the methods in case we want to call them directly.
+@total_ordering
 class MS_UVData:
     """
     UV visibility data set for a given observation time.
@@ -309,7 +319,6 @@ class MS_UVData:
 
         sID = (self.obstime, abs(self.pol))
         yID = (y.obstime, abs(y.pol))
-
         if sID > yID:
             return 1
         if sID < yID:
@@ -517,11 +526,13 @@ class BaseData:
 
         self.nstokes = len(self.stokes)
 
+    # pylint:disable=expression-not-assigned
     def set_frequency(self, freq, channel_width):
         """
         Given a numpy array of frequencies, set the relevant common
         observation parameters and add an entry to the self.freq list.
         """
+
         if self.nchan == 0:
             self.nchan = len(freq)
             self.refVal = freq[0]
@@ -538,8 +549,11 @@ class BaseData:
         else:
             totalWidth = numpy.abs(freq[-1] - freq[0])
 
+        # only append if the setup didn't exist
         freqSetup = Frequency(offset, self.channel_width, totalWidth)
-        self.freq.append(freqSetup)
+        self.freq.append(
+            freqSetup
+        ) if freqSetup not in self.freq else self.freq
 
     def add_data_set(
         self,

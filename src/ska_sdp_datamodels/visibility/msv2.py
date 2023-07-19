@@ -187,7 +187,7 @@ class WriteMs(BaseData):
                 inttime,
                 baselines,
                 visibilities,
-                flags=flags,
+                flags,
                 weights=weights,
                 pol=numericPol,
                 source=source,
@@ -212,8 +212,8 @@ class WriteMs(BaseData):
             raise RuntimeError("No visibility data defined")
 
         # Sort the data set
-
-        self.data.sort()
+        # Notice in Python 3, we have to manually specify the keys
+        self.data.sort(key=lambda x: (x.obstime, abs(x.pol)))
 
         # Write the tables
         self._write_main_table()
@@ -708,7 +708,6 @@ class WriteMs(BaseData):
         for dataSet in self.data:
             if dataSet.pol == self.stokes[0]:
                 currSourceName = dataSet.source
-
                 if currSourceName is None or currSourceName not in nameList:
                     sourceID += 1
 
@@ -991,7 +990,6 @@ class WriteMs(BaseData):
         # Spectral Window
 
         nBand = len(self.freq)
-
         col1 = tableutil.makescacoldesc(
             "MEAS_FREQ_REF", 0, comment="Frequency Measure reference"
         )
@@ -1428,7 +1426,7 @@ class WriteMs(BaseData):
             except (NameError, UnboundLocalError):
                 order = dataSet.argsort(mapper=mapper, shift=16)
 
-            # Deal with defininig the values of the new data set
+            # Deal with defining the values of the new data set
             if dataSet.pol == self.stokes[0]:
                 # Figure out the new date/time for the observation
                 if dataSet.source is None:
@@ -1500,8 +1498,7 @@ class WriteMs(BaseData):
                     float(dataSet.obstime + dataSet.inttime / 2.0)
                     for bl in dataSet.baselines
                 ]
-
-                # Add in the new new source ID and name
+                # Add in the new source ID and name
                 sourceList = [sourceID for bl in dataSet.baselines]
 
             # Zero out the visibility data
