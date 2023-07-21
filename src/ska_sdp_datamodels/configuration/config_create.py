@@ -4,11 +4,11 @@
 Create configuration.
 """
 
+import importlib.resources
 import logging
 from typing import Union
 
 import numpy
-import pkg_resources
 from astropy import units
 from astropy.coordinates import EarthLocation
 
@@ -21,49 +21,30 @@ from ska_sdp_datamodels.configuration.config_model import Configuration
 log = logging.getLogger("data-models-logger")
 
 
+def _example_antenna_file(antenna_file):
+    with importlib.resources.as_file(
+        importlib.resources.files(__package__).joinpath(
+            f"example_antenna_files/{antenna_file}"
+        )
+    ) as path:
+        return path
+
+
 ANTENNA_FILES = {
-    "LOWBD2": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/LOWBD2.csv"
-    ).name,
-    "LOWBD2-CORE": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/LOWBD2-CORE.csv"
-    ).name,
-    "LOW": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/LOW_SKA-TEL-SKO-0000422_Rev4.txt"
-    ).name,
-    "LOWR3": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/LOW_SKA-TEL-SKO-0000422_Rev3.txt"
-    ).name,
-    "LOWR4": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/LOW_SKA-TEL-SKO-0000422_Rev4.txt"
-    ).name,
-    "LOW-AA0.5": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/SKA1-LOW-AA0.5-v1.1_AA0p5.txt"
-    ).name,
-    "MID": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/ska1mid.cfg"
-    ).name,
-    "MIDR5": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/ska1mid.cfg"
-    ).name,
-    "MID-AA0.5": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/ska/ska1mid.cfg"
-    ).name,
-    "MEERKAT+": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/other/mkatplus.cfg"
-    ).name,
-    "ASKAP": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/other/askap.cfg"
-    ).name,
-    "LOFAR": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/other/lofar.cfg"
-    ).name,
-    "VLAA": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/other/vlaa_local.csv"
-    ).name,
-    "VLAA_north": pkg_resources.resource_stream(
-        __name__, "example_antenna_files/other/vlaa_local.csv"
-    ).name,
+    "LOWBD2": _example_antenna_file("ska/LOWBD2.csv"),
+    "LOWBD2-CORE": _example_antenna_file("ska/LOWBD2-CORE.csv"),
+    "LOW": _example_antenna_file("ska/LOW_SKA-TEL-SKO-0000422_Rev4.txt"),
+    "LOWR3": _example_antenna_file("ska/LOW_SKA-TEL-SKO-0000422_Rev3.txt"),
+    "LOWR4": _example_antenna_file("ska/LOW_SKA-TEL-SKO-0000422_Rev4.txt"),
+    "LOW-AA0.5": _example_antenna_file("ska/SKA1-LOW-AA0.5-v1.1_AA0p5.txt"),
+    "MID": _example_antenna_file("ska/ska1mid.cfg"),
+    "MIDR5": _example_antenna_file("ska/ska1mid.cfg"),
+    "MID-AA0.5": _example_antenna_file("ska/ska1mid.cfg"),
+    "MEERKAT+": _example_antenna_file("other/mkatplus.cfg"),
+    "ASKAP": _example_antenna_file("other/askap.cfg"),
+    "LOFAR": _example_antenna_file("other/lofar.cfg"),
+    "VLAA": _example_antenna_file("other/vlaa_local.csv"),
+    "VLAA_north": _example_antenna_file("other/vlaa_local.csv"),
 }
 
 
