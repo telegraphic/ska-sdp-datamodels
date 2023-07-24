@@ -19,9 +19,9 @@ h5py = "^3.7"
 # numpy version set to be compatible with RASCIL
 numpy = "^1.23, <1.24"
 pandas = "^1.5"
-xarray = "^2023.7.0"
-msgpack = "1.0.5"
-msgpack-numpy = "0.4.8"
+xarray = ">=2023.7.0"
+msgpack = "^1.0.5"
+msgpack-numpy = "^0.4.8"
 
 # optional dependencies; used by "extras"
 python-casacore = "^3.5.1"
