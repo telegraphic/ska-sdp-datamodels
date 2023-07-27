@@ -32,7 +32,7 @@ log = logging.getLogger("data-models-logger")
 
 
 # pylint: disable=too-many-arguments,too-many-locals,invalid-name
-# pylint: disable=too-many-branches,too-many-statements
+# pylint: disable=too-many-branches,too-many-statements, duplicate-code
 def create_visibility(
     config: Configuration,
     times: NDArray,

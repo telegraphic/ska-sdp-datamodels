@@ -1,3 +1,4 @@
+# pylint:disable=too-many-locals
 """
 Unit tests for the Visibility model
 """

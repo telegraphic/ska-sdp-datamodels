@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, duplicate-code
 
 """
 Functions working with Visibility and FlagData models.
