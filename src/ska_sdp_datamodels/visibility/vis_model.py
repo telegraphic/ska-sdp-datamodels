@@ -60,6 +60,7 @@ class Visibility(xarray.Dataset):
             configuration:       <xarray.Configuration>Dimensions:   (id: 115, spat...
             polarisation_frame:  linear
             source:              unknown
+            scan_id:             0
             meta:                None
     """  # noqa:E501 pylint: disable=line-too-long
 
@@ -90,6 +91,7 @@ class Visibility(xarray.Dataset):
         baselines=None,
         polarisation_frame=PolarisationFrame("stokesI"),
         source="anonymous",
+        scan_id=0,
         meta=None,
         low_precision="float64",
     ):
@@ -108,6 +110,7 @@ class Visibility(xarray.Dataset):
         :param polarisation_frame: Polarisation_Frame
                 e.g. Polarisation_Frame("linear")
         :param source: Source name
+        :param scan_id: Scan number ID (integer)
         :param meta: Meta info
         """
         if weight is None:
@@ -167,6 +170,7 @@ class Visibility(xarray.Dataset):
         attrs["source"] = source
         attrs["phasecentre"] = phasecentre
         attrs["_polarisation_frame"] = polarisation_frame.type
+        attrs["scan_id"] = scan_id
         attrs["meta"] = meta
 
         return cls(datavars, coords=coords, attrs=attrs)

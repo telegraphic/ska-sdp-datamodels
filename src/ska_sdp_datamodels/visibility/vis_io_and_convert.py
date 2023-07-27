@@ -48,6 +48,7 @@ def convert_visibility_to_hdf(vis: Visibility, f):
     f.attrs["polarisation_frame"] = vis.visibility_acc.polarisation_frame.type
     f.attrs["source"] = vis.source
     f.attrs["meta"] = str(vis.meta)
+    f.attrs["scan_id"] = vis.scan_id
     datavars = [
         "time",
         "frequency",
@@ -80,7 +81,7 @@ def convert_hdf_to_visibility(f):
     )
     polarisation_frame = PolarisationFrame(f.attrs["polarisation_frame"])
     source = f.attrs["source"]
-    nants = f.attrs["nants"]
+    scan_id = f.attrs["scan_id"]
     meta = ast.literal_eval(f.attrs["meta"])
     time = f["data_time"][()]
     frequency = f["data_frequency"][()]
@@ -92,7 +93,7 @@ def convert_hdf_to_visibility(f):
     flags = f["data_flags"][()]
 
     baselines = pandas.MultiIndex.from_tuples(
-        generate_baselines(nants),
+        generate_baselines(vis.visibility_acc.nants),
         names=("antenna1", "antenna2"),
     )
 
@@ -109,6 +110,7 @@ def convert_hdf_to_visibility(f):
         phasecentre=phasecentre,
         channel_bandwidth=channel_bandwidth,
         source=source,
+        scan_id=scan_id,
         meta=meta,
         configuration=convert_configuration_from_hdf(f),
     )

@@ -30,6 +30,7 @@ def fixture_visibility(low_aa05_config, phase_centre):
     polarisation_frame = PolarisationFrame("stokesI")
     source = "anonymous"
     low_precision = "float64"
+    scan_id = 1
 
     visibility = Visibility.constructor(
         frequency=frequency,
@@ -45,6 +46,7 @@ def fixture_visibility(low_aa05_config, phase_centre):
         baselines=baselines,
         polarisation_frame=polarisation_frame,
         source=source,
+        scan_id=scan_id,
         meta=None,
         low_precision=low_precision,
     )
@@ -106,13 +108,14 @@ def test_visibility_constructor_attrs(
     """
     result_attrs = result_visibility.attrs
 
-    assert len(result_attrs) == 6
+    assert len(result_attrs) == 7
     assert result_attrs["data_model"] == "Visibility"
     assert result_attrs["configuration"] == low_aa05_config
     assert result_attrs["source"] == "anonymous"
     assert result_attrs["phasecentre"] == phase_centre
     assert result_attrs["_polarisation_frame"] == "stokesI"
     assert result_attrs["meta"] is None
+    assert result_attrs["scan_id"] == 1
 
 
 def test_visibility_copy(result_visibility):
