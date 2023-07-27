@@ -91,9 +91,11 @@ def convert_hdf_to_visibility(f):
     vis = f["data_vis"][()]
     weight = f["data_weight"][()]
     flags = f["data_flags"][()]
+    config = convert_configuration_from_hdf(f)
+    nants = len(config["names"].data)
 
     baselines = pandas.MultiIndex.from_tuples(
-        generate_baselines(vis.visibility_acc.nants),
+        generate_baselines(nants),
         names=("antenna1", "antenna2"),
     )
 
@@ -112,7 +114,7 @@ def convert_hdf_to_visibility(f):
         source=source,
         scan_id=scan_id,
         meta=meta,
-        configuration=convert_configuration_from_hdf(f),
+        configuration=config,
     )
     return vis
 
