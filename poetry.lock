@@ -1127,4 +1127,4 @@ python-casacore = ["python-casacore"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "e5ddba036d9f62444ac466b9e9137e9223aa16d48b448ec20afd9e806074877e"
+content-hash = "a00126143f3be0087b6501895a61a5471904c88b96dba54948181c2842817984"
