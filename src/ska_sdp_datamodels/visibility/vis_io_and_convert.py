@@ -40,17 +40,18 @@ def convert_visibility_to_hdf(vis: Visibility, f):
 
     # We only need to keep the things we need to reconstruct the data_model
     f.attrs["data_model"] = "Visibility"
-    #    f.attrs["nants"] = numpy.max([b[1] for b in vis.baselines.data]) + 1
-    #    f.attrs["nvis"] = vis.visibility_acc.nvis
-    #    f.attrs["npol"] = vis.visibility_acc.npol
-    # Note: for phase centre the HDF files store it differently
+    # These are not part of Visibility attributes, Not sure why they are here
+    f.attrs["nants"] = numpy.max([b[1] for b in vis.baselines.data]) + 1
+    f.attrs["nvis"] = vis.visibility_acc.nvis
+    f.attrs["npol"] = vis.visibility_acc.npol
+    # Note: for phase centre the HDF file stores it differently
     f.attrs["phasecentre_coords"] = vis.phasecentre.to_string()
     f.attrs["phasecentre_frame"] = vis.phasecentre.frame.name
     f.attrs["polarisation_frame"] = vis.visibility_acc.polarisation_frame.type
     f.attrs["source"] = vis.source
     f.attrs["meta"] = str(vis.meta)
     f.attrs["scan_id"] = vis.scan_id
-    f.attrs["scan_intent"] = vis.scan_intent
+    f.attrs["scan_intent"] = str(vis.scan_intent)
     f.attrs["execblock_id"] = vis.execblock_id
 
     datavars = [
