@@ -1,5 +1,10 @@
 # Changelog
 
+0.2.2
+-----
+* Add MsgPack support for xarray.Dataset objects
+* Upgrade xarray to latest version
+
 0.2.1
 ----
 * Migrate Measurement set related functions ([MR33](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/33)) 
