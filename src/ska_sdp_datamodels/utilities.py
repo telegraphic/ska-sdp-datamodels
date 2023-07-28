@@ -19,7 +19,16 @@ from ska_sdp_datamodels.science_data_model import ReceptorFrame
 
 
 def _dataset_encoder(obj):
-    """Custom encoder for datamodel specific code."""
+    """Custom encoder for datamodel specific code.
+
+    Classes that can be encoded currently:
+    * xarray.Dataset (Specifically tested with Visibility)
+    * Most numpy arrays (excluding datetime, arrays)
+    * ska_sdp_datamodels.science_data_model.ReceptorFrame
+    * astropy.coordinates.SkyCoord
+    * astropy.coordinates.EarthLocation
+    * pyarrow.lib.Table (when available)
+    """
 
     # Dataset to dict conversion:
     if isinstance(obj, xarray.Dataset):

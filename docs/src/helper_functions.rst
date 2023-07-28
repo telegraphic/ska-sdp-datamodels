@@ -14,3 +14,10 @@ Data Models IO Functions
 
 Each data model directory comes with a set of read-write and convert functions. See :ref:`api`.
 
+
+MsgPack Support
+---------------
+
+Two new functions are now available to be able to encode and decode :py:mod:`xarray.Dataset` objects.
+
+These functions are in the :py:mod:`ska_sdp_datamodels.utilities` module.
