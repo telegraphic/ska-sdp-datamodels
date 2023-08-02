@@ -532,6 +532,17 @@ def create_visibility_from_ms(
                 equinox="J2000",
             )
 
+            # Optional scan information
+            try:
+                scantab = table(f"{msname}/SCAN", ack=False)
+                scan_id = scantab.getcol("SCAN_NUMBER")[field]
+                scan_intent = scantab.getcol("SCAN_INTENT")[field]
+                execblock_id = scantab.getcol("EXECBLOCK_ID")[field]
+            except RuntimeError:  # No scan info
+                scan_id = 0
+                scan_intent = "none"
+                execblock_id = 0
+
             time_index_row = numpy.zeros_like(time, dtype="int")
             time_last = time[0]
             time_index = 0
@@ -591,6 +602,9 @@ def create_visibility_from_ms(
                     polarisation_frame=polarisation_frame,
                     source=source,
                     meta=meta,
+                    scan_id=scan_id,
+                    scan_intent=scan_intent,
+                    execblock_id=execblock_id,
                 )
             )
         tab.close()
