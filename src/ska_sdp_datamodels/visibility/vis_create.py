@@ -113,6 +113,12 @@ def create_visibility(
     :type elevation_limit: float or None, optional
     :param source: Source name carried in the attrs of the output Visibility.
     :type source: str, optional
+    :param scan_id: Scan number ID
+    :type scan_id: int, optional
+    :param scan_intent: Intent for the scan
+    :type scan_intent: str, optional
+    :param execblock_id: Execution block ID
+    :type execblock_id: int, optional
     :param meta: Optional user-defined metadata that gets stored inside the
         attrs of the output Visibility.
     :type meta: dict or None, optional
