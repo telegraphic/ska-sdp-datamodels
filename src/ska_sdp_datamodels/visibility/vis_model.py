@@ -35,6 +35,13 @@ class Visibility(xarray.Dataset):
 
     The configuration is stored as an attribute.
 
+    The scan information are stored as:
+    scan_id -- Scan number ID
+    scan_intent -- Intent for the scan (an scan number may have multiple intents).
+                Fixed set of string for a telescope
+    execblock_id -- A number that is unique to the observation execution block.
+            Used to get more info from the online system of some telescopes.
+
     Here is an example::
 
         <xarray.Visibility>
@@ -59,7 +66,10 @@ class Visibility(xarray.Dataset):
             phasecentre:         <SkyCoord (ICRS): (ra, dec) in deg    (180., -35.)>
             configuration:       <xarray.Configuration>Dimensions:   (id: 115, spat...
             polarisation_frame:  linear
-            source:              unknown
+            source:              anonymous
+            scan_id:             0
+            scan_intent:         none
+            execblock_id:        0
             meta:                None
     """  # noqa:E501 pylint: disable=line-too-long
 
@@ -90,6 +100,9 @@ class Visibility(xarray.Dataset):
         baselines=None,
         polarisation_frame=PolarisationFrame("stokesI"),
         source="anonymous",
+        scan_id=0,
+        scan_intent="none",
+        execblock_id=0,
         meta=None,
         low_precision="float64",
     ):
@@ -108,6 +121,9 @@ class Visibility(xarray.Dataset):
         :param polarisation_frame: Polarisation_Frame
                 e.g. Polarisation_Frame("linear")
         :param source: Source name
+        :param scan_id: Scan number ID (integer)
+        :param scan_intent: Intent for the scan (string)
+        :param execblock_id: Execution block ID (integer)
         :param meta: Meta info
         """
         if weight is None:
@@ -167,6 +183,9 @@ class Visibility(xarray.Dataset):
         attrs["source"] = source
         attrs["phasecentre"] = phasecentre
         attrs["_polarisation_frame"] = polarisation_frame.type
+        attrs["scan_id"] = scan_id
+        attrs["scan_intent"] = scan_intent
+        attrs["execblock_id"] = execblock_id
         attrs["meta"] = meta
 
         return cls(datavars, coords=coords, attrs=attrs)

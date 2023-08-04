@@ -32,7 +32,7 @@ log = logging.getLogger("data-models-logger")
 
 
 # pylint: disable=too-many-arguments,too-many-locals,invalid-name
-# pylint: disable=too-many-branches,too-many-statements
+# pylint: disable=too-many-branches,too-many-statements, duplicate-code
 def create_visibility(
     config: Configuration,
     times: NDArray,
@@ -45,6 +45,9 @@ def create_visibility(
     zerow: bool = False,
     elevation_limit: Optional[float] = 15.0 * numpy.pi / 180.0,
     source: str = "unknown",
+    scan_id: int = 0,
+    scan_intent: str = "none",
+    execblock_id: int = 0,
     meta: Optional[dict] = None,
     utc_time: Optional[Time] = None,
     times_are_ha: bool = True,
@@ -110,6 +113,12 @@ def create_visibility(
     :type elevation_limit: float or None, optional
     :param source: Source name carried in the attrs of the output Visibility.
     :type source: str, optional
+    :param scan_id: Scan number ID
+    :type scan_id: int, optional
+    :param scan_intent: Intent for the scan
+    :type scan_intent: str, optional
+    :param execblock_id: Execution block ID
+    :type execblock_id: int, optional
     :param meta: Optional user-defined metadata that gets stored inside the
         attrs of the output Visibility.
     :type meta: dict or None, optional
@@ -292,6 +301,9 @@ def create_visibility(
         channel_bandwidth=rchannel_bandwidth,
         polarisation_frame=polarisation_frame,
         source=source,
+        scan_id=scan_id,
+        scan_intent=scan_intent,
+        execblock_id=execblock_id,
         meta=meta,
         phasecentre=phasecentre,
         configuration=config,

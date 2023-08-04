@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, duplicate-code
 
 """
 Functions working with Visibility and FlagData models.
@@ -40,14 +40,20 @@ def convert_visibility_to_hdf(vis: Visibility, f):
 
     # We only need to keep the things we need to reconstruct the data_model
     f.attrs["data_model"] = "Visibility"
+    # These are not part of Visibility attributes, Not sure why they are here
     f.attrs["nants"] = numpy.max([b[1] for b in vis.baselines.data]) + 1
     f.attrs["nvis"] = vis.visibility_acc.nvis
     f.attrs["npol"] = vis.visibility_acc.npol
+    # Note: for phase centre the HDF file stores it differently
     f.attrs["phasecentre_coords"] = vis.phasecentre.to_string()
     f.attrs["phasecentre_frame"] = vis.phasecentre.frame.name
     f.attrs["polarisation_frame"] = vis.visibility_acc.polarisation_frame.type
     f.attrs["source"] = vis.source
     f.attrs["meta"] = str(vis.meta)
+    f.attrs["scan_id"] = vis.scan_id
+    f.attrs["scan_intent"] = str(vis.scan_intent)
+    f.attrs["execblock_id"] = vis.execblock_id
+
     datavars = [
         "time",
         "frequency",
@@ -80,7 +86,9 @@ def convert_hdf_to_visibility(f):
     )
     polarisation_frame = PolarisationFrame(f.attrs["polarisation_frame"])
     source = f.attrs["source"]
-    nants = f.attrs["nants"]
+    scan_id = f.attrs["scan_id"]
+    scan_intent = f.attrs["scan_intent"]
+    execblock_id = f.attrs["execblock_id"]
     meta = ast.literal_eval(f.attrs["meta"])
     time = f["data_time"][()]
     frequency = f["data_frequency"][()]
@@ -90,6 +98,8 @@ def convert_hdf_to_visibility(f):
     vis = f["data_vis"][()]
     weight = f["data_weight"][()]
     flags = f["data_flags"][()]
+    config = convert_configuration_from_hdf(f)
+    nants = len(config["names"].data)
 
     baselines = pandas.MultiIndex.from_tuples(
         generate_baselines(nants),
@@ -109,8 +119,11 @@ def convert_hdf_to_visibility(f):
         phasecentre=phasecentre,
         channel_bandwidth=channel_bandwidth,
         source=source,
+        scan_id=scan_id,
+        scan_intent=scan_intent,
+        execblock_id=execblock_id,
         meta=meta,
-        configuration=convert_configuration_from_hdf(f),
+        configuration=config,
     )
     return vis
 

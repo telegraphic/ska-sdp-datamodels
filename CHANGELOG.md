@@ -2,8 +2,10 @@
 
 0.2.2
 -----
-* Add MsgPack support for xarray.Dataset objects
-* Upgrade xarray to latest version
+* Add scan attributes into Visibility ([MR39](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/39))
+* Add MsgPack support for xarray.Dataset objects, upgrade xarray to latest version ([MR38](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/38))
+* Use importlib.resources to obtain resource filenames ([MR36](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/36))
+* Bug fix for export_visibility_to_ms ([MR35](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/35))
 
 0.2.1
 ----
