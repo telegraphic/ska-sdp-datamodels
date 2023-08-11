@@ -10,14 +10,8 @@ import tempfile
 
 import numpy
 import pytest
-from astropy import units as u
-from astropy.coordinates import SkyCoord
 from casacore.tables import table
 
-from ska_sdp_datamodels.configuration.config_create import (
-    create_named_configuration,
-)
-from ska_sdp_datamodels.visibility.vis_create import create_visibility
 from ska_sdp_datamodels.visibility.vis_io_ms import (
     create_visibility_from_ms,
     export_visibility_to_ms,
