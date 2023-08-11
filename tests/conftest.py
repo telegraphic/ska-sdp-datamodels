@@ -128,7 +128,9 @@ def config_fixture_low():
         "S010‐2",
     ]
     mount = "XY"
-    x_coord, y_coord, z_coord = lla_to_ecef(lat * units.deg, lon * units.deg, altitude)
+    x_coord, y_coord, z_coord = lla_to_ecef(
+        lat * units.deg, lon * units.deg, altitude
+    )
     ant_xyz = numpy.stack((x_coord, y_coord, z_coord), axis=1)
 
     config = Configuration.constructor(

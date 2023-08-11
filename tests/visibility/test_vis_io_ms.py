@@ -149,7 +149,9 @@ def test_create_ms_slice_visibility(msfile):
     vis_by_channel = []
     for schan in range(0, NCHAN, NCHAN_AVE):
         max_chan = min(NCHAN, schan + NCHAN_AVE)
-        vis = create_visibility_from_ms(msfile, start_chan=schan, end_chan=max_chan - 1)
+        vis = create_visibility_from_ms(
+            msfile, start_chan=schan, end_chan=max_chan - 1
+        )
         assert vis[0].vis.shape[-2] == NCHAN_AVE
         nchannels = len(numpy.unique(vis[0].frequency))
         assert nchannels == NCHAN_AVE
@@ -176,7 +178,9 @@ def test_create_ms_single(msfile):
     nchan_ave = 1
     nchan = 8
     for schan in range(0, nchan, nchan_ave):
-        vis = create_visibility_from_ms(msfile, start_chan=schan, end_chan=schan)
+        vis = create_visibility_from_ms(
+            msfile, start_chan=schan, end_chan=schan
+        )
         vis_by_channel.append(vis[0])
 
     assert len(vis_by_channel) == 8
@@ -235,6 +239,10 @@ def test_export_multi_pol(low_aa05_vis):
     assert numpy.allclose(low_aa05_vis["uvw"].data, bvis["uvw"].data)
     assert numpy.allclose(low_aa05_vis.time.data, bvis.time.data)
     assert numpy.allclose(low_aa05_vis.frequency.data, bvis.frequency.data)
-    assert numpy.allclose(low_aa05_vis.phasecentre.ra.rad, bvis.phasecentre.ra.rad)
-    assert numpy.allclose(low_aa05_vis.phasecentre.dec.rad, bvis.phasecentre.dec.rad)
+    assert numpy.allclose(
+        low_aa05_vis.phasecentre.ra.rad, bvis.phasecentre.ra.rad
+    )
+    assert numpy.allclose(
+        low_aa05_vis.phasecentre.dec.rad, bvis.phasecentre.dec.rad
+    )
     shutil.rmtree("./testnew.ms", ignore_errors=True)
