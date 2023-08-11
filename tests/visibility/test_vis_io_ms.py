@@ -10,8 +10,14 @@ import tempfile
 
 import numpy
 import pytest
+from astropy import units as u
+from astropy.coordinates import SkyCoord
 from casacore.tables import table
 
+from ska_sdp_datamodels.configuration.config_create import (
+    create_named_configuration,
+)
+from ska_sdp_datamodels.visibility.vis_create import create_visibility
 from ska_sdp_datamodels.visibility.vis_io_ms import (
     create_visibility_from_ms,
     export_visibility_to_ms,
@@ -143,9 +149,7 @@ def test_create_ms_slice_visibility(msfile):
     vis_by_channel = []
     for schan in range(0, NCHAN, NCHAN_AVE):
         max_chan = min(NCHAN, schan + NCHAN_AVE)
-        vis = create_visibility_from_ms(
-            msfile, start_chan=schan, end_chan=max_chan - 1
-        )
+        vis = create_visibility_from_ms(msfile, start_chan=schan, end_chan=max_chan - 1)
         assert vis[0].vis.shape[-2] == NCHAN_AVE
         nchannels = len(numpy.unique(vis[0].frequency))
         assert nchannels == NCHAN_AVE
@@ -172,9 +176,7 @@ def test_create_ms_single(msfile):
     nchan_ave = 1
     nchan = 8
     for schan in range(0, nchan, nchan_ave):
-        vis = create_visibility_from_ms(
-            msfile, start_chan=schan, end_chan=schan
-        )
+        vis = create_visibility_from_ms(msfile, start_chan=schan, end_chan=schan)
         vis_by_channel.append(vis[0])
 
     assert len(vis_by_channel) == 8
@@ -218,3 +220,21 @@ def test_create_ms_average_slice_visibility(msfile):
         assert numpy.max(numpy.abs(vis.visibility_acc.flagged_vis)) > 0.0
         assert numpy.sum(vis.weight) > 0.0
         assert numpy.sum(vis.visibility_acc.flagged_weight) > 0.0
+
+
+def test_export_multi_pol(low_aa05_vis):
+    """
+    Test exporting a list of visibilities to a MS file.
+    """
+
+    export_visibility_to_ms("testnew.ms", [low_aa05_vis])
+    bvis = create_visibility_from_ms("testnew.ms")[0]
+    assert bvis.visibility_acc.npol == 4
+    assert bvis.polarisation.data.tolist() == ["XX", "XY", "YX", "YY"]
+    assert numpy.allclose(low_aa05_vis["vis"].data, bvis["vis"].data)
+    assert numpy.allclose(low_aa05_vis["uvw"].data, bvis["uvw"].data)
+    assert numpy.allclose(low_aa05_vis.time.data, bvis.time.data)
+    assert numpy.allclose(low_aa05_vis.frequency.data, bvis.frequency.data)
+    assert numpy.allclose(low_aa05_vis.phasecentre.ra.rad, bvis.phasecentre.ra.rad)
+    assert numpy.allclose(low_aa05_vis.phasecentre.dec.rad, bvis.phasecentre.dec.rad)
+    shutil.rmtree("./testnew.ms", ignore_errors=True)
