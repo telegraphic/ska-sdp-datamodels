@@ -1,5 +1,9 @@
 # Changelog
 
+main
+----
+* Bug Fix For Exporting MS file with Multiple Polarisations ([MR40](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/40))
+
 0.2.2
 -----
 * Add scan attributes into Visibility ([MR39](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/39))

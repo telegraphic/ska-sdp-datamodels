@@ -218,3 +218,25 @@ def test_create_ms_average_slice_visibility(msfile):
         assert numpy.max(numpy.abs(vis.visibility_acc.flagged_vis)) > 0.0
         assert numpy.sum(vis.weight) > 0.0
         assert numpy.sum(vis.visibility_acc.flagged_weight) > 0.0
+
+
+def test_export_multi_pol(low_aa05_vis):
+    """
+    Test exporting a list of visibilities to a MS file.
+    """
+
+    export_visibility_to_ms("testnew.ms", [low_aa05_vis])
+    bvis = create_visibility_from_ms("testnew.ms")[0]
+    assert bvis.visibility_acc.npol == 4
+    assert bvis.polarisation.data.tolist() == ["XX", "XY", "YX", "YY"]
+    assert numpy.allclose(low_aa05_vis["vis"].data, bvis["vis"].data)
+    assert numpy.allclose(low_aa05_vis["uvw"].data, bvis["uvw"].data)
+    assert numpy.allclose(low_aa05_vis.time.data, bvis.time.data)
+    assert numpy.allclose(low_aa05_vis.frequency.data, bvis.frequency.data)
+    assert numpy.allclose(
+        low_aa05_vis.phasecentre.ra.rad, bvis.phasecentre.ra.rad
+    )
+    assert numpy.allclose(
+        low_aa05_vis.phasecentre.dec.rad, bvis.phasecentre.dec.rad
+    )
+    shutil.rmtree("./testnew.ms", ignore_errors=True)

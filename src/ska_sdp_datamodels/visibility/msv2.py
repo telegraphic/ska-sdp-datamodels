@@ -1518,9 +1518,6 @@ class WriteMs(BaseData):
                     self.nstokes,
                     nBand * self.nchan,
                 )
-                matrix *= 0.0
-                flag_matrix *= False
-                weight_spectrum_matrix *= 1.0
             except (NameError, RuntimeError):
                 matrix = numpy.zeros(
                     (len(order), self.nstokes, self.nchan * nBand),

@@ -145,6 +145,29 @@ def config_fixture_low():
     return config
 
 
+@pytest.fixture(scope="package", name="low_aa05_vis")
+def low_aa0_5_vis_fixture(low_aa05_config, phase_centre):
+    """
+    Low-AA0.5 visibility.
+    """
+    times = numpy.array([0.0])
+    frequency = numpy.array([1.3e9])
+    channel_bandwidth = numpy.array([1e8])
+    polarisation_frame = PolarisationFrame("linear")
+
+    vis = create_visibility(
+        low_aa05_config,
+        frequency=frequency,
+        channel_bandwidth=channel_bandwidth,
+        times=times,
+        polarisation_frame=polarisation_frame,
+        phasecentre=phase_centre,
+        weight=1.0,
+    )
+
+    return vis
+
+
 @pytest.fixture(scope="package", name="gain_table")
 def gain_table_fixture(visibility):
     """
