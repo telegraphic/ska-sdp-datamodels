@@ -326,6 +326,7 @@ def create_flagtable_from_visibility(vis: Visibility) -> FlagTable:
     :return: FlagTable object
     """
     return FlagTable.constructor(
+        baselines=vis.baselines,
         flags=vis.flags,
         frequency=vis.frequency,
         channel_bandwidth=vis.channel_bandwidth,
