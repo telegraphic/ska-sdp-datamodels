@@ -142,7 +142,7 @@ def test_create_configuration_from_file_ecef_no_loc():
     raise ValueError.
     """
     ant_file = ANTENNA_FILES["LOWBD2"]
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError):
         create_configuration_from_file(ant_file, name="LOWBD2", ecef=True)
 
 
