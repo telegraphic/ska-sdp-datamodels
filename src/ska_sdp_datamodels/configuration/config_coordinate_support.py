@@ -97,11 +97,6 @@ def ecef_to_enu(location, xyz):
     :param xyz: ECEF coordinate
     :result : enu
     """
-    if not location:
-        raise ValueError(
-            "Cannot convert ECEF coordinates to ENU without a location"
-        )
-
     # ECEF coordinates of reference point
     lon = location.geodetic[0].to(units.rad).value
     lat = location.geodetic[1].to(units.rad).value

@@ -53,6 +53,8 @@ Please ensure you have all the dependency packages installed. The installation i
 through `poetry <https://python-poetry.org/docs/>`_.
 Refer to their page for instructions.
 
+Currently, the package supports Python 3.10 and above.
+
 .. toctree::
    :maxdepth: 1
    :caption: Sections
