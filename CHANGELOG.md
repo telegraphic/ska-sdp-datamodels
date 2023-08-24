@@ -1,7 +1,8 @@
 # Changelog
 
-main
+0.2.3
 ----
+* Updated dependencies and fixed bug in creating FlagTable ([MR41](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/41))
 * Bug Fix For Exporting MS file with Multiple Polarisations ([MR40](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/40))
 
 0.2.2
