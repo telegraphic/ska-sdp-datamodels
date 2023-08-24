@@ -13,15 +13,15 @@ url = "https://artefact.skao.int/repository/pypi-internal/simple"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-astroplan = "^0.8"
+astroplan = "^0.9"
 astropy = "^5.3"
-h5py = "^3.7"
+h5py = "^3.9"
 # numpy version set to be compatible with RASCIL
 numpy = "^1.23, <1.24"
-pandas = "^1.5"
+pandas = "^2.0"
 xarray = ">=2023.7.0"
-msgpack = "^1.0.5"
-msgpack-numpy = "^0.4.8"
+msgpack = "^1.0"
+msgpack-numpy = "^0.4"
 
 # optional dependencies; used by "extras"
 python-casacore = {version = "^3.5", optional = true}
@@ -30,14 +30,14 @@ python-casacore = {version = "^3.5", optional = true}
 python-casacore = ["python-casacore"]
 
 [tool.poetry.dev-dependencies]
-black = "^22.1.0"
-build = "^0.7.0"
-flake8 = "^4.0.1"
-isort = "^5.10.1"
-pylint = "^2.12.2"
-pylint-junit = "^0.3.2"
-pytest = "^7.1.1"
-pytest-cov = "^3.0.0"
+black = "^22.1"
+build = "^0.7"
+flake8 = "^4.0"
+isort = "^5.10"
+pylint = "^2.12"
+pylint-junit = "^0.3"
+pytest = "^7.1"
+pytest-cov = "^3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
