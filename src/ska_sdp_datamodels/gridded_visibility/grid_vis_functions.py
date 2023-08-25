@@ -64,7 +64,6 @@ def export_griddata_to_hdf5(gd, filename):
 
     :param gd: GridData
     :param filename: Name of HDF5 file
-    :return:None
     """
 
     if not isinstance(gd, collections.abc.Iterable):

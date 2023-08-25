@@ -79,13 +79,14 @@ class Image(xarray.Dataset):
 
         The addition of ra, dec grid enables selections such as:
 
-        secd = 1.0 / numpy.cos(numpy.deg2rad(im.dec_grid))
-        r = numpy.hypot(
-            (im.ra_grid - im.ra) * secd,
-            im.dec_grid - im.image.dec,
-        )
-        show_image(im.where(r < 0.3, 0.0))
-        plt.show()
+        .. math::
+            secd = 1.0 / numpy.cos(numpy.deg2rad(im.dec_grid))
+            r = numpy.hypot(
+                (im.ra_grid - im.ra) * secd,
+                im.dec_grid - im.image.dec,
+            )
+            show_image(im.where(r < 0.3, 0.0))
+            plt.show()
 
         :param data: pixel values; dims = [nchan, npol, ny, nx]
         :param polarisation_frame: as a PolarisationFrame object

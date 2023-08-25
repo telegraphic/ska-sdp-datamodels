@@ -33,6 +33,4 @@
 
 .. automodapi:: ska_sdp_datamodels.science_data_model
    :no-inheritance-diagram:
-
-
-
+   :noindex:
