@@ -38,6 +38,22 @@ pylint-junit = "^0.3"
 pytest = "^7.4"
 pytest-cov = "^3.0"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.2"
+#sphinx-argparse = "^"
+#sphinx-rtd-theme = "^"
+#sphinx-automodapi = "^"
+
+## Additional packages needed to be installed
+## so that the docs can render the API correctly
+## without the need of mocking every single import
+#numpy
+#astropy
+#pandas
+#xarray
+#h5py
+#astroplan
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
