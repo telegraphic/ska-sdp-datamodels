@@ -22,13 +22,15 @@ class GridData(xarray.Dataset):
     """Class to hold Gridded data for Fourier processing
 
     - Has four or more coordinates: [chan, pol, z, y, x]
-    where x can be u, l; y can be v, m; z can be w, n.
-    Note: current implementation only uses 4 coordinates:
-    [nchan, npol, v, u]
+        where x can be u, l; y can be v, m; z can be w, n.
+        Note: current implementation only uses 4 coordinates:
+        [nchan, npol, v, u]
 
-    The conventions for indexing in WCS and numpy are opposite.
+    The conventions for indexing in WCS and numpy are opposite:
+
     - In astropy.wcs, the order is
         (longitude, latitude, polarisation, frequency);
+
     - in numpy, the order is
         (frequency, polarisation, depth, latitude, longitude).
 

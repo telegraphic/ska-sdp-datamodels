@@ -210,7 +210,7 @@ class GainTable(xarray.Dataset):
             receptor2. If ReceptorFrame instance, use it for both receptor1
             and receptor2. If two-element sequence, interpret as
             [receptor1, receptor2]. See also:
-        https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
+            https://confluence.skatelescope.org/display/SE/Notes+on+receptor+frames
 
         :type receptor_frame: ReceptorFrame or sequence of two ReceptorFrames
             or None, optional

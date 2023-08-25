@@ -62,13 +62,16 @@ class PolarisationFrame:
     stokesI, stokesIQUV, linear, circular.
 
     TODO: Check if this is correct
-    Attributes:
-        fits_codes: PolarisationFrames that fit
-                    the data dimensions in actual coordinates
-        polarisation_frames: Dictionary containing
-                    the source reference frames information
-        fits_to_datamodels: PolarisationFrames that fit
-                    the data dimensions in the code
+    **Attributes**
+
+    - fits_codes: PolarisationFrames that fit
+      the data dimensions in actual coordinates
+
+    - polarisation_frames: Dictionary containing
+      the source reference frames information
+
+    - fits_to_datamodels: PolarisationFrames that fit
+      the data dimensions in the code
 
     """
 

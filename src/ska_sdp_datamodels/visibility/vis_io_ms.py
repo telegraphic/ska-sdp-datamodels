@@ -217,7 +217,7 @@ def list_ms(msname, ack=False):
     For example::
         print(list_ms('3C277.1_avg.ms'))
         (['1302+5748', '0319+415', '1407+284', '1252+5634', '1331+305'],
-          [0, 1, 2, 3])
+        [0, 1, 2, 3])
     """
     # pylint: disable=import-outside-toplevel
     try:

@@ -36,10 +36,13 @@ class Visibility(xarray.Dataset):
     The configuration is stored as an attribute.
 
     The scan information are stored as:
-    scan_id -- Scan number ID
-    scan_intent -- Intent for the scan (an scan number may have multiple intents).
+
+    - scan_id -- Scan number ID
+
+    - scan_intent -- Intent for the scan (an scan number may have multiple intents).
                 Fixed set of string for a telescope
-    execblock_id -- A number that is unique to the observation execution block.
+
+    - execblock_id -- A number that is unique to the observation execution block.
             Used to get more info from the online system of some telescopes.
 
     Here is an example::
