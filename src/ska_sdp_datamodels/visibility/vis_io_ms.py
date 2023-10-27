@@ -562,6 +562,7 @@ def create_visibility_from_ms(
             bv_integration_time = numpy.zeros([ntimes])
 
             for row, _ in enumerate(time):
+                time_index = time_index_row[row]
                 if antenna1[row] <= antenna2[row]:
                     ibaseline = baselines.get_loc(
                         (antenna1[row], antenna2[row])
@@ -576,7 +577,6 @@ def create_visibility_from_ms(
                     )
                 else:
                     raise ValueError("Bad antenna pair")
-                time_index = time_index_row[row]
                 bv_times[time_index] = time[row]
                 bv_flags[time_index, ibaseline, ...][
                     ms_flags[row, ...].astype("bool")
