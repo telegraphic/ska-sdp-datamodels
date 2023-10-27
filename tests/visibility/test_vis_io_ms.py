@@ -43,12 +43,41 @@ def fixture_ms():
     shutil.rmtree(ms_file)
 
 
+@pytest.fixture(scope="module", name="msfile_flip_ant")
+def fixture_ms_flip_ant():
+    """
+    Test setup that includes generating a temporary MS file
+    """
+    test_path = tempfile.mkdtemp(prefix="test-flip-ant-ms-", suffix=".tmp")
+    ms_file = os.path.join(test_path, "test.ms")
+
+    if not os.path.exists(ms_file):
+        write_tables_WGS84(ms_file, flip_ant=True)
+
+    yield ms_file
+
+    shutil.rmtree(ms_file)
+
+
 def test_create_visibility_from_ms(msfile):
     """
     Test for create_visibility_from_ms function, basic level
     """
 
     vis = create_visibility_from_ms(msfile)
+    # Confirm created visibility is the correct shape and type
+    for value in vis:
+        assert value.vis.data.shape[0] == 5
+        assert value.vis.data.shape[-1] == 1
+        assert value.visibility_acc.polarisation_frame.type == "stokesI"
+
+
+def test_create_visibility_from_ms_flip_ant(msfile_flip_ant):
+    """
+    Test for create_visibility_from_ms function, basic level
+    """
+
+    vis = create_visibility_from_ms(msfile_flip_ant)
     # Confirm created visibility is the correct shape and type
     for value in vis:
         assert value.vis.data.shape[0] == 5

@@ -188,7 +188,7 @@ def test_write_tables_ENU():
             assert os.path.exists(os.path.join(testFile, tbl))
 
 
-def initData_WGS84():
+def initData_WGS84(flip_ant=False):
     """
     Private function to generate a random set of data for
     writing a UVFITS file.  The data is returned as a dictionary
@@ -269,7 +269,10 @@ def initData_WGS84():
 
     for i in range(0, N - 1):
         for j in range(i + 1, N):
-            blList.append((antennas[i], antennas2[j]))
+            if flip_ant:
+                blList.append((antennas2[j], antennas[i]))
+            else:
+                blList.append((antennas[i], antennas2[j]))
 
     visData = numpy.random.rand(len(blList), len(freq))
     visData = numpy.broadcast_to(visData, (5,) + visData.shape)
@@ -305,13 +308,13 @@ def initData_WGS84():
     }
 
 
-def write_tables_WGS84(filename):
+def write_tables_WGS84(filename, flip_ant=True):
     """
     Utility function for writing WGS84 tables.
     """
 
     # Get some data
-    data = initData_WGS84()
+    data = initData_WGS84(flip_ant=flip_ant)
 
     # Start the table
     tbl = msv2.Ms(filename, ref_time=0, frame=data["site"].attrs["frame"])
