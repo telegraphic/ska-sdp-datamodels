@@ -308,7 +308,7 @@ def initData_WGS84(flip_ant=False):
     }
 
 
-def write_tables_WGS84(filename, flip_ant=True):
+def write_tables_WGS84(filename, flip_ant=False):
     """
     Utility function for writing WGS84 tables.
     """
