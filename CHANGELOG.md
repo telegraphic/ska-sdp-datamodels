@@ -1,5 +1,9 @@
 # Changelog
 
+main
+----
+* Bug Fix For Creating Visibility From Measurement Set Files ([MR45](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/45))
+
 0.2.3
 ----
 * Updated dependencies and fixed bug in creating FlagTable ([MR41](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/41))
