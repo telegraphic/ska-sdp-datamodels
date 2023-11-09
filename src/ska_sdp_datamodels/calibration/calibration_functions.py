@@ -6,6 +6,7 @@ data models.
 """
 
 import collections
+import json
 import logging
 from typing import List, Union
 
@@ -223,6 +224,73 @@ def export_pointingtable_to_hdf5(pt: PointingTable, filename):
             vf = f.create_group("PointingTable0")
             convert_pointingtable_to_hdf(pt, vf)
         f.flush()
+
+
+def convert_pointingtable_to_json(pt):
+    """
+    Convert a pointingtable to a json dictionary.
+    :param pt: Pointing Table
+    :return: json str
+    """
+    pointing_dict = {}
+    pointing_dict["attrs_data_model"] = "PointingTable"
+    pointing_dict["attrs_receptor_frame"] = pt.receptor_frame.type
+    pointing_dict[
+        "attrs_pointingcentre_coords"
+    ] = pt.pointingcentre.to_string()
+    pointing_dict["attrs_receptor_frame"] = pt.receptor_frame.type
+    pointing_dict["attrs_pointingcentre_frame"] = pt.pointingcentre.frame.name
+    pointing_dict["attrs_pointing_frame"] = pt.pointing_frame
+
+    datavars = [
+        "time",
+        "nominal",
+        "pointing",
+        "weight",
+        "residual",
+        "interval",
+        "frequency",
+    ]
+    for var in datavars:
+        pointing_dict[f"data_{var}"] = pt[var].data.tolist()
+
+    return json.dumps(pointing_dict)
+
+
+def convert_json_to_pointingtable(pt_json):
+    pointing_dict = json.loads(pt_json)
+
+    receptor_frame = ReceptorFrame(pointing_dict["attrs_receptor_frame"])
+    s = pointing_dict["attrs_pointingcentre_coords"].split()
+    ss = [float(s[0]), float(s[1])] * u.deg
+    pointingcentre = SkyCoord(
+        ra=ss[0], dec=ss[1], frame=pointing_dict["attrs_pointingcentre_frame"]
+    )
+    pointing_frame = pointing_dict["attrs_pointing_frame"]
+    # configuration = convert_configuration_from_hdf(f)
+
+    time = numpy.array(pointing_dict["data_time"])
+    frequency = numpy.array(pointing_dict["data_frequency"])
+    pointing = numpy.array(pointing_dict["data_pointing"])
+    nominal = numpy.array(pointing_dict["data_nominal"])
+    weight = numpy.array(pointing_dict["data_weight"])
+    residual = numpy.array(pointing_dict["data_residual"])
+    interval = numpy.array(pointing_dict["data_interval"])
+
+    pt = PointingTable.constructor(
+        time=time,
+        pointing=pointing,
+        nominal=nominal,
+        weight=weight,
+        residual=residual,
+        interval=interval,
+        frequency=frequency,
+        receptor_frame=receptor_frame,
+        pointing_frame=pointing_frame,
+        pointingcentre=pointingcentre,
+        configuration="no-configuration",
+    )
+    return pt
 
 
 def import_pointingtable_from_hdf5(filename):
