@@ -386,6 +386,19 @@ class GainTableAccessor(XarrayAccessorMixin):
         return qa
 
 
+def __sizeof__(self):
+    """Override default method to return size of dataset
+    :return: int
+    """
+    # Dask uses sizeof() class to get memory occupied by various data
+    # objects. For custom data objects like this one, dask falls back to
+    # sys.getsizeof() function to get memory usage. sys.getsizeof() in
+    # turns calls __sizeof__() magic method to get memory size. Here we
+    # override the default method (which gives size of reference table)
+    # to return size of Dataset.
+    return int(self.nbytes)
+
+
 class PointingTable(xarray.Dataset):
     """
     Pointing table with ska_sdp_datamodels:
@@ -414,10 +427,16 @@ class PointingTable(xarray.Dataset):
             interval   (time) float64 99.73 99.73 99.73
             datetime   (time) datetime64[ns]
                         2000-01-01T03:54:07.843184299 ... 2000-0...
+            expected_beamwidth  (nants, num_chunks, 2)
+                                float64
+            fitted_beamwidth    (nants, num_chunks, 2)
+                                float64
+            fitted_height       (nants, num_chunks)
+                                float64
         Attributes:
             data_model:  PointingTable
             receptor_frame:     ReceptorFrame object
-            pointing_frame:     azel
+            pointing_frame:     azel (["cross el", "el"])
             pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg>
             configuration:      <xarray.Configuration>
                                 Dimensions:   (id: 115 etc.)
@@ -443,6 +462,10 @@ class PointingTable(xarray.Dataset):
         weight: numpy.array = None,
         residual: numpy.array = None,
         frequency: numpy.array = None,
+        expected_beamwidth: numpy.array = None,
+        fitted_beamwidth: numpy.array = None,
+        fitted_height: numpy.array = None,
+        fitted_height_uncentainty: numpy.array = None,
         receptor_frame: ReceptorFrame = ReceptorFrame("linear"),
         pointing_frame: str = "local",
         pointingcentre=None,
@@ -457,6 +480,10 @@ class PointingTable(xarray.Dataset):
         :param weight: Weight [: nants, nchan, nrec]
         :param residual: Residual [: nants, nchan, nrec, 2]
         :param frequency: [nchan]
+        :param expected_beamwidth: Expected beam width
+        :param fitted_beamwidth: Fitted beam width
+        :param fitted_height:  Fitted Gaussian height
+        :param fitted_height_uncentainty: Fitted Gaussian uncertainties
         :param receptor_frame: e.g. Receptor_frame("linear")
         :param pointing_frame: Pointing frame
         :param pointingcentre: SkyCoord
@@ -499,20 +526,12 @@ class PointingTable(xarray.Dataset):
         attrs["pointing_frame"] = pointing_frame
         attrs["pointingcentre"] = pointingcentre
         attrs["configuration"] = configuration
+        attrs["fitted_beamwidth"] = fitted_beamwidth
+        attrs["expected_beamwidth"] = expected_beamwidth
+        attrs["fitted_height"] = fitted_height
+        attrs["fitted_height_un"] = fitted_height_uncentainty
 
         return cls(datavars, coords=coords, attrs=attrs)
-
-    def __sizeof__(self):
-        """Override default method to return size of dataset
-        :return: int
-        """
-        # Dask uses sizeof() class to get memory occupied by various data
-        # objects. For custom data objects like this one, dask falls back to
-        # sys.getsizeof() function to get memory usage. sys.getsizeof() in
-        # turns calls __sizeof__() magic method to get memory size. Here we
-        # override the default method (which gives size of reference table)
-        # to return size of Dataset.
-        return int(self.nbytes)
 
     def copy(self, deep=False, data=None, zero=False):
         """
