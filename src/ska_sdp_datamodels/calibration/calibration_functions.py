@@ -247,8 +247,7 @@ def convert_pointingtable_to_json(pt):
         pt.configuration
     )
 
-    datavars = [v for v in pt.data_vars]
-    for var in datavars:
+    for var in pt.data_vars:
         pointing_dict[f"data_{var}"] = pt[var].data.tolist()
 
     coords = [
@@ -263,6 +262,11 @@ def convert_pointingtable_to_json(pt):
 
 
 def convert_json_to_pointingtable(pt_json):
+    """
+    Convert a JSON to pointingtable.
+    :param pt_json: Json
+    :return: PointingTable
+    """
     pointing_dict = json.loads(pt_json)
 
     receptor_frame = ReceptorFrame(pointing_dict["attrs_receptor_frame"])
