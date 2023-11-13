@@ -2,6 +2,7 @@
 Test calibration data model functions.
 """
 
+import json
 import tempfile
 
 import h5py
@@ -130,7 +131,24 @@ def test_convert_pointingtable_to_json(pointing_table):
     then import it back into a pointing table.
     """
     pointingtable_json = convert_pointingtable_to_json(pointing_table)
-    assert len(pointingtable_json) == 1174684
+    pointing_dict = json.loads(pointingtable_json)
+    assert (
+        pointing_dict["attrs_receptor_frame"]
+        == pointing_table.receptor_frame.type
+    )
+    assert (
+        pointing_dict["attrs_pointingcentre_coords"]
+        == pointing_table.pointingcentre.to_string()
+    )
+    assert (
+        pointing_dict["attrs_pointingcentre_frame"]
+        == pointing_table.pointingcentre.frame.name
+    )
+    assert pointing_dict["attrs_data_model"] == "PointingTable"
+    assert (pointing_dict["data_nominal"] == pointing_table.nominal.data).all()
+    assert (
+        pointing_dict["coord_frequency"] == pointing_table.frequency.data
+    ).all()
 
 
 def test_convert_json_to_pointingtable(pointing_table):

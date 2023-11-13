@@ -2,6 +2,7 @@
 Test converting Configuration
 """
 
+import json
 import tempfile
 
 import h5py
@@ -96,7 +97,24 @@ def test_convert_configuration_to_json(low_aa05_config):
     """Test converting a configuration to a JSON file."""
 
     config_json = convert_configuration_to_json(low_aa05_config)
-    assert len(config_json) == 986
+    config_dict = json.loads(config_json)
+
+    for attr in [
+        "data_model",
+        "frame",
+        "location",
+        "name",
+        "receptor_frame",
+    ]:
+        assert attr in config_dict.keys()
+
+    assert config_dict["data_model"] == "Configuration"
+    assert config_dict["name"] == low_aa05_config.name
+
+    config_data = config_dict["configuration"]
+    assert (config_data["names"] == low_aa05_config.names.data).all()
+    assert (config_data["xyz"][:] == low_aa05_config.xyz).all()
+    assert (config_data["stations"] == low_aa05_config.stations.data).all()
 
 
 def test_convert_json_to_configuration(low_aa05_config):
