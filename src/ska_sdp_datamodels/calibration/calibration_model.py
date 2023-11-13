@@ -462,10 +462,12 @@ class PointingTable(xarray.Dataset):
         weight: numpy.array = None,
         residual: numpy.array = None,
         frequency: numpy.array = None,
-        expected_beamwidth: numpy.array = None,
-        fitted_beamwidth: numpy.array = None,
+        expected_width: numpy.array = None,
+        fitted_width: numpy.array = None,
+        fitted_width_std: numpy.array = None,
         fitted_height: numpy.array = None,
-        fitted_height_uncentainty: numpy.array = None,
+        fitted_height_std: numpy.array = None,
+        expected_height: numpy.array = None,
         receptor_frame: ReceptorFrame = ReceptorFrame("linear"),
         pointing_frame: str = "local",
         pointingcentre=None,
@@ -505,9 +507,41 @@ class PointingTable(xarray.Dataset):
             pointing,
             dims=["time", "antenna", "frequency", "receptor", "angle"],
         )
-        datavars["nominal"] = xarray.DataArray(
-            nominal, dims=["time", "antenna", "frequency", "receptor", "angle"]
-        )
+        if nominal is not None:
+            datavars["nominal"] = xarray.DataArray(
+                nominal,
+                dims=["time", "antenna", "frequency", "receptor", "angle"],
+            )
+        if fitted_width is not None:
+            datavars["fitted_width"] = xarray.DataArray(
+                fitted_width,
+                dims=["time", "antenna", "frequency", "receptor", "angle"],
+            )
+        if fitted_width_std is not None:
+            datavars["fitted_width_std"] = xarray.DataArray(
+                fitted_width_std,
+                dims=["time", "antenna", "frequency", "receptor", "angle"],
+            )
+        if expected_width is not None:
+            datavars["expected_width"] = xarray.DataArray(
+                expected_width,
+                dims=["time", "antenna", "frequency", "receptor", "angle"],
+            )
+        if fitted_height is not None:
+            datavars["fitted_height"] = xarray.DataArray(
+                fitted_height,
+                dims=["time", "antenna", "frequency", "receptor"],
+            )
+        if fitted_height_std is not None:
+            datavars["fitted_height_std"] = xarray.DataArray(
+                fitted_height_std,
+                dims=["time", "antenna", "frequency", "receptor"],
+            )
+        if expected_height is not None:
+            datavars["expected_height"] = xarray.DataArray(
+                expected_height,
+                dims=["time", "antenna", "frequency", "receptor"],
+            )
         datavars["weight"] = xarray.DataArray(
             weight, dims=["time", "antenna", "frequency", "receptor", "angle"]
         )
@@ -526,10 +560,6 @@ class PointingTable(xarray.Dataset):
         attrs["pointing_frame"] = pointing_frame
         attrs["pointingcentre"] = pointingcentre
         attrs["configuration"] = configuration
-        attrs["fitted_beamwidth"] = fitted_beamwidth
-        attrs["expected_beamwidth"] = expected_beamwidth
-        attrs["fitted_height"] = fitted_height
-        attrs["fitted_height_un"] = fitted_height_uncentainty
 
         return cls(datavars, coords=coords, attrs=attrs)
 

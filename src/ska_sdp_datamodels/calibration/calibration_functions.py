@@ -24,6 +24,8 @@ from ska_sdp_datamodels.calibration.calibration_model import (
 from ska_sdp_datamodels.configuration import (
     convert_configuration_from_hdf,
     convert_configuration_to_hdf,
+    convert_configuration_to_json,
+    convert_json_to_configuration,
 )
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
@@ -241,18 +243,21 @@ def convert_pointingtable_to_json(pt):
     pointing_dict["attrs_receptor_frame"] = pt.receptor_frame.type
     pointing_dict["attrs_pointingcentre_frame"] = pt.pointingcentre.frame.name
     pointing_dict["attrs_pointing_frame"] = pt.pointing_frame
+    pointing_dict["attrs_configuration"] = convert_configuration_to_json(
+        pt.configuration
+    )
 
-    datavars = [
+    datavars = [v for v in pt.data_vars]
+    for var in datavars:
+        pointing_dict[f"data_{var}"] = pt[var].data.tolist()
+
+    coords = [
         "time",
-        "nominal",
-        "pointing",
-        "weight",
-        "residual",
         "interval",
         "frequency",
     ]
-    for var in datavars:
-        pointing_dict[f"data_{var}"] = pt[var].data.tolist()
+    for coord in coords:
+        pointing_dict[f"coord_{coord}"] = pt[coord].data.tolist()
 
     return json.dumps(pointing_dict)
 
@@ -267,28 +272,45 @@ def convert_json_to_pointingtable(pt_json):
         ra=ss[0], dec=ss[1], frame=pointing_dict["attrs_pointingcentre_frame"]
     )
     pointing_frame = pointing_dict["attrs_pointing_frame"]
-    # configuration = convert_configuration_from_hdf(f)
+    configuration = convert_json_to_configuration(
+        pointing_dict["attrs_configuration"]
+    )
+    datavars = []
+    for k in pointing_dict.keys():
+        if k.startswith("data_"):
+            datavars.append(k[5:])
 
-    time = numpy.array(pointing_dict["data_time"])
-    frequency = numpy.array(pointing_dict["data_frequency"])
-    pointing = numpy.array(pointing_dict["data_pointing"])
-    nominal = numpy.array(pointing_dict["data_nominal"])
-    weight = numpy.array(pointing_dict["data_weight"])
-    residual = numpy.array(pointing_dict["data_residual"])
-    interval = numpy.array(pointing_dict["data_interval"])
+    coords = []
+    for k in pointing_dict.keys():
+        if k.startswith("coord_"):
+            coords.append(k[6:])
+
+    datadict = {}
+    for var in datavars:
+        datadict[var] = numpy.array(pointing_dict["data_" + var])
+
+    coorddict = {}
+    for coord in coords:
+        coorddict[coord] = numpy.array(pointing_dict["coord_" + coord])
 
     pt = PointingTable.constructor(
-        time=time,
-        pointing=pointing,
-        nominal=nominal,
-        weight=weight,
-        residual=residual,
-        interval=interval,
-        frequency=frequency,
+        time=coorddict.get("time", None),
+        interval=coorddict.get("interval", None),
+        frequency=coorddict.get("frequency", None),
+        pointing=datadict.get("pointing", None),
+        nominal=datadict.get("nominal", None),
+        weight=datadict.get("weight", None),
+        residual=datadict.get("residual", None),
+        expected_width=datadict.get("expected_width", None),
+        fitted_width=datadict.get("fitted_width", None),
+        fitted_width_std=datadict.get("fitted_width_std", None),
+        fitted_height=datadict.get("fitted_height", None),
+        fitted_height_std=datadict.get("fitted_height_std", None),
+        expected_height=datadict.get("expected_height", None),
         receptor_frame=receptor_frame,
         pointing_frame=pointing_frame,
         pointingcentre=pointingcentre,
-        configuration="no-configuration",
+        configuration=configuration,
     )
     return pt
 

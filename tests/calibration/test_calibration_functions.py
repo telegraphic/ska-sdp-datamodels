@@ -7,6 +7,8 @@ import tempfile
 import h5py
 
 from ska_sdp_datamodels.calibration import (
+    convert_json_to_pointingtable,
+    convert_pointingtable_to_json,
     export_gaintable_to_hdf5,
     export_pointingtable_to_hdf5,
     import_gaintable_from_hdf5,
@@ -120,3 +122,22 @@ def test_import_pointingtable_from_hdf5(pointing_table):
         result = import_pointingtable_from_hdf5(test_hdf)
 
         data_model_equals(result, pointing_table)
+
+
+def test_convert_pointingtable_to_json(pointing_table):
+    """
+    We convert a pointing table to a JSON string and
+    then import it back into a pointing table.
+    """
+    pointingtable_json = convert_pointingtable_to_json(pointing_table)
+    assert len(pointingtable_json) == 1174684
+
+
+def test_convert_json_to_pointingtable(pointing_table):
+    """
+    We convert a JSON string to a pointing table and
+    then import it back into a pointing table.
+    """
+    pointingtable_json = convert_pointingtable_to_json(pointing_table)
+    result = convert_json_to_pointingtable(pointingtable_json)
+    data_model_equals(result, pointing_table)

@@ -59,17 +59,17 @@ def fixture_pointing_table(low_aa05_config, phase_centre):
     frequency = numpy.ones(1)
     pointing_frame = "local"
     pointing_table = PointingTable.constructor(
-        pointing,
-        nominal,
-        time,
-        interval,
-        weight,
-        residual,
-        frequency,
-        RECEPTOR_FRAME,
-        pointing_frame,
-        phase_centre,
-        low_aa05_config,
+        pointing=pointing,
+        nominal=nominal,
+        time=time,
+        interval=interval,
+        weight=weight,
+        residual=residual,
+        frequency=frequency,
+        receptor_frame=RECEPTOR_FRAME,
+        pointing_frame=pointing_frame,
+        pointingcentre=phase_centre,
+        configuration=low_aa05_config,
     )
     return pointing_table
 

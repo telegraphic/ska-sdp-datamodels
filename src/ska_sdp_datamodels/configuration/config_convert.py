@@ -4,12 +4,34 @@
 Functions converting from and to Configuration data model.
 """
 
+import json
+
 import numpy
 from astropy.coordinates import EarthLocation
 from astropy.units import Quantity
 
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
+
+
+def _convert_earthlocation_to_string(el: EarthLocation):
+    """Convert Earth Location to string
+
+    :param el: Earth Location
+    :return: String
+    """
+    return f"{el.x}, {el.y}, {el.z}"
+
+
+def _convert_earthlocation_from_string(s: str):
+    """Convert Earth Location from string
+
+    :param s: String
+    :return: Earth Location
+    """
+    x, y, z = s.split(",")
+    el = EarthLocation(x=Quantity(x), y=Quantity(y), z=Quantity(z))
+    return el
 
 
 def convert_configuration_to_hdf(config: Configuration, f):
@@ -19,15 +41,6 @@ def convert_configuration_to_hdf(config: Configuration, f):
     :param f: hdf group
     :return: group with config added
     """
-
-    def _convert_earthlocation_to_string(el: EarthLocation):
-        """Convert Earth Location to string
-
-        :param el: Earth Location
-        :return: String
-        """
-        return f"{el.x}, {el.y}, {el.z}"
-
     if not isinstance(config, Configuration):
         raise ValueError(f"config is not a Configuration: {config}")
     if config.attrs["data_model"] != "Configuration":
@@ -58,22 +71,69 @@ def convert_configuration_to_hdf(config: Configuration, f):
     return f
 
 
+def convert_configuration_to_json(config: Configuration):
+    """Convert configuration to JSON
+    :param config: Configuration
+    :return: JSON
+    """
+    cf_dict = {}
+    cf_dict["data_model"] = "Configuration"
+    cf_dict["name"] = config.name
+    cf_dict["location"] = _convert_earthlocation_to_string(config.location)
+    cf_dict["frame"] = config.frame
+    cf_dict["receptor_frame"] = config.receptor_frame.type
+
+    cf_dict["configuration"] = {}
+    cf_dict["configuration"]["xyz"] = config.xyz.data.tolist()
+    cf_dict["configuration"]["diameter"] = config.diameter.data.tolist()
+    cf_dict["configuration"]["names"] = config.names.data.tolist()
+    cf_dict["configuration"]["mount"] = config.mount.data.tolist()
+    cf_dict["configuration"]["offset"] = config.offset.data.tolist()
+    cf_dict["configuration"]["stations"] = config.stations.data.tolist()
+    cf_dict["configuration"]["vp_type"] = config.vp_type.data.tolist()
+    return json.dumps(cf_dict)
+
+
+def convert_json_to_configuration(json_str):
+    """Convert configuration from json string to Configuration
+    :param json_str: json string
+    :return: Configuration
+    """
+    cf_dict = json.loads(json_str)
+    name = cf_dict["name"]
+    location = _convert_earthlocation_from_string(cf_dict["location"])
+    receptor_frame = ReceptorFrame(cf_dict["receptor_frame"])
+    frame = cf_dict["frame"]
+
+    cf_config_dict = cf_dict["configuration"]
+    xyz = numpy.array(cf_config_dict["xyz"])
+    diameter = numpy.array(cf_config_dict["diameter"])
+    names = cf_config_dict["names"]
+    mount = cf_config_dict["mount"]
+    stations = cf_config_dict["stations"]
+    vp_type = cf_config_dict["vp_type"]
+    offset = cf_config_dict["offset"]
+    return Configuration.constructor(
+        name=name,
+        location=location,
+        receptor_frame=receptor_frame,
+        xyz=xyz,
+        frame=frame,
+        diameter=diameter,
+        names=names,
+        mount=mount,
+        offset=offset,
+        stations=stations,
+        vp_type=vp_type,
+    )
+
+
 def convert_configuration_from_hdf(f):
     """Extract configuration from HDF
 
     :param f: hdf group
     :return: Configuration
     """
-
-    def _convert_earthlocation_from_string(s: str):
-        """Convert Earth Location from string
-
-        :param s: String
-        :return: Earth Location
-        """
-        x, y, z = s.split(",")
-        el = EarthLocation(x=Quantity(x), y=Quantity(y), z=Quantity(z))
-        return el
 
     cf = f["configuration"]
 

@@ -10,7 +10,10 @@ from ska_sdp_datamodels.configuration import (
     Configuration,
     convert_configuration_from_hdf,
     convert_configuration_to_hdf,
+    convert_configuration_to_json,
+    convert_json_to_configuration,
 )
+from tests.utils import data_model_equals
 
 
 def test_convert_configuration_to_hdf(low_aa05_config):
@@ -87,3 +90,19 @@ def test_convert_configuration_from_hdf(low_aa05_config):
                 result_config.attrs["receptor_frame"]
                 == low_aa05_config.attrs["receptor_frame"]
             )
+
+
+def test_convert_configuration_to_json(low_aa05_config):
+    """Test converting a configuration to a JSON file."""
+
+    config_json = convert_configuration_to_json(low_aa05_config)
+    assert len(config_json) == 986
+
+
+def test_convert_json_to_configuration(low_aa05_config):
+    """Test converting a JSON file to a configuration."""
+
+    config_json = convert_configuration_to_json(low_aa05_config)
+    result_config = convert_json_to_configuration(config_json)
+
+    data_model_equals(result_config, low_aa05_config)
