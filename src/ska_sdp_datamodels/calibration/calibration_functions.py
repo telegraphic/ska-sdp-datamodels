@@ -235,28 +235,33 @@ def convert_pointingtable_to_json(pt):
     :return: json str
     """
     pointing_dict = {}
-    pointing_dict["attrs_data_model"] = "PointingTable"
-    pointing_dict["attrs_receptor_frame"] = pt.receptor_frame.type
-    pointing_dict[
-        "attrs_pointingcentre_coords"
+    pointing_dict["attrs"] = {}
+    pointing_dict["attrs"]["data_model"] = "PointingTable"
+    pointing_dict["attrs"]["receptor_frame"] = pt.receptor_frame.type
+    pointing_dict["attrs"][
+        "pointingcentre_coords"
     ] = pt.pointingcentre.to_string()
-    pointing_dict["attrs_receptor_frame"] = pt.receptor_frame.type
-    pointing_dict["attrs_pointingcentre_frame"] = pt.pointingcentre.frame.name
-    pointing_dict["attrs_pointing_frame"] = pt.pointing_frame
-    pointing_dict["attrs_configuration"] = convert_configuration_to_json(
+    pointing_dict["attrs"]["receptor_frame"] = pt.receptor_frame.type
+    pointing_dict["attrs"][
+        "pointingcentre_frame"
+    ] = pt.pointingcentre.frame.name
+    pointing_dict["attrs"]["pointing_frame"] = pt.pointing_frame
+    pointing_dict["attrs"]["configuration"] = convert_configuration_to_json(
         pt.configuration
     )
 
+    pointing_dict["data_vars"] = {}
     for var in pt.data_vars:
-        pointing_dict[f"data_{var}"] = pt[var].data.tolist()
+        pointing_dict["data_vars"][var] = pt[var].data.tolist()
 
     coords = [
         "time",
         "interval",
         "frequency",
     ]
+    pointing_dict["coords"] = {}
     for coord in coords:
-        pointing_dict[f"coord_{coord}"] = pt[coord].data.tolist()
+        pointing_dict["coords"][coord] = pt[coord].data.tolist()
 
     return json.dumps(pointing_dict)
 
@@ -269,15 +274,17 @@ def convert_json_to_pointingtable(pt_json):
     """
     pointing_dict = json.loads(pt_json)
 
-    receptor_frame = ReceptorFrame(pointing_dict["attrs_receptor_frame"])
-    s = pointing_dict["attrs_pointingcentre_coords"].split()
+    receptor_frame = ReceptorFrame(pointing_dict["attrs"]["receptor_frame"])
+    s = pointing_dict["attrs"]["pointingcentre_coords"].split()
     ss = [float(s[0]), float(s[1])] * u.deg
     pointingcentre = SkyCoord(
-        ra=ss[0], dec=ss[1], frame=pointing_dict["attrs_pointingcentre_frame"]
+        ra=ss[0],
+        dec=ss[1],
+        frame=pointing_dict["attrs"]["pointingcentre_frame"],
     )
-    pointing_frame = pointing_dict["attrs_pointing_frame"]
+    pointing_frame = pointing_dict["attrs"]["pointing_frame"]
     configuration = convert_json_to_configuration(
-        pointing_dict["attrs_configuration"]
+        pointing_dict["attrs"]["configuration"]
     )
     datavars = []
     for k in pointing_dict.keys():
@@ -290,12 +297,12 @@ def convert_json_to_pointingtable(pt_json):
             coords.append(k[6:])
 
     datadict = {}
-    for var in datavars:
-        datadict[var] = numpy.array(pointing_dict["data_" + var])
+    for var in pointing_dict["data_vars"].keys():
+        datadict[var] = numpy.array(pointing_dict["data_vars"][var])
 
     coorddict = {}
-    for coord in coords:
-        coorddict[coord] = numpy.array(pointing_dict["coord_" + coord])
+    for coord in pointing_dict["coords"].keys():
+        coorddict[coord] = numpy.array(pointing_dict["coords"][coord])
 
     pt = PointingTable.constructor(
         time=coorddict.get("time", None),

@@ -133,21 +133,23 @@ def test_convert_pointingtable_to_json(pointing_table):
     pointingtable_json = convert_pointingtable_to_json(pointing_table)
     pointing_dict = json.loads(pointingtable_json)
     assert (
-        pointing_dict["attrs_receptor_frame"]
+        pointing_dict["attrs"]["receptor_frame"]
         == pointing_table.receptor_frame.type
     )
     assert (
-        pointing_dict["attrs_pointingcentre_coords"]
+        pointing_dict["attrs"]["pointingcentre_coords"]
         == pointing_table.pointingcentre.to_string()
     )
     assert (
-        pointing_dict["attrs_pointingcentre_frame"]
+        pointing_dict["attrs"]["pointingcentre_frame"]
         == pointing_table.pointingcentre.frame.name
     )
-    assert pointing_dict["attrs_data_model"] == "PointingTable"
-    assert (pointing_dict["data_nominal"] == pointing_table.nominal.data).all()
+    assert pointing_dict["attrs"]["data_model"] == "PointingTable"
     assert (
-        pointing_dict["coord_frequency"] == pointing_table.frequency.data
+        pointing_dict["data_vars"]["nominal"] == pointing_table.nominal.data
+    ).all()
+    assert (
+        pointing_dict["coords"]["frequency"] == pointing_table.frequency.data
     ).all()
 
 

@@ -386,19 +386,6 @@ class GainTableAccessor(XarrayAccessorMixin):
         return qa
 
 
-def __sizeof__(self):
-    """Override default method to return size of dataset
-    :return: int
-    """
-    # Dask uses sizeof() class to get memory occupied by various data
-    # objects. For custom data objects like this one, dask falls back to
-    # sys.getsizeof() function to get memory usage. sys.getsizeof() in
-    # turns calls __sizeof__() magic method to get memory size. Here we
-    # override the default method (which gives size of reference table)
-    # to return size of Dataset.
-    return int(self.nbytes)
-
-
 class PointingTable(xarray.Dataset):
     """
     Pointing table with ska_sdp_datamodels:
@@ -407,39 +394,30 @@ class PointingTable(xarray.Dataset):
     Here is an example::
 
         <xarray.PointingTable>
-        Dimensions:    (angle: 2, antenna: 115,
-                        frequency: 3, receptor: 2, time: 3)
+        Dimensions:            (time: 1, antenna: 4, frequency: 1, receptor: 1, angle: 2)
         Coordinates:
-          * time       (time) float64 5.085e+09 5.085e+09 5.085e+09
-          * antenna    (antenna) int64 0 1 2 3 4 5 6 7 ...  113 114
-          * frequency  (frequency) float64 1e+08 1.05e+08 1.1e+08
-          * receptor   (receptor) <U1 'X' 'Y'
-          * angle      (angle) <U2 'az' 'el'
+          * time               (time) float64 5.179e+09
+          * antenna            (antenna) int64 0 1 2 3
+          * frequency          (frequency) float64 1.329e+09
+          * receptor           (receptor) <U1 'I'
+          * angle              (angle) <U2 'az' 'el'
         Data variables:
-            pointing   (time, antenna, frequency, receptor, angle)
-                        float64 -0.0002627...
-            nominal    (time, antenna, frequency, receptor, angle)
-                        float64 -3.142 ......
-            weight     (time, antenna, frequency, receptor, angle)
-                        float64 1.0 ... 1.0
-            residual   (time, frequency, receptor, angle)
-                        float64 0.0 0.0 ... 0.0 0.0
-            interval   (time) float64 99.73 99.73 99.73
-            datetime   (time) datetime64[ns]
-                        2000-01-01T03:54:07.843184299 ... 2000-0...
-            expected_beamwidth  (nants, num_chunks, 2)
-                                float64
-            fitted_beamwidth    (nants, num_chunks, 2)
-                                float64
-            fitted_height       (nants, num_chunks)
-                                float64
+            pointing           (time, antenna, frequency, receptor, angle) float64 -0...
+            fitted_width       (time, antenna, frequency, receptor, angle) float64 81...
+            fitted_width_std   (time, antenna, frequency, receptor, angle) float64 9....
+            expected_width     (time, antenna, frequency, receptor, angle) float64 79...
+            fitted_height      (time, antenna, frequency, receptor) float64 3.029 ......
+            fitted_height_std  (time, antenna, frequency, receptor) float64 0.3215 .....
+            weight             (time, antenna, frequency, receptor, angle) float64 4....
+            residual           (time, frequency, receptor, angle) float64 0.0 0.0
+            interval           (time) float64 1.0
+            datetime           (time) datetime64[ns] 2023-01-03T06:43:56.512374762
         Attributes:
-            data_model:  PointingTable
-            receptor_frame:     ReceptorFrame object
-            pointing_frame:     azel (["cross el", "el"])
-            pointingcentre:     <SkyCoord (ICRS): (ra, dec) in deg>
-            configuration:      <xarray.Configuration>
-                                Dimensions:   (id: 115 etc.)
+            data_model:      PointingTable
+            receptor_frame:  <ska_sdp_datamodels.science_data_model.polarisation_mode...
+            pointing_frame:  ['cross-el', 'el']
+            pointingcentre:  <SkyCoord (ICRS): (ra, dec) in deg\n    (294.85429167, -...
+            configuration:   <xarray.Configuration>\nDimensions:   (id: 4, spatial: 3...
     """
 
     __slots__ = ()
