@@ -305,13 +305,13 @@ def convert_json_to_pointingtable(pt_json):
         coorddict[coord] = numpy.array(pointing_dict["coords"][coord])
 
     pt = PointingTable.constructor(
-        time=coorddict.get("time", None),
-        interval=coorddict.get("interval", None),
-        frequency=coorddict.get("frequency", None),
-        pointing=datadict.get("pointing", None),
+        time=coorddict["time"],
+        interval=coorddict["interval"],
+        frequency=coorddict["frequency"],
+        pointing=datadict["pointing"],
         nominal=datadict.get("nominal", None),
-        weight=datadict.get("weight", None),
-        residual=datadict.get("residual", None),
+        weight=datadict["weight"],
+        residual=datadict["residual"],
         expected_width=datadict.get("expected_width", None),
         fitted_width=datadict.get("fitted_width", None),
         fitted_width_std=datadict.get("fitted_width_std", None),

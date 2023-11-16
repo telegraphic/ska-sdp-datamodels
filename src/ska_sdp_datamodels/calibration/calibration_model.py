@@ -394,7 +394,8 @@ class PointingTable(xarray.Dataset):
     Here is an example::
 
         <xarray.PointingTable>
-        Dimensions:            (time: 1, antenna: 4, frequency: 1, receptor: 1, angle: 2)
+        Dimensions:            (time: 1, antenna: 4, frequency: 1, receptor:
+                                 1, angle: 2)
         Coordinates:
           * time               (time) float64 5.179e+09
           * antenna            (antenna) int64 0 1 2 3
@@ -402,22 +403,22 @@ class PointingTable(xarray.Dataset):
           * receptor           (receptor) <U1 'I'
           * angle              (angle) <U2 'az' 'el'
         Data variables:
-            pointing           (time, antenna, frequency, receptor, angle) float64 -0...
-            fitted_width       (time, antenna, frequency, receptor, angle) float64 81...
-            fitted_width_std   (time, antenna, frequency, receptor, angle) float64 9....
-            expected_width     (time, antenna, frequency, receptor, angle) float64 79...
-            fitted_height      (time, antenna, frequency, receptor) float64 3.029 ......
-            fitted_height_std  (time, antenna, frequency, receptor) float64 0.3215 .....
-            weight             (time, antenna, frequency, receptor, angle) float64 4....
-            residual           (time, frequency, receptor, angle) float64 0.0 0.0
+            pointing           (time, antenna, frequency, receptor, angle)
+            fitted_width       (time, antenna, frequency, receptor, angle)
+            fitted_width_std   (time, antenna, frequency, receptor, angle)
+            expected_width     (time, antenna, frequency, receptor, angle)
+            fitted_height      (time, antenna, frequency, receptor)
+            fitted_height_std  (time, antenna, frequency, receptor)
+            weight             (time, antenna, frequency, receptor, angle)
+            residual           (time, frequency, receptor, angle)
             interval           (time) float64 1.0
-            datetime           (time) datetime64[ns] 2023-01-03T06:43:56.512374762
+            datetime           (time) datetime64[ns] 2023-01-03T06:43:56.51
         Attributes:
             data_model:      PointingTable
-            receptor_frame:  <ska_sdp_datamodels.science_data_model.polarisation_mode...
+            receptor_frame:  <ska_sdp_datamodels.science_data_model.polar...
             pointing_frame:  ['cross-el', 'el']
-            pointingcentre:  <SkyCoord (ICRS): (ra, dec) in deg\n    (294.85429167, -...
-            configuration:   <xarray.Configuration>\nDimensions:   (id: 4, spatial: 3...
+            pointingcentre:  <SkyCoord (ICRS): (ra, dec) in deg\n ...
+            configuration:   <xarray.Configuration>\nDimensions:   (id:...
     """
 
     __slots__ = ()
