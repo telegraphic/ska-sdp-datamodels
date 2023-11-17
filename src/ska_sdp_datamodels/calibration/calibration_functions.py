@@ -275,11 +275,16 @@ def convert_json_to_pointingtable(pt_json):
     pointing_dict = json.loads(pt_json)
 
     receptor_frame = ReceptorFrame(pointing_dict["attrs"]["receptor_frame"])
-    s = pointing_dict["attrs"]["pointingcentre_coords"].split()
-    ss = [float(s[0]), float(s[1])] * u.deg
+    pointing_center_coords = pointing_dict["attrs"][
+        "pointingcentre_coords"
+    ].split()
+    pointing_center_coords_degs = [
+        float(pointing_center_coords[0]),
+        float(pointing_center_coords[1]),
+    ] * u.deg
     pointingcentre = SkyCoord(
-        ra=ss[0],
-        dec=ss[1],
+        ra=pointing_center_coords_degs[0],
+        dec=pointing_center_coords_degs[1],
         frame=pointing_dict["attrs"]["pointingcentre_frame"],
     )
     pointing_frame = pointing_dict["attrs"]["pointing_frame"]

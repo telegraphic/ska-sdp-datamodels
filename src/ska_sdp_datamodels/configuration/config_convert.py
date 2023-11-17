@@ -14,26 +14,6 @@ from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
 
 
-def _convert_earthlocation_to_string(el: EarthLocation):
-    """Convert Earth Location to string
-
-    :param el: Earth Location
-    :return: String
-    """
-    return f"{el.x}, {el.y}, {el.z}"
-
-
-def _convert_earthlocation_from_string(s: str):
-    """Convert Earth Location from string
-
-    :param s: String
-    :return: Earth Location
-    """
-    x, y, z = s.split(",")
-    el = EarthLocation(x=Quantity(x), y=Quantity(y), z=Quantity(z))
-    return el
-
-
 def convert_configuration_to_hdf(config: Configuration, f):
     """Convert a Configuration to an HDF file
 
@@ -41,6 +21,15 @@ def convert_configuration_to_hdf(config: Configuration, f):
     :param f: hdf group
     :return: group with config added
     """
+
+    def _convert_earthlocation_to_string(el: EarthLocation):
+        """Convert Earth Location to string
+
+        :param el: Earth Location
+        :return: String
+        """
+        return f"{el.x}, {el.y}, {el.z}"
+
     if not isinstance(config, Configuration):
         raise ValueError(f"config is not a Configuration: {config}")
     if config.attrs["data_model"] != "Configuration":
@@ -79,7 +68,9 @@ def convert_configuration_to_json(config: Configuration):
     cf_dict = {}
     cf_dict["data_model"] = "Configuration"
     cf_dict["name"] = config.name
-    cf_dict["location"] = _convert_earthlocation_to_string(config.location)
+    cf_dict[
+        "location"
+    ] = f"{config.location.x}, {config.location.y}, {config.location.z}"
     cf_dict["frame"] = config.frame
     cf_dict["receptor_frame"] = config.receptor_frame.type
 
@@ -99,6 +90,17 @@ def convert_json_to_configuration(json_str):
     :param json_str: json string
     :return: Configuration
     """
+
+    def _convert_earthlocation_from_string(s: str):
+        """Convert Earth Location from string
+
+        :param s: String
+        :return: Earth Location
+        """
+        x, y, z = s.split(",")
+        el = EarthLocation(x=Quantity(x), y=Quantity(y), z=Quantity(z))
+        return el
+
     cf_dict = json.loads(json_str)
     name = cf_dict["name"]
     location = _convert_earthlocation_from_string(cf_dict["location"])
@@ -142,7 +144,8 @@ def convert_configuration_from_hdf(f):
     ), f"{cf.attrs['data_model']} is not a Configuration"
 
     name = cf.attrs["name"]
-    location = _convert_earthlocation_from_string(cf.attrs["location"])
+    x, y, z = cf.attrs["location"].split(",")
+    location = EarthLocation(x=Quantity(x), y=Quantity(y), z=Quantity(z))
     receptor_frame = ReceptorFrame(cf.attrs["receptor_frame"])
     frame = cf.attrs["frame"]
 
