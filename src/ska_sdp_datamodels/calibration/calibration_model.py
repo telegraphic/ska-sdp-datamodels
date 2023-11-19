@@ -408,14 +408,23 @@ class PointingTable(xarray.Dataset):
           * angle              (angle) <U2 'az' 'el'
         Data variables:
             pointing           (time, antenna, frequency, receptor, angle)
+                                float64 -0.0002627...
             nominal            (time, antenna, frequency, receptor, angle)
+                                float64 -3.142...
             expected_width     (time, antenna, frequency, receptor, 2)
+                                float64 0.03008409...
             fitted_width       (time, antenna, frequency, receptor, 2)
+                                float64 0.0272884...
             fitted_width_std   (time, antenna, frequency, receptor, 2)
+                                float64 0.00500445...
             fitted_height      (time, antenna, frequency, receptor)
+                                float64 3.109...
             fitted_height_std  (time, antenna, frequency, receptor)
+                                float64 0.3112...
             weight             (time, antenna, frequency, receptor, angle)
+                                float64 1.0 ... 1.0
             residual           (time, frequency, receptor, angle)
+                                float64 0.0 0.0 ... 0.0 0.0
             interval           (time) float64 1.0
             datetime           (time) datetime64[ns] 2023-01-03T06:43:56.51
         Attributes:
@@ -465,11 +474,14 @@ class PointingTable(xarray.Dataset):
         :param weight: Weight [: nants, nchan, nrec]
         :param residual: Residual [: nants, nchan, nrec, 2]
         :param frequency: [nchan]
-        :param expected_width: Expected beamwidth (rad) [:, nants, nchan, nrec, 2]
+        :param expected_width: Expected beamwidth (rad)
+            [:, nants, nchan, nrec, 2]
         :param fitted_width: Fitted beamwidth (rad) [:, nants, nchan, nrec, 2]
-        :param fitted_width_std: Fitted beamwidth uncertainty (rad) [:, nants, nchan, nrec, 2]
+        :param fitted_width_std: Fitted beamwidth uncertainty (rad)
+            [:, nants, nchan, nrec, 2]
         :param fitted_height: Fitted Gaussian height [:, nants, nchan, nrec]
-        :param fitted_height_std: Fitted height uncertainty [:, nants, nchan, nrec]
+        :param fitted_height_std: Fitted height uncertainty
+            [:, nants, nchan, nrec]
         :param receptor_frame: e.g. Receptor_frame("linear")
         :param pointing_frame: Pointing frame
         :param pointingcentre: SkyCoord
