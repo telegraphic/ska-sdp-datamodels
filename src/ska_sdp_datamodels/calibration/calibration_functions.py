@@ -322,7 +322,6 @@ def convert_json_to_pointingtable(pt_json):
         fitted_width_std=datadict.get("fitted_width_std", None),
         fitted_height=datadict.get("fitted_height", None),
         fitted_height_std=datadict.get("fitted_height_std", None),
-        expected_height=datadict.get("expected_height", None),
         receptor_frame=receptor_frame,
         pointing_frame=pointing_frame,
         pointingcentre=pointingcentre,
