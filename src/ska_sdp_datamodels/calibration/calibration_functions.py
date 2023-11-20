@@ -315,6 +315,7 @@ def convert_json_to_pointingtable(pt_json):
         frequency=coorddict["frequency"],
         pointing=datadict["pointing"],
         nominal=datadict.get("nominal", None),
+        pointing_std=datadict.get("pointing_std", None),
         weight=datadict["weight"],
         residual=datadict["residual"],
         expected_width=datadict.get("expected_width", None),
