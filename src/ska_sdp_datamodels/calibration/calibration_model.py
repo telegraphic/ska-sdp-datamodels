@@ -406,14 +406,14 @@ class PointingTable(xarray.Dataset):
 
         <xarray.PointingTable>
         Dimensions:            (time: 1, antenna: 4, frequency: 1, receptor:
-                                 1, angle: 2)
+                                 1, angle: 2, polarisation: 2)
         Coordinates:
           * time               (time) float64 5.179e+09
           * antenna            (antenna) int64 0 1 2 3
           * frequency          (frequency) float64 1.329e+09
           * receptor           (receptor) <U1 'I'
           * angle              (angle) <U2 'az' 'el'
-          * pol                (polarisation) <U2 'H' 'V'
+          * polarisation       (polarisation) <U2 'H' 'V'
         Data variables:
             pointing           (time, antenna, frequency, receptor, angle)
                                 float64 -0.0002627...
@@ -421,12 +421,12 @@ class PointingTable(xarray.Dataset):
                                 float64 -3.142...
             pointing_std       (time, antenna, frequency, receptor, angle)
                                 float64  0.00170397...
-            expected_width     (time, antenna, frequency, receptor, 2)
-                                float64 0.03008409...
-            fitted_width       (time, antenna, frequency, receptor, 2)
-                                float64 0.0272884...
-            fitted_width_std   (time, antenna, frequency, receptor, 2)
-                                float64 0.00500445...
+            expected_width     (time, antenna, frequency, receptor,
+                polarisation) float64 0.03008409...
+            fitted_width       (time, antenna, frequency, receptor,
+                polarisation) float64 0.0272884...
+            fitted_width_std   (time, antenna, frequency, receptor,
+                polarisation) float64 0.00500445...
             fitted_height      (time, antenna, frequency, receptor)
                                 float64 3.109...
             fitted_height_std  (time, antenna, frequency, receptor)
@@ -509,7 +509,7 @@ class PointingTable(xarray.Dataset):
             "frequency": frequency,
             "receptor": receptor_frame.names,
             "angle": ["az", "el"],
-            "pol": ["H", "V"],
+            "polarisation": ["H", "V"],
         }
 
         datavars = {}
@@ -529,17 +529,35 @@ class PointingTable(xarray.Dataset):
         if expected_width is not None:
             datavars["expected_width"] = xarray.DataArray(
                 expected_width,
-                dims=["time", "antenna", "frequency", "receptor", "pol"],
+                dims=[
+                    "time",
+                    "antenna",
+                    "frequency",
+                    "receptor",
+                    "polarisation",
+                ],
             )
         if fitted_width is not None:
             datavars["fitted_width"] = xarray.DataArray(
                 fitted_width,
-                dims=["time", "antenna", "frequency", "receptor", "pol"],
+                dims=[
+                    "time",
+                    "antenna",
+                    "frequency",
+                    "receptor",
+                    "polarisation",
+                ],
             )
         if fitted_width_std is not None:
             datavars["fitted_width_std"] = xarray.DataArray(
                 fitted_width_std,
-                dims=["time", "antenna", "frequency", "receptor", "pol"],
+                dims=[
+                    "time",
+                    "antenna",
+                    "frequency",
+                    "receptor",
+                    "polarisation",
+                ],
             )
         if fitted_height is not None:
             datavars["fitted_height"] = xarray.DataArray(
