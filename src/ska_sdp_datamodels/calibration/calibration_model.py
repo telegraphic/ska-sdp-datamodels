@@ -413,6 +413,7 @@ class PointingTable(xarray.Dataset):
           * frequency          (frequency) float64 1.329e+09
           * receptor           (receptor) <U1 'I'
           * angle              (angle) <U2 'az' 'el'
+          * pol                (polarisation) <U2 'H' 'V'
         Data variables:
             pointing           (time, antenna, frequency, receptor, angle)
                                 float64 -0.0002627...
@@ -508,6 +509,7 @@ class PointingTable(xarray.Dataset):
             "frequency": frequency,
             "receptor": receptor_frame.names,
             "angle": ["az", "el"],
+            "pol": ["H", "V"],
         }
 
         datavars = {}
@@ -515,11 +517,10 @@ class PointingTable(xarray.Dataset):
             pointing,
             dims=["time", "antenna", "frequency", "receptor", "angle"],
         )
-        if nominal is not None:
-            datavars["nominal"] = xarray.DataArray(
-                nominal,
-                dims=["time", "antenna", "frequency", "receptor", "angle"],
-            )
+        datavars["nominal"] = xarray.DataArray(
+            nominal,
+            dims=["time", "antenna", "frequency", "receptor", "angle"],
+        )
         if pointing_std is not None:
             datavars["pointing_std"] = xarray.DataArray(
                 pointing_std,
@@ -528,17 +529,17 @@ class PointingTable(xarray.Dataset):
         if expected_width is not None:
             datavars["expected_width"] = xarray.DataArray(
                 expected_width,
-                dims=["time", "antenna", "frequency", "receptor", 2],
+                dims=["time", "antenna", "frequency", "receptor", "pol"],
             )
         if fitted_width is not None:
             datavars["fitted_width"] = xarray.DataArray(
                 fitted_width,
-                dims=["time", "antenna", "frequency", "receptor", 2],
+                dims=["time", "antenna", "frequency", "receptor", "pol"],
             )
         if fitted_width_std is not None:
             datavars["fitted_width_std"] = xarray.DataArray(
                 fitted_width_std,
-                dims=["time", "antenna", "frequency", "receptor", 2],
+                dims=["time", "antenna", "frequency", "receptor", "pol"],
             )
         if fitted_height is not None:
             datavars["fitted_height"] = xarray.DataArray(
