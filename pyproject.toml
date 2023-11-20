@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-sdp-datamodels"
-version = "0.2.3"
+version = "0.2.4"
 description = "SKA SDP Python-based Data Models"
 authors = ["SKA SDP Developers"]
 license = "Apache 2.0"

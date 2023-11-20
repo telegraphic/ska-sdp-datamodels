@@ -1,6 +1,6 @@
 # Changelog
 
-main
+0.2.4
 ----
 * Bug Fix For Creating Visibility From Measurement Set Files ([MR45](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/45))
 
