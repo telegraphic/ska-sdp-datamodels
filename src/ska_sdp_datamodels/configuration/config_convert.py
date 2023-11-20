@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, too-many-locals
 
 """
 Functions converting from and to Configuration data model.
