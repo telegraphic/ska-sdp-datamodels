@@ -1,9 +1,11 @@
 # Changelog
 
-
 main
-----
+=======
 * Refractor pointing table And Add two JSON related functions ([MR46](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/46))
+
+* 0.2.4
+----
 * Bug Fix For Creating Visibility From Measurement Set Files ([MR45](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/45))
 
 0.2.3
