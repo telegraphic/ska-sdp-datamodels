@@ -590,6 +590,18 @@ class PointingTable(xarray.Dataset):
 
         return cls(datavars, coords=coords, attrs=attrs)
 
+    def __sizeof__(self):
+        """Override default method to return size of dataset
+        :return: int
+        """
+        # Dask uses sizeof() class to get memory occupied by various data
+        # objects. For custom data objects like this one, dask falls back to
+        # sys.getsizeof() function to get memory usage. sys.getsizeof() in
+        # turns calls __sizeof__() magic method to get memory size. Here we
+        # override the default method (which gives size of reference table)
+        # to return size of Dataset.
+        return int(self.nbytes)
+
     def copy(self, deep=False, data=None, zero=False):
         """
         Copy PointingTable
