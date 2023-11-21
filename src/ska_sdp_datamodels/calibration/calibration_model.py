@@ -391,32 +391,42 @@ class PointingTable(xarray.Dataset):
     Pointing table with ska_sdp_datamodels:
     time, antenna, offset[:, chan, rec, 2], weight columns
 
-    The variables expected_width, fitted_width, fitted_width_std,
-    fitted_height, and fitted_height_std are useful for storing
-    pointing offset calibration results.
+    This table was refactored to allow for storing the
+    results from a pointing offset calibration for local
+    pointing correction. The newly added variables are the
+    pointing_std, expected_width, fitted_width, fitted_width_std,
+    fitted_height, and fitted_height_std. They are parameters
+    obtained by fitting a 2D Gaussian to the un-normalised
+    gains (G terms) from the offset pointing scans. Refer to
+    the documentation for the pointing offset calibration on
+    https://developer.skao.int/projects/ska-sdp-wflow-pointing-offset/en/latest/
+    for detailed description of each parameter.
 
     Here is an example::
 
         <xarray.PointingTable>
         Dimensions:            (time: 1, antenna: 4, frequency: 1, receptor:
-                                 1, angle: 2)
+                                 1, angle: 2, polarisation: 2)
         Coordinates:
           * time               (time) float64 5.179e+09
           * antenna            (antenna) int64 0 1 2 3
           * frequency          (frequency) float64 1.329e+09
           * receptor           (receptor) <U1 'I'
           * angle              (angle) <U2 'az' 'el'
+          * polarisation       (polarisation) <U2 'H' 'V'
         Data variables:
             pointing           (time, antenna, frequency, receptor, angle)
                                 float64 -0.0002627...
             nominal            (time, antenna, frequency, receptor, angle)
                                 float64 -3.142...
-            expected_width     (time, antenna, frequency, receptor, 2)
-                                float64 0.03008409...
-            fitted_width       (time, antenna, frequency, receptor, 2)
-                                float64 0.0272884...
-            fitted_width_std   (time, antenna, frequency, receptor, 2)
-                                float64 0.00500445...
+            pointing_std       (time, antenna, frequency, receptor, angle)
+                                float64  0.00170397...
+            expected_width     (time, antenna, frequency, receptor,
+                polarisation) float64 0.03008409...
+            fitted_width       (time, antenna, frequency, receptor,
+                polarisation) float64 0.0272884...
+            fitted_width_std   (time, antenna, frequency, receptor,
+                polarisation) float64 0.00500445...
             fitted_height      (time, antenna, frequency, receptor)
                                 float64 3.109...
             fitted_height_std  (time, antenna, frequency, receptor)
@@ -450,6 +460,7 @@ class PointingTable(xarray.Dataset):
         cls,
         pointing: numpy.array = None,
         nominal: numpy.array = None,
+        pointing_std: numpy.array = None,
         time: numpy.array = None,
         interval=None,
         weight: numpy.array = None,
@@ -469,6 +480,8 @@ class PointingTable(xarray.Dataset):
 
         :param pointing: Pointing (rad) [:, nants, nchan, nrec, 2]
         :param nominal: Nominal (rad) [:, nants, nchan, nrec, 2]
+        :param pointing_std: Uncertainty on pointing (rad)
+            [:, nants, nchan, nrec, 2]
         :param time: Centroid of solution [:]
         :param interval: Interval of validity
         :param weight: Weight [: nants, nchan, nrec]
@@ -496,6 +509,7 @@ class PointingTable(xarray.Dataset):
             "frequency": frequency,
             "receptor": receptor_frame.names,
             "angle": ["az", "el"],
+            "polarisation": ["H", "V"],
         }
 
         datavars = {}
@@ -503,25 +517,47 @@ class PointingTable(xarray.Dataset):
             pointing,
             dims=["time", "antenna", "frequency", "receptor", "angle"],
         )
-        if nominal is not None:
-            datavars["nominal"] = xarray.DataArray(
-                nominal,
+        datavars["nominal"] = xarray.DataArray(
+            nominal,
+            dims=["time", "antenna", "frequency", "receptor", "angle"],
+        )
+        if pointing_std is not None:
+            datavars["pointing_std"] = xarray.DataArray(
+                pointing_std,
                 dims=["time", "antenna", "frequency", "receptor", "angle"],
             )
         if expected_width is not None:
             datavars["expected_width"] = xarray.DataArray(
                 expected_width,
-                dims=["time", "antenna", "frequency", "receptor", 2],
+                dims=[
+                    "time",
+                    "antenna",
+                    "frequency",
+                    "receptor",
+                    "polarisation",
+                ],
             )
         if fitted_width is not None:
             datavars["fitted_width"] = xarray.DataArray(
                 fitted_width,
-                dims=["time", "antenna", "frequency", "receptor", 2],
+                dims=[
+                    "time",
+                    "antenna",
+                    "frequency",
+                    "receptor",
+                    "polarisation",
+                ],
             )
         if fitted_width_std is not None:
             datavars["fitted_width_std"] = xarray.DataArray(
                 fitted_width_std,
-                dims=["time", "antenna", "frequency", "receptor", 2],
+                dims=[
+                    "time",
+                    "antenna",
+                    "frequency",
+                    "receptor",
+                    "polarisation",
+                ],
             )
         if fitted_height is not None:
             datavars["fitted_height"] = xarray.DataArray(

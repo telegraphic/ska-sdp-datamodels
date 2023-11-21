@@ -213,6 +213,7 @@ def test_pointing_table_constructor_coords(result_pointing_table):
         "frequency",
         "receptor",
         "angle",
+        "polarisation",
     ]
     result_coords = result_pointing_table.coords
 
@@ -222,6 +223,7 @@ def test_pointing_table_constructor_coords(result_pointing_table):
     assert result_coords["frequency"] == 1
     assert result_coords["receptor"] == "I"
     (result_coords["angle"] == ["az", "el"]).all()
+    (result_coords["polarisation"] == ["H", "V"]).all()
 
 
 def test_pointing_table_constructor_datavars(result_pointing_table):
