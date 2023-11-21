@@ -1,5 +1,6 @@
 # Changelog
 
+
 main
 ----
 * Refractor pointing table And Add two JSON related functions ([MR46](https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels/-/merge_requests/46))
