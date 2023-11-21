@@ -6,6 +6,7 @@ data models.
 """
 
 import collections
+import json
 import logging
 from typing import List, Union
 
@@ -23,6 +24,8 @@ from ska_sdp_datamodels.calibration.calibration_model import (
 from ska_sdp_datamodels.configuration import (
     convert_configuration_from_hdf,
     convert_configuration_to_hdf,
+    convert_configuration_to_json,
+    convert_json_to_configuration,
 )
 from ska_sdp_datamodels.configuration.config_model import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame
@@ -223,6 +226,99 @@ def export_pointingtable_to_hdf5(pt: PointingTable, filename):
             vf = f.create_group("PointingTable0")
             convert_pointingtable_to_hdf(pt, vf)
         f.flush()
+
+
+def convert_pointingtable_to_json(pt):
+    """
+    Convert a pointingtable to a json dictionary.
+    :param pt: Pointing Table
+    :return: json str
+    """
+    pointing_dict = {}
+    pointing_dict["attrs"] = {}
+    pointing_dict["attrs"]["data_model"] = "PointingTable"
+    pointing_dict["attrs"]["receptor_frame"] = pt.receptor_frame.type
+    pointing_dict["attrs"][
+        "pointingcentre_coords"
+    ] = pt.pointingcentre.to_string()
+    pointing_dict["attrs"]["receptor_frame"] = pt.receptor_frame.type
+    pointing_dict["attrs"][
+        "pointingcentre_frame"
+    ] = pt.pointingcentre.frame.name
+    pointing_dict["attrs"]["pointing_frame"] = pt.pointing_frame
+    pointing_dict["attrs"]["configuration"] = convert_configuration_to_json(
+        pt.configuration
+    )
+
+    pointing_dict["data_vars"] = {}
+    for var in pt.data_vars:
+        pointing_dict["data_vars"][var] = pt[var].data.tolist()
+
+    coords = [
+        "time",
+        "interval",
+        "frequency",
+    ]
+    pointing_dict["coords"] = {}
+    for coord in coords:
+        pointing_dict["coords"][coord] = pt[coord].data.tolist()
+
+    return json.dumps(pointing_dict)
+
+
+def convert_json_to_pointingtable(pt_json):
+    """
+    Convert a JSON to pointingtable.
+    :param pt_json: Json
+    :return: PointingTable
+    """
+    pointing_dict = json.loads(pt_json)
+
+    receptor_frame = ReceptorFrame(pointing_dict["attrs"]["receptor_frame"])
+    pointing_center_coords = pointing_dict["attrs"][
+        "pointingcentre_coords"
+    ].split()
+    pointing_center_coords_degs = [
+        float(pointing_center_coords[0]),
+        float(pointing_center_coords[1]),
+    ] * u.deg
+    pointingcentre = SkyCoord(
+        ra=pointing_center_coords_degs[0],
+        dec=pointing_center_coords_degs[1],
+        frame=pointing_dict["attrs"]["pointingcentre_frame"],
+    )
+    pointing_frame = pointing_dict["attrs"]["pointing_frame"]
+    configuration = convert_json_to_configuration(
+        pointing_dict["attrs"]["configuration"]
+    )
+
+    datadict = {}
+    for var in pointing_dict["data_vars"].keys():
+        datadict[var] = numpy.array(pointing_dict["data_vars"][var])
+
+    coorddict = {}
+    for coord in pointing_dict["coords"].keys():
+        coorddict[coord] = numpy.array(pointing_dict["coords"][coord])
+
+    pt = PointingTable.constructor(
+        time=coorddict["time"],
+        interval=coorddict["interval"],
+        frequency=coorddict["frequency"],
+        pointing=datadict["pointing"],
+        nominal=datadict.get("nominal", None),
+        weight=datadict["weight"],
+        residual=datadict["residual"],
+        expected_width=datadict.get("expected_width", None),
+        fitted_width=datadict.get("fitted_width", None),
+        fitted_width_std=datadict.get("fitted_width_std", None),
+        fitted_height=datadict.get("fitted_height", None),
+        fitted_height_std=datadict.get("fitted_height_std", None),
+        receptor_frame=receptor_frame,
+        pointing_frame=pointing_frame,
+        pointingcentre=pointingcentre,
+        configuration=configuration,
+    )
+    return pt
 
 
 def import_pointingtable_from_hdf5(filename):

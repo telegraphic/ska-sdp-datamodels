@@ -2,11 +2,14 @@
 Test calibration data model functions.
 """
 
+import json
 import tempfile
 
 import h5py
 
 from ska_sdp_datamodels.calibration import (
+    convert_json_to_pointingtable,
+    convert_pointingtable_to_json,
     export_gaintable_to_hdf5,
     export_pointingtable_to_hdf5,
     import_gaintable_from_hdf5,
@@ -120,3 +123,41 @@ def test_import_pointingtable_from_hdf5(pointing_table):
         result = import_pointingtable_from_hdf5(test_hdf)
 
         data_model_equals(result, pointing_table)
+
+
+def test_convert_pointingtable_to_json(pointing_table):
+    """
+    We convert a pointing table to a JSON string and
+    then import it back into a pointing table.
+    """
+    pointingtable_json = convert_pointingtable_to_json(pointing_table)
+    pointing_dict = json.loads(pointingtable_json)
+    assert (
+        pointing_dict["attrs"]["receptor_frame"]
+        == pointing_table.receptor_frame.type
+    )
+    assert (
+        pointing_dict["attrs"]["pointingcentre_coords"]
+        == pointing_table.pointingcentre.to_string()
+    )
+    assert (
+        pointing_dict["attrs"]["pointingcentre_frame"]
+        == pointing_table.pointingcentre.frame.name
+    )
+    assert pointing_dict["attrs"]["data_model"] == "PointingTable"
+    assert (
+        pointing_dict["data_vars"]["nominal"] == pointing_table.nominal.data
+    ).all()
+    assert (
+        pointing_dict["coords"]["frequency"] == pointing_table.frequency.data
+    ).all()
+
+
+def test_convert_json_to_pointingtable(pointing_table):
+    """
+    We convert a JSON string to a pointing table and
+    then import it back into a pointing table.
+    """
+    pointingtable_json = convert_pointingtable_to_json(pointing_table)
+    result = convert_json_to_pointingtable(pointingtable_json)
+    data_model_equals(result, pointing_table)
